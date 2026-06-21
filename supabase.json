@@ -1,0 +1,25 @@
+{
+  "api": {
+    "port": 54321,
+    "schemas": ["public", "auth", "storage"],
+    "max_rows": 1000
+  },
+  "db": {
+    "port": 54322,
+    "major_version": 15
+  },
+  "studio": {
+    "port": 54323
+  },
+  "inbucket": {
+    "port": 54324
+  },
+  "vector": {
+    "port": 54325
+  },
+  "realtime": {
+    "enabled": true,
+    "max_concurrent_users": 200,
+    "max_event_channels": 128
+  }
+}
