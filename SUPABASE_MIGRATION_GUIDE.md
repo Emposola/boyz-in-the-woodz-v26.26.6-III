@@ -131,7 +131,7 @@ await supabase.auth.signOut();
 const products = await base44.entities.Product.filter({ active: true });
 
 // Get with sorting
-const products = await base44.entities.Product.filter(
+const products = await EMPOSOLA-SDK.entities.Product.filter(
   { category: 'shirts' },
   '-created_date', // descending
   20 // limit
@@ -153,7 +153,7 @@ const newProduct = await base44.entities.Product.create({
 
 **Update**
 ```javascript
-const updated = await base44.entities.Product.update(productId, {
+const updated = await SDK.entities.Product.update(productId, {
   price: 39.99,
   featured: true
 });
@@ -166,7 +166,7 @@ const success = await base44.entities.Product.delete(productId);
 
 **Real-time Subscriptions**
 ```javascript
-const unsubscribe = base44.entities.Product.subscribe((payload) => {
+const unsubscribe = SDK.entities.Product.subscribe((payload) => {
   console.log('Product changed:', payload);
   // Handle: INSERT, UPDATE, or DELETE
 });
@@ -277,20 +277,7 @@ npm run typecheck
 npm run preview
 ```
 
-## File Changes Summary
 
-### Created
-- `supabase_schema.sql` - Database schema
-
-### Modified
-- `src/api/base44Client.js` - Complete rewrite with Supabase
-- `package.json` - Removed base44 dependencies
-- `vite.config.js` - Removed base44 plugin
-
-### Already Updated
-- `src/lib/supabase.js` - Supabase client
-- `src/lib/AuthContext.jsx` - Supabase auth
-- All page components - Compatible with new API
 
 ## Support & Resources
 
