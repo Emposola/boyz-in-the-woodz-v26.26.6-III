@@ -81,7 +81,7 @@ npm run typecheck
 ```
 src/
 ├── api/
-│   └── base44Client.js          # Supabase API client (Base44 compatibility)
+│   └── xxClient.js          # Supabase API client (for sdk compatibility)
 ├── components/
 │   ├── home/                     # Home page components
 │   ├── layout/                   # Layout components
@@ -267,21 +267,9 @@ Proprietary - All rights reserved
 
 ## Migration Notes
 
-This application was **successfully migrated from Base44 to Supabase** on 2026-06-16.
+This application was **successfully migrated backend
 
-### What Changed
-- ✅ Backend: Base44 → Supabase
-- ✅ Database: Base44 entities → Supabase tables
-- ✅ API Client: New Supabase-based implementation
-- ✅ Authentication: Supabase Auth
-- ✅ Storage: Supabase Storage (optional)
 
-### What Stayed the Same
-- ✅ All component code
-- ✅ All styling
-- ✅ All business logic
-- ✅ Application structure
-- ✅ User experience
 
 For detailed migration information, see [MIGRATION_CHECKLIST.md](./MIGRATION_CHECKLIST.md).
 
