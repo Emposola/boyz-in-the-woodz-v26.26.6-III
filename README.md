@@ -125,27 +125,7 @@ See `supabase_schema.sql` for complete schema definition.
 
 ### Getting Started with base44 Client
 
-The application uses a compatibility layer (`base44` client) that maps to Supabase:
-
-```javascript
-import { base44 } from '@/api/base44Client';
-
-// Authentication
-const user = await base44.auth.me();
-await base44.auth.logout();
-
-// CRUD Operations
-const products = await base44.entities.Product.filter({ active: true });
-const product = await base44.entities.Product.get(id);
-const created = await base44.entities.Product.create({ name: 'Item' });
-const updated = await base44.entities.Product.update(id, { price: 29.99 });
-const deleted = await base44.entities.Product.delete(id);
-
-// Real-time Subscriptions
-const unsubscribe = base44.entities.Product.subscribe((changes) => {
-  console.log('Changes:', changes);
-});
-```
+The application uses a compatibility layer (`SDK` client) that maps to Supabase
 
 ### Using Utility Functions
 
