@@ -26,7 +26,9 @@ const APP_STATUS_COLORS = {
 
 const EMPTY_EVENT = {
   title: '', type: 'retreat', location_name: '', start_date: '',
-  spots_remaining: 12, active: true, featured: false,
+  spots_remaining: 12, capacity: 12, active: true, featured: false,
+  full_price: 297, deposit_amount: 100, difficulty: 'Easy',
+  duration: '2-day', description: '', image_url: '',
 };
 
 /* ── Application Row ─────────────────────────────────────── */
@@ -47,6 +49,16 @@ function AppRow({ app, onUpdate }) {
             </span>
             {r.waitlist_position && app.status === 'waitlist' && (
               <span className="text-[10px] text-muted-foreground">#{r.waitlist_position} on waitlist</span>
+            )}
+            {app.payment_pending && !app.deposit_paid && (
+              <span className="text-[10px] font-heading tracking-wider uppercase px-2 py-0.5 rounded-full bg-orange-900/40 text-orange-400 border border-orange-800/40">
+                Payment Pending
+              </span>
+            )}
+            {app.deposit_paid && (
+              <span className="text-[10px] font-heading tracking-wider uppercase px-2 py-0.5 rounded-full bg-green-900/40 text-green-400 border border-green-800/40">
+                Deposit Paid ✓
+              </span>
             )}
           </div>
           <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground flex-wrap">
@@ -91,6 +103,12 @@ function AppRow({ app, onUpdate }) {
 
               {/* Action buttons */}
               <div className="flex flex-wrap gap-2">
+                {app.payment_pending && !app.deposit_paid && (
+                  <Button onClick={() => onUpdate(app.id, 'deposit_paid')} size="sm"
+                    className="font-heading tracking-wider uppercase text-xs gap-1.5 bg-orange-600 hover:bg-orange-500 text-white">
+                    ✓ Mark Deposit Paid
+                  </Button>
+                )}
                 {app.status !== 'approved' && (
                   <Button onClick={() => onUpdate(app.id, 'approved')} size="sm"
                     className="font-heading tracking-wider uppercase text-xs gap-1.5" style={{ background: FG }}>
@@ -132,7 +150,7 @@ function EventForm({ initial, onSave, onCancel }) {
   return (
     <div className="bg-card border border-border rounded-xl p-5 space-y-4">
       <div className="grid sm:grid-cols-2 gap-4">
-        <div>
+        <div className="sm:col-span-2">
           <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Title *</label>
           <Input value={form.title} onChange={e => set('title', e.target.value)}
             placeholder="Broken Bow Fall Retreat" className="bg-secondary border-border" />
@@ -149,21 +167,73 @@ function EventForm({ initial, onSave, onCancel }) {
             className="bg-secondary border-border" />
         </div>
         <div>
+          <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Full Price ($) *</label>
+          <Input type="number" min="0" step="1" value={form.full_price || ''}
+            onChange={e => set('full_price', parseFloat(e.target.value) || 0)}
+            placeholder="297" className="bg-secondary border-border" />
+        </div>
+        <div>
+          <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Deposit Amount ($) *</label>
+          <Input type="number" min="0" step="1" value={form.deposit_amount || ''}
+            onChange={e => set('deposit_amount', parseFloat(e.target.value) || 0)}
+            placeholder="100" className="bg-secondary border-border" />
+          {form.full_price > 0 && form.deposit_amount > 0 && (
+            <p className="text-[10px] text-muted-foreground mt-1">
+              Balance due on approval: ${(form.full_price - form.deposit_amount).toFixed(0)}
+            </p>
+          )}
+        </div>
+        <div>
+          <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Capacity</label>
+          <Input type="number" min="1" value={form.capacity || form.spots_remaining || ''}
+            onChange={e => { const v = parseInt(e.target.value) || 0; set('capacity', v); set('spots_remaining', v); }}
+            className="bg-secondary border-border" />
+        </div>
+        <div>
           <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Spots Remaining</label>
-          <Input type="number" value={form.spots_remaining}
+          <Input type="number" min="0" value={form.spots_remaining ?? ''}
             onChange={e => set('spots_remaining', parseInt(e.target.value) || 0)}
             className="bg-secondary border-border" />
         </div>
         <div>
+          <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Difficulty</label>
+          <select value={form.difficulty || 'Easy'} onChange={e => set('difficulty', e.target.value)}
+            className="w-full rounded-md border border-border bg-secondary px-3 py-2 text-sm text-foreground">
+            <option value="Easy">Easy</option>
+            <option value="Moderate">Moderate</option>
+            <option value="Hard">Hard</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Duration</label>
+          <select value={form.duration || '2-day'} onChange={e => set('duration', e.target.value)}
+            className="w-full rounded-md border border-border bg-secondary px-3 py-2 text-sm text-foreground">
+            <option value="2-day">2-Day (Weekend Reset)</option>
+            <option value="3-day">3-Day (Deep Dive)</option>
+            <option value="5-day">5-Day (Expedition)</option>
+          </select>
+        </div>
+        <div>
           <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Type</label>
-          <select value={form.type} onChange={e => set('type', e.target.value)}
+          <select value={form.type || 'retreat'} onChange={e => set('type', e.target.value)}
             className="w-full rounded-md border border-border bg-secondary px-3 py-2 text-sm text-foreground">
             <option value="retreat">Retreat</option>
             <option value="event">Event</option>
             <option value="workshop">Workshop</option>
           </select>
         </div>
-        <div className="flex items-end gap-4 pb-1">
+        <div className="sm:col-span-2">
+          <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Image URL</label>
+          <Input value={form.image_url || ''} onChange={e => set('image_url', e.target.value)}
+            placeholder="https://images.unsplash.com/..." className="bg-secondary border-border" />
+        </div>
+        <div className="sm:col-span-2">
+          <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Description</label>
+          <textarea value={form.description || ''} onChange={e => set('description', e.target.value)}
+            rows={2} placeholder="What makes this retreat special..."
+            className="w-full rounded-md border border-border bg-secondary px-3 py-2 text-sm text-foreground resize-none focus:outline-none focus:ring-1 focus:ring-ring" />
+        </div>
+        <div className="flex items-center gap-6">
           <label className="flex items-center gap-2 cursor-pointer text-sm">
             <input type="checkbox" checked={form.active} onChange={e => set('active', e.target.checked)} className="accent-primary" />
             Active
@@ -234,11 +304,19 @@ export default function AdminRetreats() {
 
   const updateApp = useMutation({
     mutationFn: async ({ id, status }) => {
-      const { error } = await supabase
-        .from('retreat_applications')
-        .update({ status })
-        .eq('id', id);
-      if (error) throw error;
+      if (status === 'deposit_paid') {
+        const { error } = await supabase
+          .from('retreat_applications')
+          .update({ deposit_paid: true, payment_pending: false })
+          .eq('id', id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('retreat_applications')
+          .update({ status })
+          .eq('id', id);
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-retreat-apps'] });
@@ -400,11 +478,15 @@ export default function AdminRetreats() {
                       </span>
                     </div>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
-                      <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{ev.location_name || '—'}</span>
+                      <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{r.location_name || '—'}</span>
                       <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />
                         {ev.start_date ? format(new Date(ev.start_date), 'MMM d, yyyy') : '—'}
                       </span>
                       <span className="flex items-center gap-1"><Users className="w-3 h-3" />{ev.spots_remaining ?? 0} spots</span>
+                      {ev.full_price > 0 && (
+                        <span className="font-heading" style={{ color: FG }}>${ev.full_price} (${ev.deposit_amount ?? 0} deposit)</span>
+                      )}
+                      {ev.difficulty && <span>{ev.difficulty} · {ev.duration}</span>}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
