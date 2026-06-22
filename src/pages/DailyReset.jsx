@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Flame, Sun, Moon, Clock, Camera, Bell, ChevronRight, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import SEO from '@/components/shared/SEO';
 
 const FG = '#2D5A27';
 const SAND = '#D2B48C';
@@ -70,6 +71,7 @@ export default function DailyReset() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Daily Reset — BOYZ IN THE WOODZ" description="Your daily reset ritual. Cold water, movement, and 20 minutes of nature." canonical="/daily-reset" />
       {/* Hero */}
       <section className="relative py-14" style={{ background: 'linear-gradient(135deg, rgba(45,90,39,0.1) 0%, transparent 60%)' }}>
         <div className="max-w-3xl mx-auto px-4">

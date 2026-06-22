@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
+import SEO from '@/components/shared/SEO';
 
 /* --- Fallback events --- */
 const FALLBACK_EVENTS = [
@@ -49,6 +50,7 @@ export default function Events() {
 
   return (
     <div className="min-h-screen">
+      <SEO title="Events — BOYZ IN THE WOODZ" description="Retreats, meetups, and wilderness events. Find your next reset." canonical="/events" />
       {/* --- Hero --- */}
       <section className="py-16 md:py-20 bg-secondary/30">
         <div className="max-w-7xl mx-auto px-4 text-center">

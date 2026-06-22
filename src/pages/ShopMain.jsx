@@ -1,5 +1,5 @@
 /* ============================================================
-   SHOP MAIN — 50+ products, filters, bundles, size guide
+   SHOP MAIN — Dynamic products from Supabase, filters, bundles, size guide
    URL: /shop  (and /shop/:category)
    ============================================================ */
 import React, { useState, useMemo, useEffect } from 'react';
@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { useCart } from '@/lib/cartContext';
 import { toast } from 'sonner';
 import SEO from '@/components/shared/SEO';
+import api from '@/api/supabaseClient';
+import { useQuery } from '@tanstack/react-query';
 
 const FG = '#2D5A27';
 const SAND = '#D2B48C';
@@ -176,29 +178,45 @@ export default function ShopMain() {
   const [sortBy, setSortBy] = useState('default');
   const [wishlist, setWishlist] = useState([]);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
-  const [countdown, setCountdown] = useState({ h: 11, m: 47, s: 22 });
+  const [countdown, setCountdown] = useState({ h: 0, m: 0, s: 0 });
 
-  React.useEffect(() => {
-    const t = setInterval(() => {
-      setCountdown(c => {
-        let { h, m, s } = c;
-        s--; if (s < 0) { s = 59; m--; } if (m < 0) { m = 59; h--; } if (h < 0) { h = 23; }
-        return { h, m, s };
-      });
-    }, 1000);
+  useEffect(() => {
+    const getNextFriday = () => {
+      const now = new Date();
+      const daysUntilFriday = (5 - now.getDay() + 7) % 7 || 7;
+      const nextFriday = new Date(now);
+      nextFriday.setDate(now.getDate() + daysUntilFriday);
+      nextFriday.setHours(23, 59, 59, 999);
+      return nextFriday;
+    };
+
+    const target = getNextFriday();
+    const update = () => {
+      const diff = target - new Date();
+      if (diff <= 0) {
+        setCountdown({ h: 0, m: 0, s: 0 });
+        return;
+      }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setCountdown({ h, m, s });
+    };
+    update();
+    const t = setInterval(update, 1000);
     return () => clearInterval(t);
   }, []);
 
   const toggleWishlist = (id) => setWishlist(w => w.includes(id) ? w.filter(x => x !== id) : [...w, id]);
 
   const filtered = useMemo(() => {
-    let list = getFilteredProducts(ALL_PRODUCTS, catParam, activeFilter);
+    let list = getFilteredProducts(allProducts, catParam, activeFilter);
     if (sortBy === 'price-asc') list = [...list].sort((a, b) => a.price - b.price);
     if (sortBy === 'price-desc') list = [...list].sort((a, b) => b.price - a.price);
     return list;
-  }, [catParam, activeFilter, sortBy]);
+  }, [allProducts, catParam, activeFilter, sortBy]);
 
-  const limitedItems = ALL_PRODUCTS.filter(p => p.tag === 'Limited Edition');
+  const limitedItems = allProducts.filter(p => p.tag === 'Limited Edition');
 
   return (
     <div className="min-h-screen bg-background">
@@ -306,7 +324,7 @@ export default function ShopMain() {
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {ALL_PRODUCTS.filter(p => p.bundle).map(product => (
+              {allProducts.filter(p => p.bundle).map(product => (
                 <ProductCard key={`bun-${product.id}`} product={product} onWishlist={toggleWishlist} wishlisted={wishlist.includes(product.id)} />
               ))}
             </div>

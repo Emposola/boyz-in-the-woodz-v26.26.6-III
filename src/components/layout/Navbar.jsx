@@ -3,7 +3,7 @@
    ============================================================ */
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Leaf, ShoppingBag, User, Menu, X, ChevronDown, ArrowRight, Home, Trees, Compass, Users, BookOpen, Zap, LayoutDashboard } from 'lucide-react';
+import { Search, Leaf, ShoppingBag, ChevronDown, ArrowRight, Home, Trees, Compass, Users, BookOpen, Zap, LayoutDashboard } from 'lucide-react';
 import { FiShoppingBag, FiUser, FiMenu, FiX } from 'react-icons/fi';
 import { useCart } from '@/lib/cartContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,12 +11,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 const LOGO_URL = '/images/logos/logo-navbar-about.jpg';
 const FG = '#2D5A27';
 const SAND = '#D2B48C';
-
-const TikTokIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
-    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V9.09a8.22 8.22 0 004.78 1.52V7.15a4.85 4.85 0 01-1.01-.46z"/>
-  </svg>
-);
 
 const NAV_MENUS = [
   {
@@ -54,7 +48,7 @@ const NAV_MENUS = [
           { label: 'Survival Kits', to: '/shop/bundles' },
           { label: 'Brotherhood Bundles', to: '/shop/bundles' },
           { label: 'Sale Items', to: '/shop/sale' },
-          { label: 'Limited Edition', to: '/shop/limited' },
+          { label: 'Limited Edition', to: '/shop/limited-edition' },
           { label: 'Gift Cards', to: '/shop/gift-cards' },
           { label: 'New Arrivals', to: '/shop/new' },
         ],
@@ -81,12 +75,12 @@ const NAV_MENUS = [
     label: 'Brotherhood',
     icon: Users,
     links: [
-      { label: 'Take the Pledge', to: '/pledge' },
-      { label: 'Pledge Wall', to: '/pledge-wall' },
-      { label: 'Brotherhood Map', to: '/brotherhood/map' },
-      { label: 'Chapters', to: '/chapters' },
-      { label: 'Start a Chapter', to: '/chapters/apply' },
-      { label: 'Virtual Campfire', to: '/campfire' },
+      { label: 'Take the Pledge', to: '/the-code' },
+      { label: 'Pledge Wall', to: '/brotherhood/directory' },
+      { label: 'Brotherhood Map', to: '/locations' },
+      { label: 'Chapters', to: '/locations' },
+      { label: 'Start a Chapter', to: '/retreat/apply' },
+      { label: 'Virtual Campfire', to: '/studio' },
       { label: 'Brother Directory', to: '/brotherhood/directory' },
       { label: 'Leaderboard', to: '/brotherhood/leaderboard' },
     ],
@@ -136,6 +130,15 @@ export default function Navbar() {
   const timeoutRef = useRef(null);
 
   useEffect(() => { setOpenMenu(null); setMobileOpen(false); }, [location.pathname]);
+
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
 
   const enter = (label) => { clearTimeout(timeoutRef.current); setOpenMenu(label); };
   const leave = () => { timeoutRef.current = setTimeout(() => setOpenMenu(null), 180); };

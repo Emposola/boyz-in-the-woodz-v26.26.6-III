@@ -13,6 +13,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { CartProvider } from '@/lib/cartContext';
 import { PledgeProvider } from '@/lib/pledgeContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
 /* --- Layout --- */
 import MainLayout from './components/layout/MainLayout';
@@ -138,7 +139,6 @@ const AuthenticatedApp = () => {
             <Route path="/events" element={<Events />} />
 
             {/* ── Boyz In The Woodz ── */}
-            <Route path="/shop/:business" element={<Shop />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/the-code" element={<TheCode />} />
             <Route path="/science" element={<Science />} />
@@ -147,10 +147,10 @@ const AuthenticatedApp = () => {
             <Route path="/blog" element={<Journal />} />
 
             {/* ── Retreats ── */}
-            <Route path="/retreat/apply" element={<RetreatApply />} />
+            <Route path="/retreat/apply" element={<ProtectedRoute><RetreatApply /></ProtectedRoute>} />
             <Route path="/retreat/waitlist" element={<RetreatWaitlist />} />
-            <Route path="/retreat/confirmed" element={<RetreatConfirmed />} />
-            <Route path="/retreat/survey" element={<RetreatSurvey />} />
+            <Route path="/retreat/confirmed" element={<ProtectedRoute><RetreatConfirmed /></ProtectedRoute>} />
+            <Route path="/retreat/survey" element={<ProtectedRoute><RetreatSurvey /></ProtectedRoute>} />
 
             {/* ── Barbershop Phase 1 ── */}
             <Route path="/barber/services" element={<BarberServices />} />
@@ -160,17 +160,18 @@ const AuthenticatedApp = () => {
             <Route path="/barber/faq" element={<BarberFAQ />} />
 
             {/* ── Barbershop Phase 2 ── */}
-            <Route path="/barber/book" element={<BookAppointment />} />
+            <Route path="/barber/book" element={<ProtectedRoute><BookAppointment /></ProtectedRoute>} />
             <Route path="/barber/walkin" element={<WalkInWaitlistLive />} />
             <Route path="/barber/profile/:id" element={<BarberProfile />} />
 
             {/* ── New Features ── */}
             <Route path="/case-studies" element={<CaseStudies />} />
             <Route path="/studio" element={<StudioLive />} />
-            <Route path="/admin/studio" element={<AdminStudio />} />
+            <Route path="/admin/studio" element={<ProtectedRoute requiredRole="admin"><AdminStudio /></ProtectedRoute>} />
 
             {/* ── Shop ── */}
             <Route path="/shop" element={<ShopMain />} />
+            <Route path="/shop/boyz" element={<Shop />} />
             <Route path="/shop/:category" element={<ShopMain />} />
 
             {/* ── New Brand Pages ── */}
@@ -201,7 +202,7 @@ const AuthenticatedApp = () => {
             <Route path="/science/testimonials" element={<ScienceHub />} />
 
             {/* ── Journal ── */}
-            <Route path="/journal/submit" element={<JournalSubmit />} />
+            <Route path="/journal/submit" element={<ProtectedRoute><JournalSubmit /></ProtectedRoute>} />
             <Route path="/journal/category/:cat" element={<Journal />} />
 
             {/* ── New Premium Pages ── */}
@@ -216,8 +217,8 @@ const AuthenticatedApp = () => {
             <Route path="/community/time-capsule" element={<TimeCapsule />} />
 
             {/* ── Admin ── */}
-            <Route path="/admin/blog" element={<AdminBlog />} />
-            <Route path="/admin/blog/pending" element={<AdminBlog />} />
+            <Route path="/admin/blog" element={<ProtectedRoute requiredRole="admin"><AdminBlog /></ProtectedRoute>} />
+            <Route path="/admin/blog/pending" element={<ProtectedRoute requiredRole="admin"><AdminBlog /></ProtectedRoute>} />
 
             {/* ── Legal ── */}
             <Route path="/legal/retreat-waiver" element={<LegalRetreat />} />
@@ -227,10 +228,10 @@ const AuthenticatedApp = () => {
             <Route path="/legal/merchandise-safety" element={<LegalRetreat />} />
 
             {/* ── Admin ── */}
-            <Route path="/admin/calendar" element={<AdminBookingCalendar />} />
+            <Route path="/admin/calendar" element={<ProtectedRoute requiredRole="admin"><AdminBookingCalendar /></ProtectedRoute>} />
 
             {/* ── Account ── */}
-            <Route path="/account" element={<Account />} />
+            <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
 
             {/* ── Legal ── */}
             <Route path="/privacy" element={<Legal />} />

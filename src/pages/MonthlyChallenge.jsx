@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, Target, Check, ArrowRight, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SEO from '@/components/shared/SEO';
 
 const FG = '#2D5A27';
 const SAND = '#D2B48C';
@@ -31,16 +32,25 @@ const PAST_CHALLENGES = [
 export default function MonthlyChallenge() {
   const [joined, setJoined] = useState(false);
   const [userProgress, setUserProgress] = useState(1);
-  const [countdown, setCountdown] = useState({ d: 11, h: 14, m: 22, s: 8 });
+  const [countdown, setCountdown] = useState({ d: 0, h: 0, m: 0, s: 0 });
 
   useEffect(() => {
-    const t = setInterval(() => {
-      setCountdown(c => {
-        let { d, h, m, s } = c;
-        s--; if (s < 0) { s = 59; m--; } if (m < 0) { m = 59; h--; } if (h < 0) { h = 23; d--; }
-        return { d: Math.max(0, d), h, m, s };
-      });
-    }, 1000);
+    const getEndOfMonth = () => {
+      const now = new Date();
+      return new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    };
+    const target = getEndOfMonth();
+    const update = () => {
+      const diff = target - new Date();
+      if (diff <= 0) { setCountdown({ d: 0, h: 0, m: 0, s: 0 }); return; }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setCountdown({ d, h, m, s });
+    };
+    update();
+    const t = setInterval(update, 1000);
     return () => clearInterval(t);
   }, []);
 
@@ -50,6 +60,7 @@ export default function MonthlyChallenge() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Monthly Challenge — BOYZ IN THE WOODZ" description="Join the monthly challenge. Upload proofs, earn points, compete with brothers." canonical="/monthly-challenge" />
       {/* Hero */}
       <section className="relative py-14" style={{ background: 'linear-gradient(135deg, rgba(45,90,39,0.1) 0%, transparent 60%)' }}>
         <div className="max-w-4xl mx-auto px-4">

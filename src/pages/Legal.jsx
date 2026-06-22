@@ -4,6 +4,7 @@
    ============================================================ */
 import React from 'react';
 import { Shield } from 'lucide-react';
+import SEO from '@/components/shared/SEO';
 
 /* --- Legal content by type --- */
 const LEGAL_CONTENT = {
@@ -58,6 +59,7 @@ export default function Legal() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12 md:py-20">
+      <SEO title="Legal — BOYZ IN THE WOODZ" description="Terms, privacy policy, and legal information for BOYZ IN THE WOODZ." canonical="/legal" />
       <div className="flex items-center gap-2 mb-6">
         <Shield className="w-5 h-5 text-primary" />
         <h1 className="font-heading text-3xl tracking-wide uppercase">{content.title}</h1>

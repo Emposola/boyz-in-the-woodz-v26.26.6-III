@@ -58,7 +58,7 @@ export default function HomeProof() {
             <span className="text-xs font-heading tracking-[0.3em] text-primary uppercase">Real Numbers</span>
             <h2 className="font-heading text-3xl md:text-4xl tracking-wide uppercase mt-2">Brotherhood By The Numbers</h2>
           </div>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {NUMBERS.map((n, i) => (
               <motion.div key={n.label} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }} transition={{ delay: i * 0.06 }}

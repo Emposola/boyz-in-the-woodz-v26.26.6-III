@@ -2,10 +2,12 @@
    RETREAT WAITLIST STATUS — User sees their position
    Referral boost: +2 spots per friend who applies
    ============================================================ */
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useAuth } from '@/lib/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { api } from '@/api/supabaseClient';
 import { useQuery } from '@tanstack/react-query';
-import { Trees, Users, Link as LinkIcon, Copy, ArrowUp } from 'lucide-react';
+import { Trees, Users, Copy, ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -21,8 +23,8 @@ const STATUS_CONFIG = {
 };
 
 export default function RetreatWaitlist() {
-  const [user, setUser] = useState(null);
-  useEffect(() => { api.auth.me().then(setUser).catch(() => {}); }, []);
+  const { user, isAuthenticated, isLoadingAuth } = useAuth();
+  const navigate = useNavigate();
 
   const { data: applications } = useQuery({
     queryKey: ['retreat-apps', user?.id],
@@ -33,12 +35,12 @@ export default function RetreatWaitlist() {
 
   const referralLink = user ? `${window.location.origin}/retreat/apply?ref=${user.id}` : '';
 
-  if (!user) {
+  if (!isAuthenticated && !isLoadingAuth) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4 text-center">
         <h1 className="font-heading text-3xl tracking-wide uppercase mb-3">Check Your Status</h1>
         <p className="text-sm text-muted-foreground mb-6">Sign in to see your retreat application status.</p>
-        <Button onClick={() => api.auth.redirectToLogin('/retreat/waitlist')} className="font-heading tracking-wider uppercase">Sign In</Button>
+        <Button onClick={() => navigate('/auth/signin?redirect=/retreat/waitlist')} className="font-heading tracking-wider uppercase">Sign In</Button>
       </div>
     );
   }
@@ -62,19 +64,23 @@ export default function RetreatWaitlist() {
       ) : (
         <div className="space-y-4">
           {applications.map((app, i) => {
+            const appLocation = app.location_name || app.responses?.location_name;
+            const appDate = app.requested_date || app.responses?.requested_date;
+            const appWaitlistPosition = app.waitlist_position || app.responses?.waitlist_position;
+            const appReferralCount = app.referral_count || app.responses?.referral_count || 0;
             const cfg = STATUS_CONFIG[app.status] || STATUS_CONFIG.pending;
             return (
               <motion.div key={app.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                 className="bg-card border border-border rounded-xl p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="font-heading text-lg tracking-wider uppercase">{app.location_name}</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">{app.requested_date}</p>
+                    <h3 className="font-heading text-lg tracking-wider uppercase">{appLocation}</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">{appDate}</p>
                   </div>
                   <Badge className={`${cfg.color} border-0 text-xs`}>{cfg.label}</Badge>
                 </div>
 
-                {app.status === 'waitlist' && app.waitlist_position && (
+                {app.status === 'waitlist' && appWaitlistPosition && (
                   <div className="bg-secondary rounded-lg p-4 flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
                       <span className="font-heading text-xl">{app.waitlist_position}</span>

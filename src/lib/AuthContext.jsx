@@ -18,10 +18,9 @@ export const AuthProvider = ({ children }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === 'SIGNED_IN') {
-          const { data: { user } } = await supabase.auth.getUser();
-          setUser(user);
-          setIsAuthenticated(true);
-          await fetchUserProfile(user.id);
+              const { data: { user } } = await supabase.auth.getUser();
+        setIsAuthenticated(true);
+        await fetchOrCreateUserProfile(user);
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setIsAuthenticated(false);
@@ -34,16 +33,50 @@ export const AuthProvider = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchUserProfile = async (userId) => {
-    const { data: profile } = await supabase
+  const fetchOrCreateUserProfile = async (user) => {
+    if (!user?.id) return null;
+
+    const { data: profile, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', userId)
+      .eq('id', user.id)
       .single();
-    
-    if (profile) {
-      setUser(prev => ({ ...prev, ...profile }));
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error fetching profile:', error);
+      return null;
     }
+
+    if (profile) {
+      const mergedUser = { ...user, ...profile };
+      setUser(mergedUser);
+      return mergedUser;
+    }
+
+    const profileDefaults = {
+      id: user.id,
+      email: user.email,
+      full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || null,
+      role: user.user_metadata?.role || 'member',
+      created_at: new Date().toISOString(),
+    };
+
+    const { data: createdProfile, error: insertError } = await supabase
+      .from('profiles')
+      .insert(profileDefaults)
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('Error creating profile:', insertError);
+      const mergedUser = { ...user, ...profileDefaults };
+      setUser(mergedUser);
+      return mergedUser;
+    }
+
+    const mergedUser = { ...user, ...createdProfile };
+    setUser(mergedUser);
+    return mergedUser;
   };
 
   const checkAppState = async () => {
@@ -62,9 +95,8 @@ export const AuthProvider = ({ children }) => {
       
       if (session) {
         const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
         setIsAuthenticated(true);
-        await fetchUserProfile(user.id);
+        await fetchOrCreateUserProfile(user);
       }
       
       setIsLoadingPublicSettings(false);
@@ -93,12 +125,18 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signUp = async (email, password, metadata = {}) => {
+    const signUpMetadata = { ...metadata, role: metadata.role || 'member' };
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: metadata }
+      options: { data: signUpMetadata }
     });
     if (error) throw error;
+
+    if (data?.user) {
+      await fetchOrCreateUserProfile(data.user);
+    }
+
     return data;
   };
 
@@ -109,7 +147,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const navigateToLogin = () => {
-    window.location.href = '/login';
+    window.location.href = '/auth/signin';
   };
 
   return (

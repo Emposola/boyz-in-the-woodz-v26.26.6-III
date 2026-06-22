@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { Search, MapPin, Users, UserPlus, Check, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import SEO from '@/components/shared/SEO';
 
 const FG = '#2D5A27';
 
@@ -33,6 +34,7 @@ export default function BrotherhoodDirectory() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Brotherhood Directory" description="Find brothers near you. Connect with the brotherhood in your area." canonical="/brotherhood/directory" />
       <section className="relative py-16 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(45,90,39,0.1) 0%, transparent 60%)' }}>
         <div className="max-w-4xl mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>

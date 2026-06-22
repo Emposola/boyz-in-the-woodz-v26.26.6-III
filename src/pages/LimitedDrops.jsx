@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCart } from '@/lib/cartContext';
 import { toast } from 'sonner';
+import SEO from '@/components/shared/SEO';
 
 const FG = '#2D5A27';
 const SAND = '#D2B48C';
@@ -27,7 +28,7 @@ const PAST_DROPS = [
 ];
 
 export default function LimitedDrops() {
-  const [countdown, setCountdown] = useState({ d: 6, h: 12, m: 33, s: 0 });
+  const [countdown, setCountdown] = useState({ d: 0, h: 0, m: 0, s: 0 });
   const [notifyEmail, setNotifyEmail] = useState('');
   const [notified, setNotified] = useState(false);
   const [userPoints] = useState(3200); // simulated
@@ -35,18 +36,32 @@ export default function LimitedDrops() {
   const { addItem } = useCart();
 
   useEffect(() => {
-    const t = setInterval(() => {
-      setCountdown(c => {
-        let { d, h, m, s } = c;
-        s--; if (s < 0) { s = 59; m--; } if (m < 0) { m = 59; h--; } if (h < 0) { h = 23; d--; }
-        return { d: Math.max(0, d), h, m, s };
-      });
-    }, 1000);
+    const getNextFriday = () => {
+      const now = new Date();
+      const daysUntilFriday = (5 - now.getDay() + 7) % 7 || 7;
+      const nextFriday = new Date(now);
+      nextFriday.setDate(now.getDate() + daysUntilFriday);
+      nextFriday.setHours(23, 59, 59, 999);
+      return nextFriday;
+    };
+    const target = getNextFriday();
+    const update = () => {
+      const diff = target - new Date();
+      if (diff <= 0) { setCountdown({ d: 0, h: 0, m: 0, s: 0 }); return; }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setCountdown({ d, h, m, s });
+    };
+    update();
+    const t = setInterval(update, 1000);
     return () => clearInterval(t);
   }, []);
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Limited Drops — BOYZ IN THE WOODZ" description="Exclusive limited edition drops. Grab gear before it's gone." canonical="/shop/limited" />
       {/* Hero */}
       <section className="relative min-h-[50vh] flex items-end overflow-hidden">
         <div className="absolute inset-0">

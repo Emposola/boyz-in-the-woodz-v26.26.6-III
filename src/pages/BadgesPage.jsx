@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Lock, Star, Trophy, Users, PenLine, Heart, Flame } from 'lucide-react';
+import SEO from '@/components/shared/SEO';
 
 const FG = '#2D5A27';
 const SAND = '#D2B48C';
@@ -41,6 +42,7 @@ export default function BadgesPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Badges — BOYZ IN THE WOODZ" description="Collect badges as you progress through the brotherhood. Proof of your journey." canonical="/badges" />
       <section className="relative py-14" style={{ background: 'linear-gradient(135deg, rgba(45,90,39,0.1) 0%, transparent 60%)' }}>
         <div className="max-w-4xl mx-auto px-4">
           <span className="text-xs font-heading tracking-[0.3em] uppercase block mb-2" style={{ color: SAND }}>Your Journey</span>

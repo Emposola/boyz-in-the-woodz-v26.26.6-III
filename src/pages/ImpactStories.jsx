@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star, Filter, Share2, Heart, PenLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SEO from '@/components/shared/SEO';
 
 const FG = '#2D5A27';
 const SAND = '#D2B48C';
@@ -40,6 +41,7 @@ export default function ImpactStories() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Impact Stories — Brotherhood" description="Real stories from brothers who found their edge in the woods." canonical="/impact-stories" />
       {/* Hero */}
       <section className="relative min-h-[50vh] flex items-end overflow-hidden">
         <div className="absolute inset-0">

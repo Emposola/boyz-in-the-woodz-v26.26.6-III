@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, Users, Filter, ArrowRight, Trees, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SEO from '@/components/shared/SEO';
 
 const RETREATS = [
   { id: 1, slug: 'broken-bow-jul-2026', title: 'Broken Bow Summer Reset', dates: 'Jul 18–20, 2026', location: 'Broken Bow, OK', type: 'Weekend Reset', difficulty: 'Easy', duration: '2-day', season: 'summer', price: 297, capacity: 12, spotsLeft: 2, terrain: 'Forest / Lake', img: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=600&q=75' },
@@ -42,6 +43,7 @@ export default function RetreatCalendar() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Retreat Calendar — Upcoming Events" description="View upcoming retreat dates and reserve your spot in the brotherhood." canonical="/retreat/calendar" />
       {/* Hero */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0">

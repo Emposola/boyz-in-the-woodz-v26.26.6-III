@@ -7,8 +7,8 @@ const DefaultFallback = () => (
   </div>
 );
 
-export default function ProtectedRoute({ children, fallback = <DefaultFallback /> }) {
-  const { isAuthenticated, isLoadingAuth, authChecked } = useAuth();
+export default function ProtectedRoute({ children, requiredRole, fallback = <DefaultFallback /> }) {
+  const { user, isAuthenticated, isLoadingAuth, authChecked } = useAuth();
 
   if (isLoadingAuth || !authChecked) {
     return fallback;
@@ -16,6 +16,18 @@ export default function ProtectedRoute({ children, fallback = <DefaultFallback /
 
   if (!isAuthenticated) {
     return <Navigate to="/auth/signin" replace state={{ from: window.location.pathname }} />;
+  }
+
+  if (requiredRole === 'admin' && !user?.is_admin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="font-heading text-4xl tracking-wide uppercase mb-4">Access Denied</h1>
+          <p className="text-muted-foreground mb-6">You don't have permission to access this page.</p>
+          <a href="/" className="text-primary hover:underline">Go Home</a>
+        </div>
+      </div>
+    );
   }
 
   return children;

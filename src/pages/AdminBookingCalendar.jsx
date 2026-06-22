@@ -2,11 +2,12 @@
    ADMIN: BOOKING CALENDAR — Drag-drop view per barber
    Admin only. Block time, set limits, view appointments.
    ============================================================ */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useAuth } from '@/lib/AuthContext';
 import { api } from '@/api/supabaseClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, addDays, startOfWeek, isSameDay } from 'date-fns';
-import { CalendarDays, ChevronLeft, ChevronRight, Users, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -20,19 +21,17 @@ const STATUS_CONFIG = {
 };
 
 export default function AdminBookingCalendar() {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [weekStart, setWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [selectedBarber, setSelectedBarber] = useState('all');
   const qc = useQueryClient();
-
-  useEffect(() => { api.auth.me().then(setUser).catch(() => {}); }, []);
 
   const weekDays = Array.from({ length: 6 }, (_, i) => addDays(weekStart, i)); // Mon-Sat
 
   const { data: appointments } = useQuery({
     queryKey: ['admin-appointments', weekStart.toISOString(), selectedBarber],
-    queryFn: () => api.entities.Appointment.list('-start_time', 200),
-    enabled: user?.role === 'admin',
+    queryFn: () => api.entities.Appointment.filter({}, '-start_time', 200),
+    enabled: user?.is_admin === true,
     initialData: [],
   });
 
@@ -56,7 +55,7 @@ export default function AdminBookingCalendar() {
   const getAptsForDay = (day) =>
     filteredAppointments.filter(a => a.start_time && isSameDay(new Date(a.start_time), day));
 
-  if (!user || user.role !== 'admin') {
+  if (!user || !user.is_admin) {
     return (
       <div className="min-h-screen flex items-center justify-center text-center px-4">
         <div>

@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
   Trees, Heart, Shield, Zap, Trophy, ArrowRight,
-  Users, MapPin, Star, ChevronDown, Quote, ShoppingBag
+  Users, Star, ChevronDown, Quote, ShoppingBag
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SEO from '@/components/shared/SEO';
@@ -93,7 +93,7 @@ export default function About() {
 
       {/* ── 2. ORIGIN STORY ── */}
       <section className="py-20 md:py-28 bg-background">
-        <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-16 items-center">
+        <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
             <span className="text-xs font-heading tracking-[0.3em] text-primary uppercase">Why We Exist</span>
             <h2 className="font-heading text-4xl md:text-5xl tracking-wide uppercase mt-3 mb-6 leading-tight">
@@ -119,7 +119,7 @@ export default function About() {
             </div>
           </motion.div>
           <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="relative">
-            <div className="relative h-96 rounded-2xl overflow-hidden">
+            <div className="relative h-64 md:h-96 rounded-2xl overflow-hidden">
               <img src="/images/unsplash/men-group-bonding.webp" alt="Brotherhood" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
               <div className="absolute bottom-6 left-6 right-6">
@@ -214,7 +214,7 @@ export default function About() {
             <span className="text-xs font-heading tracking-[0.3em] text-primary uppercase">The Journey</span>
             <h2 className="font-heading text-4xl md:text-5xl tracking-wide uppercase mt-2">Our Timeline</h2>
           </motion.div>
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
+          <div className="grid lg:grid-cols-2 gap-6 lg:gap-12 items-start">
             {/* Year list */}
             <div className="space-y-2">
               {TIMELINE.map((entry, i) => (

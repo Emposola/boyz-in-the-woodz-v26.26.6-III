@@ -5,6 +5,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Zap, Baby, Compass, Clock } from 'lucide-react';
+import SEO from '@/components/shared/SEO';
 
 const ARCHETYPES = [
   {
@@ -60,6 +61,7 @@ const ARCHETYPES = [
 export default function Archetypes() {
   return (
     <div className="min-h-screen">
+      <SEO title="Archetypes — Find Your Brotherhood Identity" description="Discover your brotherhood archetype. The Wanderer, The Guardian, The Sage, or The Builder." canonical="/archetypes" />
       {/* --- Hero --- */}
       <section className="py-20 md:py-28 bg-secondary/30 text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mx-auto px-4">

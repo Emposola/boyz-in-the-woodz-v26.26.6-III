@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import SEO from '@/components/shared/SEO';
 
 const SESSION_TYPE_LABELS = {
   retreat_prep: { label: 'Retreat Prep', color: 'bg-green-900/40 text-green-400' },
@@ -276,6 +277,7 @@ export default function StudioLive() {
 
   return (
     <div className="min-h-screen pb-20">
+      <SEO title="Studio Live — BOYZ IN THE WOODZ" description="Live sessions, conversations, and content from the brotherhood studio." canonical="/studio" />
 
       {/* ── HERO ── */}
       <section className="relative py-16 overflow-hidden border-b border-border bg-secondary/20">

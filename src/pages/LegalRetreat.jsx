@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import { Shield, Check, AlertCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import SEO from '@/components/shared/SEO';
 
 const FOREST_GREEN = '#2D5A27';
 
@@ -131,6 +132,7 @@ export default function LegalRetreat() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Retreat Legal — BOYZ IN THE WOODZ" description="Legal terms and conditions for retreat participation." canonical="/retreat/legal" />
       {/* Header */}
       <div className="relative py-16 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(45,90,39,0.15) 0%, transparent 60%)' }}>
         <div className="max-w-4xl mx-auto px-4">

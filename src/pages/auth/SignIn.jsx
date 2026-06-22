@@ -17,9 +17,8 @@ export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState('');
   const { signIn, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -147,16 +146,7 @@ export default function SignIn() {
               </div>
             </div>
             
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-600 bg-gray-900/50 text-primary focus:ring-primary/20"
-                />
-                <span>Remember me</span>
-              </label>
+            <div className="flex items-center justify-end">
               <Link 
                 to="/auth/signup" 
                 className="text-sm text-primary/70 hover:text-primary transition-colors"

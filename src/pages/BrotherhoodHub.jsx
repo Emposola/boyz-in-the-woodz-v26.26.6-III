@@ -7,6 +7,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Trophy, Target, BarChart3, Zap, Star, ArrowRight, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SEO from '@/components/shared/SEO';
 
 const FG = '#2D5A27';
 const SAND = '#D2B48C';
@@ -170,8 +171,8 @@ function Statistics() {
 
 export default function BrotherhoodHub() {
   const location = useLocation();
-  if (location.pathname.includes('/leaderboard')) return <Leaderboard />;
-  if (location.pathname.includes('/challenges')) return <Challenges />;
-  if (location.pathname.includes('/statistics')) return <Statistics />;
-  return <Leaderboard />;
+  if (location.pathname.includes('/leaderboard')) return <><SEO title="Brotherhood Hub — Connect" description="The central hub for the brotherhood. Connect, share, and grow together." canonical="/brotherhood" /><Leaderboard /></>;
+  if (location.pathname.includes('/challenges')) return <><SEO title="Brotherhood Hub — Connect" description="The central hub for the brotherhood. Connect, share, and grow together." canonical="/brotherhood" /><Challenges /></>;
+  if (location.pathname.includes('/statistics')) return <><SEO title="Brotherhood Hub — Connect" description="The central hub for the brotherhood. Connect, share, and grow together." canonical="/brotherhood" /><Statistics /></>;
+  return <><SEO title="Brotherhood Hub — Connect" description="The central hub for the brotherhood. Connect, share, and grow together." canonical="/brotherhood" /><Leaderboard /></>;
 }

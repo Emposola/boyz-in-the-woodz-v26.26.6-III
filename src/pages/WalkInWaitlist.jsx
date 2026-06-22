@@ -8,6 +8,7 @@ import { Clock, MessageSquare, UserCheck, ArrowRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import SEO from '@/components/shared/SEO';
 
 export default function WalkInWaitlist() {
   const [email, setEmail] = useState('');

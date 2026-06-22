@@ -37,7 +37,7 @@ const wordVariant = {
 
 export default function HomeHero() {
   return (
-    <section className="relative h-[90vh] md:h-[95vh] flex overflow-hidden">
+    <section className="relative h-[90vh] min-h-[480px] md:h-[95vh] flex overflow-hidden">
       {/* Background — crossfading video/image slideshow */}
       <HeroSlideshow />
       <div className="absolute inset-0 z-[2] bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
@@ -69,7 +69,7 @@ export default function HomeHero() {
           variants={container}
           initial="hidden"
           animate="visible"
-          className="font-heading text-5xl md:text-7xl lg:text-[5.5rem] tracking-wide uppercase text-white leading-[0.95] mb-6"
+          className="font-heading text-3xl sm:text-5xl md:text-7xl lg:text-[5.5rem] tracking-wide uppercase text-white leading-[0.95] mb-6"
         >
           {headlineWords.map((w, i) => (
             <motion.span

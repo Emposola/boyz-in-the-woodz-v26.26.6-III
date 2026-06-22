@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PenLine, Star, ArrowRight, X, Share2, ChevronRight, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import SEO from '@/components/shared/SEO';
 
 const FG = '#2D5A27';
 const SAND = '#D2B48C';
@@ -35,6 +36,7 @@ export default function BrotherhoodLetters() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Brotherhood Letters" description="Letters from the brotherhood. Stories, wisdom, and proof shared man to man." canonical="/brotherhood/letters" />
       {/* Hero */}
       <section className="relative min-h-[45vh] flex items-end overflow-hidden">
         <div className="absolute inset-0">

@@ -3,14 +3,16 @@
    Step 1: Service, Step 2: Date/Time, Step 3: Barber,
    Step 4: Add-ons, Step 5: Confirm
    ============================================================ */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useAuth } from '@/lib/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { api } from '@/api/supabaseClient';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Scissors, Calendar, User, Plus, CheckCircle, ArrowLeft, ArrowRight, Clock, Star } from 'lucide-react';
+import { Scissors, Plus, CheckCircle, ArrowLeft, ArrowRight, Clock, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { format, addDays, setHours, setMinutes, isBefore, startOfDay } from 'date-fns';
+import { format, addDays, setHours, setMinutes, isBefore } from 'date-fns';
 import SEO from '@/components/shared/SEO';
 
 /* --- Static services (replace with DB in later phase) --- */
@@ -48,11 +50,10 @@ const STEPS = ['Service', 'Date & Time', 'Barber', 'Add-ons', 'Confirm'];
 export default function BookAppointment() {
   const [step, setStep] = useState(0);
   const [selected, setSelected] = useState({ service: null, date: null, time: null, barber: null, addons: [] });
-  const [user, setUser] = useState(null);
+  const { user, isAuthenticated, isLoadingAuth } = useAuth();
+  const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [booked, setBooked] = useState(false);
-
-  useEffect(() => { api.auth.me().then(setUser).catch(() => {}); }, []);
 
   const { data: barbers } = useQuery({
     queryKey: ['barbers-active'],
@@ -78,7 +79,7 @@ export default function BookAppointment() {
   };
 
   const handleBook = async () => {
-    if (!user) { api.auth.redirectToLogin('/barber/book'); return; }
+    if (!isAuthenticated && !isLoadingAuth) { navigate('/auth/signin?redirect=/barber/book'); return; }
     setSubmitting(true);
     const startTime = selected.time;
     const endTime = new Date(startTime.getTime() + selected.service.duration_minutes * 60000);

@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Coins, ShoppingBag, Users, Award, Gift, Calculator } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
+import SEO from '@/components/shared/SEO';
 
 /* --- Ways to earn --- */
 const EARN_METHODS = [
@@ -22,6 +23,7 @@ export default function Points() {
 
   return (
     <div className="min-h-screen">
+      <SEO title="Brotherhood Points — BOYZ IN THE WOODZ" description="Track and earn Brotherhood Points. Proof of nature builds your reputation." canonical="/points" />
       {/* --- Hero --- */}
       <section className="py-20 md:py-28 bg-secondary/30 text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mx-auto px-4">

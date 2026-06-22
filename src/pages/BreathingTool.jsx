@@ -5,6 +5,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, RotateCcw, Maximize, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SEO from '@/components/shared/SEO';
 
 const FG = '#2D5A27';
 const SAND = '#D2B48C';
@@ -70,6 +71,7 @@ export default function BreathingTool() {
 
   return (
     <div className={BG}>
+      <SEO title="Breathing Tool — Reset Now" description="Guided breathing exercise to reset your nervous system in 3 minutes." canonical="/breathing" />
       {!fullscreen && (
         <section className="relative py-12 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(45,90,39,0.1) 0%, transparent 60%)' }}>
           <div className="max-w-3xl mx-auto px-4">

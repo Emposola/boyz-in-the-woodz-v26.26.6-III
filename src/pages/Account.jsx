@@ -3,13 +3,14 @@
    Unified user account for both businesses
    ============================================================ */
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/lib/AuthContext';
 import { api } from '@/api/supabaseClient';
 import { useQuery } from '@tanstack/react-query';
 import { 
-  Coins, ShoppingBag, Gift, Settings, Copy, Calendar, 
+  Coins, Gift, Settings, Copy, Calendar, 
   Trees, RotateCcw, User, Mail, LogOut, ChevronRight,
-  Star, Clock, Package, Award, Users, Phone, MapPin,
-  Shield, CreditCard, Heart, Crown
+  Star, Package, Users, Shield, Crown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +20,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { usePledge } from '@/lib/pledgeContext';
+import SEO from '@/components/shared/SEO';
 
 // --- Skeleton Loader ---
 const SkeletonLoader = () => (
@@ -71,16 +73,14 @@ const StatsCard = ({ icon: Icon, label, value, color = 'text-primary' }) => (
 );
 
 export default function Account() {
-  const [user, setUser] = useState(null);
+  const { user, logout, isAuthenticated, isLoadingAuth } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const { pledgeAccepted } = usePledge();
 
-  // Load user
   useEffect(() => {
-    api.auth.me()
-      .then(u => { setUser(u); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, []);
+    if (!isLoadingAuth) setLoading(false);
+  }, [isLoadingAuth]);
 
   // Fetch user data
   const { data: transactions = [] } = useQuery({
@@ -116,6 +116,7 @@ export default function Account() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-black">
+        <SEO title="Account — BOYZ IN THE WOODZ" description="Manage your account, track orders, and view your Brotherhood Points." canonical="/account" />
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto" />
           <p className="text-gray-400 text-sm mt-4">Loading your account...</p>
@@ -128,6 +129,7 @@ export default function Account() {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-black px-4 py-12">
+        <SEO title="Account — BOYZ IN THE WOODZ" description="Manage your account, track orders, and view your Brotherhood Points." canonical="/account" />
         <div className="max-w-md w-full">
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-gray-700 p-8 text-center shadow-2xl">
             {/* Icon */}
@@ -142,7 +144,7 @@ export default function Account() {
             
             <div className="mt-8 space-y-3">
               <Button 
-                onClick={() => api.auth.redirectToLogin()} 
+                onClick={() => navigate('/auth/signin')} 
                 className="w-full bg-primary hover:bg-primary/90 font-heading tracking-wider uppercase py-6 text-base group"
               >
                 Sign In
@@ -182,6 +184,7 @@ export default function Account() {
   // --- Logged in - Dashboard ---
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black px-4 py-8 md:py-12">
+      <SEO title="Account — BOYZ IN THE WOODZ" description="Manage your account, track orders, and view your Brotherhood Points." canonical="/account" />
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
@@ -203,7 +206,7 @@ export default function Account() {
           
           <Button 
             variant="outline" 
-            onClick={() => api.auth.logout()}
+            onClick={() => logout()}
             className="border-gray-600 text-gray-400 hover:text-white hover:bg-gray-700/50"
           >
             <LogOut className="w-4 h-4 mr-2" />
@@ -327,8 +330,8 @@ export default function Account() {
                 return (
                   <div key={app.id} className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:border-primary/30 transition-all">
                     <div>
-                      <p className="text-sm font-medium text-white">{app.location_name}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{app.requested_date}</p>
+                      <p className="text-sm font-medium text-white">{app.location_name || app.responses?.location_name}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{app.requested_date || app.responses?.requested_date}</p>
                     </div>
                     <Badge className={`${statusColors[app.status] || 'text-gray-400 bg-gray-700/50'} border`}>
                       {app.status}
@@ -449,13 +452,13 @@ export default function Account() {
               </div>
               
               <div className="pt-4 border-t border-gray-700/50 flex flex-col sm:flex-row gap-3">
-                <Button variant="outline" className="border-gray-600 text-gray-300 hover:text-red-400 hover:border-red-400/30 hover:bg-red-400/10">
+                <Button variant="outline" onClick={() => navigate('/privacy')} className="border-gray-600 text-gray-300 hover:text-red-400 hover:border-red-400/30 hover:bg-red-400/10">
                   <Shield className="w-4 h-4 mr-2" />
                   Privacy Settings
                 </Button>
                 <Button 
                   variant="outline" 
-                  onClick={() => api.auth.logout()}
+                  onClick={() => logout()}
                   className="border-gray-600 text-gray-300 hover:text-red-400 hover:border-red-400/30 hover:bg-red-400/10"
                 >
                   <LogOut className="w-4 h-4 mr-2" />

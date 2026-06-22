@@ -5,6 +5,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '@/lib/cartContext';
+import { useAuth } from '@/lib/AuthContext';
+import api from '@/api/supabaseClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -13,6 +15,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import SEO from '@/components/shared/SEO';
 
 const PAYMENT_ICONS = [
   { name: 'Visa', bg: '#1A1F71', text: 'VISA' },
@@ -25,6 +28,7 @@ const PAYMENT_ICONS = [
 
 export default function Cart() {
   const { items, updateQuantity, removeItem, clearCart, subtotal, itemCount } = useCart();
+  const { user } = useAuth();
   const [discountCode, setDiscountCode] = useState('');
   const [discountApplied, setDiscountApplied] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
@@ -46,18 +50,61 @@ export default function Cart() {
     }
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
+    if (!user) {
+      toast.error('Please sign in to place an order.');
+      return;
+    }
     setCheckingOut(true);
-    setTimeout(() => {
+    try {
+      const orderData = {
+        user_id: user.id,
+        items: items.map(i => ({
+          product_id: i.product_id,
+          product_name: i.product_name,
+          price: i.price,
+          quantity: i.quantity,
+          size: i.size || null,
+          business: i.business,
+          image_url: i.image_url || null,
+        })),
+        subtotal,
+        discount: discountApplied ? discount : 0,
+        shipping,
+        total,
+        discount_code: discountApplied ? 'BROTHER10' : null,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+      };
+
+      const order = await api.entities.Order.create(orderData);
+      if (!order) {
+        toast.error('Failed to place order. Please try again.');
+        return;
+      }
+
+      await api.entities.LoyaltyTransaction.create({
+        user_id: user.id,
+        points: pointsEarned,
+        type: 'earned',
+        source: 'purchase',
+        description: `Order #${order.id.slice(0, 8)}`,
+      });
+
       toast.success(`Order placed! You earned ${pointsEarned} Brotherhood Points.`);
       clearCart();
+    } catch (err) {
+      console.error('Checkout error:', err);
+      toast.error('Something went wrong. Please try again.');
+    } finally {
       setCheckingOut(false);
-    }, 1500);
+    }
   };
 
   if (items.length === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4 text-center">
+        <SEO title="Cart — BOYZ IN THE WOODZ" description="Your cart is ready. Complete your order and earn Brotherhood Points." canonical="/cart" />
         <ShoppingBag className="w-16 h-16 text-muted-foreground/30 mb-4" />
         <h1 className="font-heading text-3xl tracking-wide uppercase">Cart Is Empty</h1>
         <p className="text-sm text-muted-foreground mt-2 mb-6">Time to gear up, brother.</p>
@@ -75,6 +122,7 @@ export default function Cart() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 md:py-12">
+      <SEO title="Cart — BOYZ IN THE WOODZ" description="Your cart is ready. Complete your order and earn Brotherhood Points." canonical="/cart" />
       <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Continue Shopping
       </Link>

@@ -9,6 +9,7 @@ import { api } from '@/api/supabaseClient';
 import { motion } from 'framer-motion';
 import { MapPin, Trees, Scissors, Clock } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
+import SEO from '@/components/shared/SEO';
 
 /* --- Fix Leaflet marker icon issue --- */
 import L from 'leaflet';
@@ -44,6 +45,7 @@ export default function Locations() {
 
   return (
     <div className="min-h-screen">
+      <SEO title="Locations — Find Your Reset" description="Locations for resets, retreats, and brotherhood meetups across the country." canonical="/locations" />
       {/* --- Hero --- */}
       <section className="py-12 md:py-16 bg-secondary/30 text-center">
         <MapPin className="w-8 h-8 text-primary mx-auto mb-3" />

@@ -7,12 +7,14 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, BookOpen, Zap, Heart, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SEO from '@/components/shared/SEO';
 
 const FG = '#2D5A27';
 const SAND = '#D2B48C';
 
 const SciencePage = ({ tag, title, subtitle, sections, cta }) => (
   <div className="min-h-screen bg-background">
+    <SEO title="The Science — Why Nature Heals" description="Peer-reviewed research on why nature, cold water, and community heal the modern man." canonical="/science" />
     <section className="relative py-14" style={{ background: 'linear-gradient(135deg, rgba(45,90,39,0.1) 0%, transparent 60%)' }}>
       <div className="max-w-4xl mx-auto px-4">
         <div className="flex gap-2 mb-4 flex-wrap">

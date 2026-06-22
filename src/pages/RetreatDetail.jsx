@@ -7,6 +7,7 @@ import { Link, useParams, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Check, Clock, MapPin, Users, Star, ChevronDown, ArrowRight, Download, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SEO from '@/components/shared/SEO';
 
 const FG = '#2D5A27';
 const SAND = '#D2B48C';
@@ -127,6 +128,7 @@ export default function RetreatDetail() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Retreat Details — BOYZ IN THE WOODZ" description="Wilderness retreats designed to reset your mind, body, and brotherhood." canonical="/retreat" />
       {/* Hero */}
       <section className="relative min-h-[55vh] flex items-end overflow-hidden">
         <div className="absolute inset-0">

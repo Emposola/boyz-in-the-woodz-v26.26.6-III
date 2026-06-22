@@ -2,10 +2,11 @@
    RETREAT CONFIRMED — After admin approval
    Packing list, waiver (e-sign), deposit link, weather
    ============================================================ */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useAuth } from '@/lib/AuthContext';
 import { api } from '@/api/supabaseClient';
 import { useQuery } from '@tanstack/react-query';
-import { CheckCircle, Package, FileText, DollarSign, Cloud, Download } from 'lucide-react';
+import { CheckCircle, Package, FileText, Cloud } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
@@ -23,12 +24,10 @@ const PACKING_LIST = [
 const WAIVER_TEXT = `I, the undersigned, acknowledge and accept that participation in the Boyz In The Woodz retreat involves inherent risks including but not limited to: hiking, campfires, wildlife, and remote terrain. I am in sufficient physical condition to participate. I release Boyz In The Woodz, its organizers, and facilitators from all liability for any injuries or damages. I have disclosed all relevant medical conditions. I agree to follow The Code and the instructions of retreat facilitators at all times.`;
 
 export default function RetreatConfirmed() {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [waiverChecked, setWaiverChecked] = useState(false);
   const [waiverSigned, setWaiverSigned] = useState(false);
   const [packingChecked, setPackingChecked] = useState([]);
-
-  useEffect(() => { api.auth.me().then(setUser).catch(() => {}); }, []);
 
   const { data: applications } = useQuery({
     queryKey: ['confirmed-apps', user?.id],
@@ -38,13 +37,22 @@ export default function RetreatConfirmed() {
   });
 
   const app = applications[0];
+  const appLocationName = app?.location_name || app?.responses?.location_name;
+  const appRequestedDate = app?.requested_date || app?.responses?.requested_date;
+  const appWaiverSigned = waiverSigned || app?.waiver_signed || app?.responses?.waiver_signed;
+  const appWaiverDate = app?.waiver_signed_date || app?.responses?.waiver_signed_date;
 
   const handleSignWaiver = async () => {
     if (!waiverChecked) return;
     if (app) {
-      await api.entities.RetreatApplication.update(app.id, {
+      const latestApp = await api.entities.RetreatApplication.get(app.id);
+      const updatedResponses = {
+        ...(latestApp?.responses || {}),
         waiver_signed: true,
         waiver_signed_date: new Date().toISOString(),
+      };
+      await api.entities.RetreatApplication.update(app.id, {
+        responses: updatedResponses,
       });
     }
     setWaiverSigned(true);
@@ -61,7 +69,7 @@ export default function RetreatConfirmed() {
       <div className="text-center mb-10">
         <CheckCircle className="w-14 h-14 text-primary mx-auto mb-4" />
         <h1 className="font-heading text-4xl tracking-wide uppercase">You're Confirmed</h1>
-        {app && <p className="text-muted-foreground text-sm mt-2">{app.location_name} · {app.requested_date}</p>}
+        {app && <p className="text-muted-foreground text-sm mt-2">{appLocationName} · {appRequestedDate}</p>}
       </div>
 
       <div className="space-y-6">
@@ -71,9 +79,9 @@ export default function RetreatConfirmed() {
             <FileText className="w-5 h-5 text-primary" />
             <h2 className="font-heading text-xl tracking-wider uppercase">Liability Waiver</h2>
           </div>
-          {waiverSigned || app?.waiver_signed ? (
+          {appWaiverSigned ? (
             <div className="bg-green-900/20 border border-green-800 rounded-lg p-3 text-xs text-green-400 flex items-center gap-2">
-              <CheckCircle className="w-4 h-4" /> Waiver signed on {app?.waiver_signed_date ? new Date(app.waiver_signed_date).toLocaleDateString() : 'file'}
+              <CheckCircle className="w-4 h-4" /> Waiver signed on {appWaiverDate ? new Date(appWaiverDate).toLocaleDateString() : 'file'}
             </div>
           ) : (
             <>

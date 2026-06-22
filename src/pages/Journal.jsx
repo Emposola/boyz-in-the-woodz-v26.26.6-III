@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import SEO from '@/components/shared/SEO';
 
 /* ── Fallback posts ── */
 const FALLBACK_POSTS = [
@@ -41,31 +42,8 @@ const TOPICS = [
 
 const TRENDING = FALLBACK_POSTS.slice(0, 3);
 
-/* ── Social proof toast notifications ── */
-const PROOF_NOTIFICATIONS = [
-  '🔥 Marcus just read "Why 20 Minutes in the Forest Changes Everything"',
-  '✅ Devon from Houston pledged The Code 2 min ago',
-  '📖 18 brothers reading right now',
-  '🏕️ 3 men applied for Broken Bow Retreat after reading Field Notes',
-];
-
-function useProofNotifications() {
-  useEffect(() => {
-    let i = 0;
-    const show = () => {
-      toast(PROOF_NOTIFICATIONS[i % PROOF_NOTIFICATIONS.length], { duration: 3500, position: 'bottom-left' });
-      i++;
-    };
-    const t1 = setTimeout(show, 4000);
-    const t2 = setTimeout(show, 12000);
-    const t3 = setTimeout(show, 22000);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, []);
-}
-
 function PostCard({ post, featured = false, index = 0 }) {
   const [liked, setLiked] = useState(false);
-  const [likes] = useState(Math.floor(Math.random() * 80) + 12);
   const handleLike = (e) => { e.stopPropagation(); setLiked(l => !l); };
   const handleShare = (e) => {
     e.stopPropagation();
@@ -98,7 +76,7 @@ function PostCard({ post, featured = false, index = 0 }) {
               Read Story <ArrowRight className="w-3.5 h-3.5" />
             </Button>
             <button onClick={handleLike} className={`flex items-center gap-1.5 text-xs transition-colors ${liked ? 'text-red-400' : 'text-white/60 hover:text-red-400'}`}>
-              <Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} /> {liked ? likes + 1 : likes}
+              <Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} /> Like
             </button>
             <button onClick={handleShare} className="text-white/60 hover:text-white"><Share2 className="w-4 h-4" /></button>
           </div>
@@ -133,7 +111,7 @@ function PostCard({ post, featured = false, index = 0 }) {
           <div className="text-xs text-muted-foreground">{post.author}</div>
           <div className="flex items-center gap-2">
             <button onClick={handleLike} className={`flex items-center gap-1 text-xs transition-colors ${liked ? 'text-red-400' : 'text-muted-foreground hover:text-red-400'}`}>
-              <Heart className={`w-3.5 h-3.5 ${liked ? 'fill-current' : ''}`} /> {liked ? likes + 1 : likes}
+              <Heart className={`w-3.5 h-3.5 ${liked ? 'fill-current' : ''}`} /> Like
             </button>
             <button onClick={handleShare} className="text-muted-foreground hover:text-primary">
               <Share2 className="w-3.5 h-3.5" />
@@ -235,19 +213,6 @@ function TopicsSidebar({ category, setCategory }) {
           <a href="/the-code">Take the Pledge <ArrowRight className="w-3 h-3 ml-1" /></a>
         </Button>
       </div>
-
-      {/* Social proof: reading now */}
-      <div className="bg-secondary/50 border border-border rounded-xl p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="flex -space-x-1.5">
-            {[1,2,3,4].map(i => (
-              <div key={i} className="w-6 h-6 rounded-full bg-primary/20 border border-border flex items-center justify-center text-[8px] text-primary font-bold">{i}</div>
-            ))}
-          </div>
-          <span className="text-xs text-muted-foreground"><strong className="text-foreground">18 brothers</strong> reading now</span>
-        </div>
-        <p className="text-[10px] text-muted-foreground">Don't let this story sit in your tabs. Earn +10 points for sharing.</p>
-      </div>
     </aside>
   );
 }
@@ -256,8 +221,6 @@ export default function Journal() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
   const [business, setBusiness] = useState('all');
-
-  useProofNotifications();
 
   const { data: dbPosts } = useQuery({
     queryKey: ['journal-posts'],
@@ -279,6 +242,7 @@ export default function Journal() {
 
   return (
     <div className="min-h-screen pb-12">
+      <SEO title="Journal — Brotherhood Field Notes" description="Stories, field notes, and survival wisdom from the brotherhood. Read what brothers are sharing from the trail." canonical="/journal" />
       {/* ─── Hero Header ─── */}
       <section className="relative py-12 bg-secondary/30 overflow-hidden border-b border-border">
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1448375240586-882707db888b?w=1400&q=20)', backgroundSize: 'cover' }} />

@@ -38,10 +38,10 @@ const COLUMN_EXPLORE = [
 ];
 
 const COLUMN_BROTHERHOOD = [
-  { label: 'Take the Pledge', to: '/pledge-wall' },
-  { label: 'Find a Chapter', to: '/chapters' },
+  { label: 'Take the Pledge', to: '/the-code' },
+  { label: 'Find a Chapter', to: '/locations' },
   { label: 'Brotherhood Map', to: '/locations' },
-  { label: 'Proof Gallery', to: '/proofs' },
+  { label: 'Proof Gallery', to: '/brotherhood/impact-stories' },
   { label: 'Virtual Campfire', to: '/studio' },
   { label: 'Confessions', to: '/journal' },
 ];

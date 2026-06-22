@@ -14,6 +14,7 @@ import { ShoppingBag, Award, Shield, Minus, Plus, ArrowLeft } from 'lucide-react
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import PledgeModal from '../components/shared/PledgeModal';
+import SEO from '@/components/shared/SEO';
 
 export default function ProductDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -72,6 +73,7 @@ export default function ProductDetail() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+      <SEO title="Product — BOYZ IN THE WOODZ Shop" description="Gear forged in the woods. Worn as proof." canonical="/shop/product" />
       {/* Back Button */}
       <Link
         to={`/shop/${product.business}`}

@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Trees, Shield, Zap, Star, ChevronDown, ArrowRight, Check, MapPin, Calendar, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import SEO from '@/components/shared/SEO';
 
 const RETREAT_TYPES = [
   {
@@ -90,6 +91,7 @@ export default function Services() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Services — BOYZ IN THE WOODZ" description="Barber, studio, and outdoor services. Everything the brotherhood offers." canonical="/services" />
 
       {/* ── HERO ── */}
       <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">

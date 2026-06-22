@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { api } from '@/api/supabaseClient';
 import { toast } from 'sonner';
+import SEO from '@/components/shared/SEO';
 
 const FG = '#2D5A27';
 const CATEGORIES = ['Brotherhood Stories', 'Mental Health', 'Nature & Adventure', 'Retreat Recaps', 'Guest Posts', 'Science', 'Gear', 'General'];
@@ -59,6 +60,7 @@ export default function JournalSubmit() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Submit Your Story — Journal" description="Share your story with the brotherhood. Submit your field notes, survival wisdom, and proof of nature." canonical="/journal/submit" />
       <section className="relative py-14 overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(45,90,39,0.1) 0%, transparent 60%)' }}>
         <div className="max-w-3xl mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>

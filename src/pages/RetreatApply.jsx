@@ -3,11 +3,12 @@
    Step 1: Select date/location, Step 2: Emergency contact,
    Step 3: Medical info, Step 4: Accept The Code, Step 5: Submit
    ============================================================ */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useAuth } from '@/lib/AuthContext';import { supabase } from '@/lib/supabase';import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '@/api/supabaseClient';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trees, MapPin, Heart, Shield, CheckCircle, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Trees, MapPin, Heart, Shield, CheckCircle, ArrowLeft, ArrowRight, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -30,21 +31,25 @@ const CODE_ITEMS = [
   'I will leave better than I arrived',
 ];
 
+const isUuid = (value) => typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+
 export default function RetreatApply() {
   const [step, setStep] = useState(0);
-  const [user, setUser] = useState(null);
+  const { user, isAuthenticated, isLoadingAuth } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const referralId = queryParams.get('ref');
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const [form, setForm] = useState({
     retreat: null,
     emergency_contact_name: '',
     emergency_contact_phone: '',
     medical_notes: '',
-    code_accepted: false,
     code_items_checked: [],
   });
-
-  useEffect(() => { api.auth.me().then(setUser).catch(() => {}); }, []);
 
   const { data: events } = useQuery({
     queryKey: ['retreat-events'],
@@ -64,25 +69,124 @@ export default function RetreatApply() {
   };
 
   const allCodeChecked = form.code_items_checked.length === CODE_ITEMS.length;
+  const selectedRetreat = form.retreat;
+  const spotsRemaining = selectedRetreat ? (selectedRetreat.spots_remaining ?? selectedRetreat.capacity ?? 0) : 0;
+  const isReadyToSubmit = selectedRetreat && form.emergency_contact_name && form.emergency_contact_phone && allCodeChecked;
 
   const handleSubmit = async () => {
-    if (!user) { api.auth.redirectToLogin('/retreat/apply'); return; }
+    setError('');
+
+    if (!selectedRetreat) {
+      setError('Please choose a retreat before submitting.');
+      return;
+    }
+
+    if (!form.emergency_contact_name || !form.emergency_contact_phone) {
+      setError('Add emergency contact information to continue.');
+      setStep(1);
+      return;
+    }
+
+    if (!allCodeChecked) {
+      setError('You must confirm all items in The Code.');
+      setStep(3);
+      return;
+    }
+
+    if (!isAuthenticated && !isLoadingAuth) {
+      navigate('/auth/signin?redirect=/retreat/apply');
+      return;
+    }
+
     setSubmitting(true);
-    await api.entities.RetreatApplication.create({
-      user_id: user.id,
-      user_email: user.email,
-      user_name: user.full_name,
-      location_name: form.retreat?.location_name || form.retreat?.title,
-      requested_date: form.retreat?.requested_date || form.retreat?.start_date,
-      status: 'pending',
-      emergency_contact_name: form.emergency_contact_name,
-      emergency_contact_phone: form.emergency_contact_phone,
-      medical_notes: form.medical_notes,
-      code_accepted: true,
-    });
-    setSubmitting(false);
-    setSubmitted(true);
-    toast.success('Application submitted! You\'ll hear back within 48 hours.');
+
+    try {
+      const eventId = isUuid(selectedRetreat.id) ? selectedRetreat.id : null;
+      const existingApps = eventId
+        ? await api.entities.RetreatApplication.filter({ user_id: user.id, event_id: eventId }, '-created_date', 1)
+        : [];
+
+      if (existingApps.length > 0) {
+        setError('You already have an application for this retreat.');
+        setSubmitting(false);
+        return;
+      }
+
+      const waitlistFilters = { status: 'waitlist' };
+      if (eventId) waitlistFilters.event_id = eventId;
+
+      const waitlistApps = await api.entities.RetreatApplication.filter(waitlistFilters, '-created_date', 100);
+      const waitlistPosition = spotsRemaining > 0 ? null : waitlistApps.length + 1;
+      const applicationStatus = spotsRemaining > 0 ? 'pending' : 'waitlist';
+
+      const createdApplication = await api.entities.RetreatApplication.create({
+        user_id: user.id,
+        event_id: eventId,
+        status: applicationStatus,
+        responses: {
+          retreat_title: selectedRetreat.title,
+          location_name: selectedRetreat.location_name || selectedRetreat.title,
+          requested_date: selectedRetreat.requested_date || selectedRetreat.start_date,
+          user_name: user.full_name || user.email,
+          user_email: user.email,
+          emergency_contact_name: form.emergency_contact_name,
+          emergency_contact_phone: form.emergency_contact_phone,
+          medical_notes: form.medical_notes,
+          code_accepted: allCodeChecked,
+          code_items_checked: form.code_items_checked,
+          referred_by: referralId || null,
+          waitlist_position: waitlistPosition,
+          referral_count: 0,
+          waiver_signed: false,
+          waiver_signed_date: null,
+          survey_completed: false,
+          proof_photo_url: null,
+        },
+      });
+
+      if (!createdApplication) {
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('retreat_applications')
+          .insert({
+            user_id: user.id,
+            event_id: eventId,
+            status: applicationStatus,
+            responses: {
+              retreat_title: selectedRetreat.title,
+              location_name: selectedRetreat.location_name || selectedRetreat.title,
+              requested_date: selectedRetreat.requested_date || selectedRetreat.start_date,
+              user_name: user.full_name || user.email,
+              user_email: user.email,
+              emergency_contact_name: form.emergency_contact_name,
+              emergency_contact_phone: form.emergency_contact_phone,
+              medical_notes: form.medical_notes,
+              code_accepted: allCodeChecked,
+              code_items_checked: form.code_items_checked,
+              referred_by: referralId || null,
+              waitlist_position: waitlistPosition,
+              referral_count: 0,
+              waiver_signed: false,
+              waiver_signed_date: null,
+              survey_completed: false,
+              proof_photo_url: null,
+            },
+          })
+          .select();
+
+        if (fallbackError || !fallbackData?.[0]) {
+          console.error('Fallback Supabase insert failed:', fallbackError);
+          throw new Error(fallbackError?.message || 'Unable to save retreat application. Please try again or contact support.');
+        }
+      }
+
+      setSubmitted(true);
+      toast.success('Application submitted! You\'ll hear back within 48 hours.');
+    } catch (submitError) {
+      console.error('Retreat application failed:', submitError);
+      setError(submitError.message || 'Unable to submit your application.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -113,6 +217,12 @@ export default function RetreatApply() {
         <span className="text-xs font-heading tracking-[0.3em] text-primary uppercase">The Woodz</span>
       </div>
       <h1 className="font-heading text-3xl md:text-4xl tracking-wide uppercase mb-6">Apply for a Retreat</h1>
+
+      {error && (
+        <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
+          {error}
+        </div>
+      )}
 
       {/* Step Indicator */}
       <div className="flex items-center gap-1 mb-8">

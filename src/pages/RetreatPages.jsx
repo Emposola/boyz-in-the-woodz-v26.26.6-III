@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { Check, ChevronDown, ArrowRight, Download, MapPin, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import SEO from '@/components/shared/SEO';
 
 const FG = '#2D5A27';
 const SAND = '#D2B48C';
@@ -229,9 +230,9 @@ function PackingList() {
 /* ─── ROUTER ─── */
 export default function RetreatPages() {
   const location = useLocation();
-  if (location.pathname.includes('/custom')) return <CustomRetreat />;
-  if (location.pathname.includes('/virtual-tour')) return <VirtualTour />;
-  if (location.pathname.includes('/what-to-expect')) return <WhatToExpect />;
-  if (location.pathname.includes('/packing-list')) return <PackingList />;
-  return <WhatToExpect />;
+  if (location.pathname.includes('/custom')) return <><SEO title="Retreats — BOYZ IN THE WOODZ" description="Wilderness brotherhood retreats. Reset, reconnect, and reclaim your edge." canonical="/retreats" /><CustomRetreat /></>;
+  if (location.pathname.includes('/virtual-tour')) return <><SEO title="Retreats — BOYZ IN THE WOODZ" description="Wilderness brotherhood retreats. Reset, reconnect, and reclaim your edge." canonical="/retreats" /><VirtualTour /></>;
+  if (location.pathname.includes('/what-to-expect')) return <><SEO title="Retreats — BOYZ IN THE WOODZ" description="Wilderness brotherhood retreats. Reset, reconnect, and reclaim your edge." canonical="/retreats" /><WhatToExpect /></>;
+  if (location.pathname.includes('/packing-list')) return <><SEO title="Retreats — BOYZ IN THE WOODZ" description="Wilderness brotherhood retreats. Reset, reconnect, and reclaim your edge." canonical="/retreats" /><PackingList /></>;
+  return <><SEO title="Retreats — BOYZ IN THE WOODZ" description="Wilderness brotherhood retreats. Reset, reconnect, and reclaim your edge." canonical="/retreats" /><WhatToExpect /></>;
 }

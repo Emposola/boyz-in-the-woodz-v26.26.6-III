@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
+import SEO from '@/components/shared/SEO';
 
 const CASE_STUDIES = [
   {
@@ -756,6 +757,7 @@ export default function CaseStudies() {
 
   return (
     <div className="min-h-screen">
+      <SEO title="Case Studies — Brotherhood Impact" description="Data and stories showing how nature resets the modern man. Science-backed proof." canonical="/case-studies" />
 
       {/* ── 1. CINEMATIC HERO ── */}
       <section className="relative min-h-[70vh] flex items-end pb-16 overflow-hidden">

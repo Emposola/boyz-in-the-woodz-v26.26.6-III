@@ -2,9 +2,11 @@
    POST-RETREAT SURVEY — 5 questions + proof photo upload
    Completing grants +100 Brotherhood Points
    ============================================================ */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useAuth } from '@/lib/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { api } from '@/api/supabaseClient';
-import { Star, Camera, CheckCircle, Upload } from 'lucide-react';
+import { Camera, CheckCircle, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
@@ -38,15 +40,14 @@ function ScaleQuestion({ question, value, onChange }) {
 }
 
 export default function RetreatSurvey() {
-  const [user, setUser] = useState(null);
+  const { user, isAuthenticated, isLoadingAuth } = useAuth();
+  const navigate = useNavigate();
   const [answers, setAnswers] = useState({});
   const [proofPhoto, setProofPhoto] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const urlParams = new URLSearchParams(window.location.search);
   const appId = urlParams.get('id');
-
-  useEffect(() => { api.auth.me().then(setUser).catch(() => {}); }, []);
 
   const setAnswer = (id, val) => setAnswers(p => ({ ...p, [id]: val }));
 
@@ -61,12 +62,18 @@ export default function RetreatSurvey() {
   };
 
   const handleSubmit = async () => {
-    if (!user) { api.auth.redirectToLogin(); return; }
+    if (!isAuthenticated && !isLoadingAuth) { navigate('/auth/signin'); return; }
     // Update the application with survey data
     if (appId) {
-      await api.entities.RetreatApplication.update(appId, {
+      const existingApp = await api.entities.RetreatApplication.get(appId);
+      const updatedResponses = {
+        ...(existingApp?.responses || {}),
         survey_completed: true,
         proof_photo_url: proofPhoto,
+        survey_answers: answers,
+      };
+      await api.entities.RetreatApplication.update(appId, {
+        responses: updatedResponses,
       });
     }
     // Award 100 loyalty points

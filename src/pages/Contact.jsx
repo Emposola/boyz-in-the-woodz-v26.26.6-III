@@ -9,6 +9,7 @@ import { Mail, Phone, MapPin, MessageSquare, Clock, Trees, Scissors, Send, Check
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import SEO from '@/components/shared/SEO';
 
 const FAQS = [
   { q: 'How do I book an appointment?', a: 'Go to /barber/book and follow the 5-step booking wizard. Same-day slots available.' },
@@ -36,6 +37,7 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen">
+      <SEO title="Contact — BOYZ IN THE WOODZ" description="Reach out to the brotherhood. Questions, partnerships, or just need to talk." canonical="/contact" />
       {/* 1. Hero */}
       <section className="relative py-20 bg-cover bg-center" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1400&q=80)' }}>
         <div className="absolute inset-0 bg-black/70" />
