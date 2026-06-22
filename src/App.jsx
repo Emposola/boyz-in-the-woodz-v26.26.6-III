@@ -35,6 +35,7 @@ import TheCode from './pages/TheCode';
 import Science from './pages/Science';
 import Archetypes from './pages/Archetypes';
 import Journal from './pages/Journal';
+import JournalPost from './pages/JournalPost';
 import Points from './pages/Points';
 import Cart from './pages/Cart';
 import Locations from './pages/Locations';
@@ -153,6 +154,9 @@ const AuthenticatedApp = () => {
             <Route path="/science" element={<Science />} />
             <Route path="/archetypes" element={<Archetypes />} />
             <Route path="/journal" element={<Journal />} />
+            <Route path="/journal/submit" element={<ProtectedRoute><JournalSubmit /></ProtectedRoute>} />
+            <Route path="/journal/category/:cat" element={<Journal />} />
+            <Route path="/journal/:slug" element={<JournalPost />} />
             <Route path="/blog" element={<Journal />} />
 
             {/* ── Retreats ── */}
@@ -211,8 +215,6 @@ const AuthenticatedApp = () => {
             <Route path="/science/testimonials" element={<ScienceHub />} />
 
             {/* ── Journal ── */}
-            <Route path="/journal/submit" element={<ProtectedRoute><JournalSubmit /></ProtectedRoute>} />
-            <Route path="/journal/category/:cat" element={<Journal />} />
 
             {/* ── New Premium Pages ── */}
             <Route path="/brotherhood/impact-stories" element={<ImpactStories />} />
