@@ -6,6 +6,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Search, Leaf, ShoppingBag, ChevronDown, ArrowRight, Home, Trees, Compass, Users, BookOpen, Zap, LayoutDashboard } from 'lucide-react';
 import { FiShoppingBag, FiUser, FiMenu, FiX } from 'react-icons/fi';
 import { useCart } from '@/lib/cartContext';
+import { useAuth } from '@/lib/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const LOGO_URL = '/images/logos/logo-navbar-about.jpg';
@@ -126,6 +127,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState(null);
   const { itemCount } = useCart();
+  const { user } = useAuth();
   const location = useLocation();
   const timeoutRef = useRef(null);
 
@@ -191,6 +193,14 @@ export default function Navbar() {
             <div className="hidden sm:flex p-2 text-white/20 rounded-xl" title="Pledge Status">
               <Leaf size={18} />
             </div>
+            {user?.is_admin && (
+              <Link to="/admin"
+                className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-heading tracking-wider uppercase transition-all text-white/60 hover:text-white hover:bg-white/10"
+                title="Admin Panel">
+                <LayoutDashboard size={15} />
+                <span className="hidden lg:inline">Admin</span>
+              </Link>
+            )}
             <button className="lg:hidden p-2 text-white/70" onClick={() => setMobileOpen(!mobileOpen)}>
               {mobileOpen ? <FiX size={20} /> : <FiMenu size={20} />}
             </button>

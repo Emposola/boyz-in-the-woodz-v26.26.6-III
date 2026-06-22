@@ -17,6 +17,15 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 /* --- Layout --- */
 import MainLayout from './components/layout/MainLayout';
+import AdminLayout from './components/admin/AdminLayout';
+
+/* --- Admin Pages --- */
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminRetreats from './pages/admin/AdminRetreats';
+import AdminProducts from './pages/admin/AdminProducts';
+import AdminMembers from './pages/admin/AdminMembers';
+import AdminOrders from './pages/admin/AdminOrders';
+import AdminSettings from './pages/admin/AdminSettings';
 
 /* --- Phase 1: Public Pages --- */
 import Home from './pages/Home';
@@ -216,19 +225,12 @@ const AuthenticatedApp = () => {
             <Route path="/shop/limited-edition" element={<LimitedDrops />} />
             <Route path="/community/time-capsule" element={<TimeCapsule />} />
 
-            {/* ── Admin ── */}
-            <Route path="/admin/blog" element={<ProtectedRoute requiredRole="admin"><AdminBlog /></ProtectedRoute>} />
-            <Route path="/admin/blog/pending" element={<ProtectedRoute requiredRole="admin"><AdminBlog /></ProtectedRoute>} />
-
-            {/* ── Legal ── */}
+          {/* ── Legal ── */}
             <Route path="/legal/retreat-waiver" element={<LegalRetreat />} />
             <Route path="/legal/retreat-cancellation" element={<LegalRetreat />} />
             <Route path="/legal/pledge-terms" element={<LegalRetreat />} />
             <Route path="/legal/chapter-terms" element={<LegalRetreat />} />
             <Route path="/legal/merchandise-safety" element={<LegalRetreat />} />
-
-            {/* ── Admin ── */}
-            <Route path="/admin/calendar" element={<ProtectedRoute requiredRole="admin"><AdminBookingCalendar /></ProtectedRoute>} />
 
             {/* ── Account ── */}
             <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
@@ -243,6 +245,58 @@ const AuthenticatedApp = () => {
             <Route path="/sitemap" element={<Sitemap />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
+
+          {/* ── Admin Panel (AdminLayout — separate from MainLayout) ── */}
+          <Route path="/admin" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout><AdminDashboard /></AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/retreats" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout><AdminRetreats /></AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/products" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout><AdminProducts /></AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/orders" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout><AdminOrders /></AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/blog" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout><AdminBlog /></AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/blog/pending" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout><AdminBlog /></AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/studio" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout><AdminStudio /></AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/calendar" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout><AdminBookingCalendar /></AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/members" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout><AdminMembers /></AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/settings" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout><AdminSettings /></AdminLayout>
+            </ProtectedRoute>
+          } />
         </Routes>
       </PledgeProvider>
     </CartProvider>
