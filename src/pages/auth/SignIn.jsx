@@ -19,18 +19,19 @@ export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { signIn, isAuthenticated } = useAuth();
+  const { signIn, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
   const queryParams = new URLSearchParams(location.search);
-  const redirectTo = queryParams.get('redirect') || '/account';
+  const redirectTo = queryParams.get('redirect') || null;
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate(redirectTo, { replace: true });
+    if (isAuthenticated && user) {
+      const dest = redirectTo || (user.is_admin ? '/admin' : '/account');
+      navigate(dest, { replace: true });
     }
-  }, [isAuthenticated, navigate, redirectTo]);
+  }, [isAuthenticated, user, navigate, redirectTo]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,8 +39,9 @@ export default function SignIn() {
     setLoading(true);
     
     try {
-      await signIn(email, password);
-      navigate(redirectTo, { replace: true });
+      const data = await signIn(email, password);
+      const dest = redirectTo || (data?.user?.user_metadata?.is_admin ? '/admin' : '/account');
+      navigate(dest, { replace: true });
     } catch (err) {
       setError(err.message || 'Invalid email or password');
     } finally {

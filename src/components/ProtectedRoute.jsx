@@ -15,7 +15,8 @@ export default function ProtectedRoute({ children, requiredRole, fallback = <Def
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/auth/signin" replace state={{ from: window.location.pathname }} />;
+    const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
+    return <Navigate to={`/auth/signin?redirect=${returnTo}`} replace />;
   }
 
   if (requiredRole === 'admin' && !user?.is_admin) {
