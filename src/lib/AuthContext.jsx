@@ -18,15 +18,20 @@ export const AuthProvider = ({ children }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === 'SIGNED_IN') {
-              const { data: { user } } = await supabase.auth.getUser();
-        setIsAuthenticated(true);
-        await fetchOrCreateUserProfile(user);
+          const { data: { user } } = await supabase.auth.getUser();
+          setIsAuthenticated(true);
+          await fetchOrCreateUserProfile(user);
+          setIsLoadingAuth(false);
+          setAuthChecked(true);
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setIsAuthenticated(false);
+          setIsLoadingAuth(false);
+          setAuthChecked(true);
+        } else {
+          setIsLoadingAuth(false);
+          setAuthChecked(true);
         }
-        setIsLoadingAuth(false);
-        setAuthChecked(true);
       }
     );
 

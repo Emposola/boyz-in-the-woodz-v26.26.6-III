@@ -10,15 +10,25 @@ const DefaultFallback = () => (
 export default function ProtectedRoute({ children, requiredRole, fallback = <DefaultFallback /> }) {
   const { user, isAuthenticated, isLoadingAuth, authChecked } = useAuth();
 
+  // Still resolving session
   if (isLoadingAuth || !authChecked) {
     return fallback;
   }
 
+  // Authenticated but profile not yet loaded — wait for it
+  // This happens in the brief window between onAuthStateChange firing
+  // and fetchOrCreateUserProfile completing
+  if (isAuthenticated && !user) {
+    return fallback;
+  }
+
+  // Not logged in at all
   if (!isAuthenticated) {
     const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
     return <Navigate to={`/auth/signin?redirect=${returnTo}`} replace />;
   }
 
+  // Logged in but wrong role
   if (requiredRole === 'admin' && !user?.is_admin) {
     return (
       <div className="min-h-screen flex items-center justify-center">

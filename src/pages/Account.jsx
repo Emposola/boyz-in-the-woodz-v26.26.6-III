@@ -73,10 +73,15 @@ const StatsCard = ({ icon: Icon, label, value, color = 'text-primary' }) => (
 );
 
 export default function Account() {
-  const { user, logout, isAuthenticated, isLoadingAuth } = useAuth();
+  const { user, logout: logoutAuth, isAuthenticated, isLoadingAuth } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const { pledgeAccepted } = usePledge();
+
+  const logout = async () => {
+    await logoutAuth();
+    window.location.href = '/auth/signin';
+  };
 
   useEffect(() => {
     if (!isLoadingAuth) setLoading(false);

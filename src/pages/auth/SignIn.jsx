@@ -19,7 +19,7 @@ export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { signIn, isAuthenticated, user } = useAuth();
+  const { signIn, isAuthenticated, isLoadingAuth, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -27,11 +27,18 @@ export default function SignIn() {
   const redirectTo = queryParams.get('redirect') || null;
 
   useEffect(() => {
-    if (isAuthenticated && user) {
-      const dest = redirectTo || (user.is_admin ? '/admin' : '/account');
-      navigate(dest, { replace: true });
+    // Only handle already-authenticated users landing on /signin (e.g. browser back)
+    // Do NOT redirect here after a fresh login — handleSubmit handles that
+    if (!isLoadingAuth && isAuthenticated && user && !loading) {
+      if (redirectTo) {
+        navigate(redirectTo, { replace: true });
+      } else if (user.is_admin) {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/account', { replace: true });
+      }
     }
-  }, [isAuthenticated, user, navigate, redirectTo]);
+  }, []); // intentionally empty — only run once on mount for already-logged-in users
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,12 +46,28 @@ export default function SignIn() {
     setLoading(true);
     
     try {
-      const data = await signIn(email, password);
-      const dest = redirectTo || (data?.user?.user_metadata?.is_admin ? '/admin' : '/account');
-      navigate(dest, { replace: true });
+      const authData = await signIn(email, password);
+      // authData = { user, session } from Supabase
+
+      // Fetch profile directly to get is_admin without waiting for AuthContext
+      const { supabase } = await import('@/lib/supabase');
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', authData.user.id)
+        .single();
+
+      const isAdmin = profile?.is_admin === true;
+
+      if (redirectTo && redirectTo !== '/account') {
+        navigate(redirectTo, { replace: true });
+      } else if (isAdmin) {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/account', { replace: true });
+      }
     } catch (err) {
       setError(err.message || 'Invalid email or password');
-    } finally {
       setLoading(false);
     }
   };
