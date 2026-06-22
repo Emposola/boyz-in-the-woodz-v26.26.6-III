@@ -1,0 +1,152 @@
+/* ============================================================
+   BOYZ IN THE WOODZ + BARBERSHOP — Design Tokens
+   Rugged masculine palette: deep forest, warm earth, clean cuts
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* — Deep forest / earth palette — */
+    --background: 30 10% 6%;         /* near-black warm */
+    --foreground: 40 20% 92%;        /* warm cream */
+    --card: 30 8% 10%;               /* dark card */
+    --card-foreground: 40 20% 92%;
+    --popover: 30 8% 10%;
+    --popover-foreground: 40 20% 92%;
+    --primary: 82 60% 45%;           /* acid green — Truewerk-inspired accent */
+    --primary-foreground: 30 10% 6%;
+    --secondary: 30 8% 16%;          /* dark secondary */
+    --secondary-foreground: 40 20% 80%;
+    --muted: 30 6% 14%;
+    --muted-foreground: 40 10% 55%;
+    --accent: 28 70% 50%;            /* warm amber */
+    --accent-foreground: 30 10% 6%;
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 30 6% 18%;
+    --input: 30 6% 18%;
+    --ring: 82 60% 45%;
+    --chart-1: 82 60% 45%;
+    --chart-2: 28 70% 50%;
+    --chart-3: 150 40% 35%;
+    --chart-4: 45 80% 55%;
+    --chart-5: 0 60% 50%;
+    --radius: 0.5rem;
+
+    /* — Font vars — */
+    --font-heading: 'Bebas Neue', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-accent: 'Playfair Display', serif;
+
+    /* — Sidebar (admin) — */
+    --sidebar-background: 30 8% 8%;
+    --sidebar-foreground: 40 20% 85%;
+    --sidebar-primary: 82 60% 45%;
+    --sidebar-primary-foreground: 30 10% 6%;
+    --sidebar-accent: 30 8% 14%;
+    --sidebar-accent-foreground: 40 20% 85%;
+    --sidebar-border: 30 6% 18%;
+    --sidebar-ring: 82 60% 45%;
+  }
+
+  .dark {
+    --background: 30 10% 6%;
+    --foreground: 40 20% 92%;
+    --card: 30 8% 10%;
+    --card-foreground: 40 20% 92%;
+    --popover: 30 8% 10%;
+    --popover-foreground: 40 20% 92%;
+    --primary: 82 60% 45%;
+    --primary-foreground: 30 10% 6%;
+    --secondary: 30 8% 16%;
+    --secondary-foreground: 40 20% 80%;
+    --muted: 30 6% 14%;
+    --muted-foreground: 40 10% 55%;
+    --accent: 28 70% 50%;
+    --accent-foreground: 30 10% 6%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 30 6% 18%;
+    --input: 30 6% 18%;
+    --ring: 82 60% 45%;
+    --chart-1: 82 60% 45%;
+    --chart-2: 28 70% 50%;
+    --chart-3: 150 40% 35%;
+    --chart-4: 45 80% 55%;
+    --chart-5: 0 60% 50%;
+    --sidebar-background: 30 8% 8%;
+    --sidebar-foreground: 40 20% 85%;
+    --sidebar-primary: 82 60% 45%;
+    --sidebar-primary-foreground: 30 10% 6%;
+    --sidebar-accent: 30 8% 14%;
+    --sidebar-accent-foreground: 40 20% 85%;
+    --sidebar-border: 30 6% 18%;
+    --sidebar-ring: 82 60% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+}
+
+/* ============================================================
+   Utility Classes
+   ============================================================ */
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: hsl(30 8% 10%); }
+::-webkit-scrollbar-thumb { background: hsl(30 6% 25%); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(82 60% 45%); }
+
+/* Selection color */
+::selection {
+  background: hsl(82 60% 45% / 0.3);
+  color: hsl(40 20% 92%);
+}
+
+/* Animated gradient keyframe (used by tailwind animation-gradient-x) */
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes logo-breathe {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 0px transparent); }
+  50% { opacity: 0.88; filter: drop-shadow(0 0 10px hsl(82 60% 45% / 0.5)); }
+}
+
+@keyframes border-spin {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Animated border stripe button */
+.btn-animated-border {
+  position: relative;
+  z-index: 0;
+  border-radius: var(--radius);
+  overflow: visible;
+}
+.btn-animated-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: calc(var(--radius) + 2px);
+  background: linear-gradient(270deg, hsl(82,60%,45%), hsl(28,70%,55%), hsl(150,50%,40%), hsl(82,60%,45%));
+  background-size: 300% 300%;
+  animation: border-spin 4s ease infinite;
+  z-index: -1;
+}

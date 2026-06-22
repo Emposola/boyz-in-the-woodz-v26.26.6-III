@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Extractor</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #fff; }
+        .image { margin: 10px; display: inline-block; border: 1px solid #333; padding: 10px; }
+        img { max-width: 200px; max-height: 200px; }
+        button { background: #4CAF50; color: white; padding: 10px; margin: 10px; cursor: pointer; }
+        #status { margin: 20px 0; padding: 10px; background: #333; }
+        .progress { width: 100%; height: 20px; background: #333; margin: 10px 0; }
+        .progress-bar { height: 100%; background: #4CAF50; width: 0%; }
+    </style>
+</head>
+<body>
+    <h1>Image Extractor - Boyz In The Woodz</h1>
+    <div id="status">Connecting to app...</div>
+    <div class="progress"><div id="progress-bar" class="progress-bar"></div></div>
+    <button onclick="extractImages()">Start Extraction</button>
+    <div id="results"></div>
+
+    <script>
+        let allImages = [];
+        let downloadedCount = 0;
+
+        async function extractImages() {
+            const statusDiv = document.getElementById('status');
+            const resultsDiv = document.getElementById('results');
+            const progressBar = document.getElementById('progress-bar');
+            
+            statusDiv.innerHTML = '🔄 Scanning for images...';
+            
+            // Extract all images from the page
+            const imgElements = document.querySelectorAll('img');
+            const bgElements = document.querySelectorAll('[style*="background-image"]');
+            
+            // Collect URLs
+            imgElements.forEach(img => {
+                if (img.src && !allImages.includes(img.src)) {
+                    allImages.push(img.src);
+                }
+            });
+            
+            bgElements.forEach(el => {
+                const style = getComputedStyle(el);
+                const bgImage = style.backgroundImage;
+                const match = bgImage.match(/url\(["']?([^"')]+)["']?\)/);
+                if (match && match[1] && !allImages.includes(match[1])) {
+                    allImages.push(match[1]);
+                }
+            });
+            
+            statusDiv.innerHTML = 📸 Found \ images. Downloading...;
+            
+            // Download each image
+            for (let i = 0; i < allImages.length; i++) {
+                const url = allImages[i];
+                const percent = ((i + 1) / allImages.length) * 100;
+                progressBar.style.width = percent + '%';
+                
+                try {
+                    const response = await fetch(url);
+                    const blob = await response.blob();
+                    const filename = url.split('/').pop().split('?')[0] || image_\.jpg;
+                    
+                    // Determine subfolder
+                    let subfolder = 'products';
+                    if (url.includes('barber') || url.includes('Barber')) subfolder = 'barbers';
+                    else if (url.includes('blog') || url.includes('post')) subfolder = 'blog';
+                    else if (url.includes('bg') || url.includes('background')) subfolder = 'backgrounds';
+                    
+                    // Create download link
+                    const a = document.createElement('a');
+                    const downloadUrl = URL.createObjectURL(blob);
+                    a.href = downloadUrl;
+                    a.download = filename;
+                    a.click();
+                    URL.revokeObjectURL(downloadUrl);
+                    
+                    downloadedCount++;
+                    statusDiv.innerHTML = 📥 Downloaded \/\: \;
+                    
+                    // Add to results
+                    const imgDiv = document.createElement('div');
+                    imgDiv.className = 'image';
+                    imgDiv.innerHTML = <img src="\"><br><small>\</small>;
+                    resultsDiv.appendChild(imgDiv);
+                    
+                } catch (err) {
+                    console.error(Failed to download: \, err);
+                }
+                
+                // Small delay to avoid overwhelming
+                await new Promise(r => setTimeout(r, 100));
+            }
+            
+            statusDiv.innerHTML = ✅ Complete! Extracted \ images.;
+            
+            // Generate summary
+            const summary = {
+                totalImages: allImages.length,
+                downloaded: downloadedCount,
+                urls: allImages,
+                timestamp: new Date().toISOString()
+            };
+            
+            console.log('Extraction summary:', summary);
+            
+            // Download the summary as JSON
+            const summaryBlob = new Blob([JSON.stringify(summary, null, 2)], {type: 'application/json'});
+            const summaryUrl = URL.createObjectURL(summaryBlob);
+            const summaryLink = document.createElement('a');
+            summaryLink.href = summaryUrl;
+            summaryLink.download = 'image-extraction-summary.json';
+            summaryLink.click();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+{
+  "images": {
+    "forest-campfire": {
+      "id": "photo-1448375240586-882707db888b",
+      "usedIn": ["Hero", "Welcome", "About Timeline", "Popup", "HomeFeatureBlocks", "HeroSplit", "BrotherhoodLetters"],
+      "description": "Forest campfire scene"
+    },
+    "hiking-backpack": {
+      "id": "photo-1441974231531-c6227db76b6e",
+      "usedIn": ["CrossBrandCTA", "GearLoan"],
+      "description": "Hiking backpack in mountains"
+    },
+    "men-group-bonding": {
+      "id": "photo-1529156069898-49953e39b3ac",
+      "usedIn": ["About", "Welcome", "ImpactStories", "Contact", "HomeFeatureBlocks"],
+      "description": "Group of men bonding"
+    },
+    "campfire-night": {
+      "id": "photo-1504280390367-361c6d9f38f4",
+      "usedIn": ["HomeFeatureBlocks", "Welcome", "GearLoan", "Events", "About closing"],
+      "description": "Campfire at night"
+    },
+    "forest-hiking-trail": {
+      "id": "photo-1542273917363-3b1817f69a2d",
+      "usedIn": ["BarberServices", "BarberGallery", "About Timeline", "Events", "ImpactStories", "GearLoan"],
+      "description": "Forest hiking trail"
+    },
+    "barbershop-scene": {
+      "id": "photo-1503951914875-452162b0f3f1",
+      "usedIn": ["Welcome", "MarketingPopup"],
+      "description": "Barbershop interior"
+    },
+    "man-portrait-1": {
+      "id": "photo-1507003211169-0a1dd7228f2d",
+      "usedIn": ["BarberTeam", "ImpactStories"],
+      "description": "Man portrait (Marcus)"
+    },
+    "man-portrait-2": {
+      "id": "photo-1506794778202-cad84cf45f1d",
+      "usedIn": ["BarberTeam"],
+      "description": "Man portrait (Dre)"
+    },
+    "man-portrait-3": {
+      "id": "photo-1500648767791-00dcc994a43e",
+      "usedIn": ["BarberTeam", "ImpactStories"],
+      "description": "Man portrait (Tomás)"
+    },
+    "headlamp-outdoors": {
+      "id": "photo-1506905925346-21bda4d32df4",
+      "usedIn": ["HomeFeatureBlocks", "GearLoan"],
+      "description": "Headlamp in outdoors"
+    },
+    "camping-tent": {
+      "id": "photo-1504280390367-361c6d9f38f4",
+      "usedIn": ["GearLoan"],
+      "description": "Camping tent"
+    },
+    "sleeping-bag": {
+      "id": "photo-1470071459604-3b5ec3a7fe05",
+      "usedIn": ["GearLoan"],
+      "description": "Sleeping bag"
+    },
+    "camping-backpack": {
+      "id": "photo-1441974231531-c6227db76b6e",
+      "usedIn": ["GearLoan"],
+      "description": "Hiking backpack"
+    },
+    "camp-stove": {
+      "id": "photo-1476611338391-6f395a0ebc7b",
+      "usedIn": ["GearLoan"],
+      "description": "Camp stove"
+    },
+    "campfire-gathering": {
+      "id": "photo-1508193638397-1c4234db14d8",
+      "usedIn": ["BrotherhoodLetters"],
+      "description": "Campfire gathering"
+    },
+    "desert-landscape": {
+      "id": "photo-1469854523086-cc02fe5d8800",
+      "usedIn": ["Events"],
+      "description": "Desert landscape"
+    },
+    "man-portrait-4": {
+      "id": "photo-1472099645785-5658abf4ff4e",
+      "usedIn": ["ImpactStories"],
+      "description": "Man portrait (David)"
+    },
+    "man-portrait-5": {
+      "id": "photo-1560250097-0b93528c311a",
+      "usedIn": ["ImpactStories"],
+      "description": "Man portrait (Robert)"
+    },
+    "man-portrait-6": {
+      "id": "photo-1519085360753-af0119f7cbe7",
+      "usedIn": ["ImpactStories"],
+      "description": "Man portrait (Andre)"
+    },
+    "man-portrait-7": {
+      "id": "photo-1558618666-fcd25c85cd64",
+      "usedIn": ["ImpactStories"],
+      "description": "Man portrait (Kevin)"
+    },
+    "man-portrait-8": {
+      "id": "photo-1553267751-1c148a7280a1",
+      "usedIn": ["ImpactStories"],
+      "description": "Man portrait (Troy)"
+    },
+    "man-portrait-9": {
+      "id": "photo-1524504388940-b1c1722653e1",
+      "usedIn": ["ImpactStories"],
+      "description": "Man portrait (Marcus Jr)"
+    },
+    "man-portrait-10": {
+      "id": "photo-1542178243-bc20204b769f",
+      "usedIn": ["ImpactStories"],
+      "description": "Man portrait (Damon)"
+    },
+    "man-portrait-11": {
+      "id": "photo-1566492031773-4f4e44671857",
+      "usedIn": ["ImpactStories"],
+      "description": "Man portrait (Chris)"
+    },
+    "man-portrait-12": {
+      "id": "photo-1531427186611-ecfd6d936c79",
+      "usedIn": ["ImpactStories"],
+      "description": "Man portrait (Leon)"
+    },
+    "barber-tools": {
+      "id": "photo-1599351431202-1e0f0137899a",
+      "usedIn": ["BarberGallery"],
+      "description": "Barber tools and shave"
+    },
+    "barber-hot-towel": {
+      "id": "photo-1621605815971-fbc98d665033",
+      "usedIn": ["BarberGallery", "BarberServices", "Events"],
+      "description": "Hot towel shave"
+    },
+    "barber-lineup": {
+      "id": "photo-1622286342621-4bd786c2447c",
+      "usedIn": ["BarberGallery"],
+      "description": "Sharp barber lineup"
+    },
+    "barber-beard-care": {
+      "id": "photo-1585747860019-8007580e2f14",
+      "usedIn": ["BarberGallery"],
+      "description": "Barbershop atmosphere"
+    },
+    "barber-fresh-cut": {
+      "id": "photo-1596728325478-17f1e0acda3b",
+      "usedIn": ["BarberGallery"],
+      "description": "Fresh haircut"
+    }
+  }
+}

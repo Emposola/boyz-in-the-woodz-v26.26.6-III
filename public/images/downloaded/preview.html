@@ -1,0 +1,25 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Downloaded Images Preview</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #fff; }
+        h1 { color: #4CAF50; }
+        .stats { background: #333; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .image-item { background: #2a2a2a; padding: 10px; border-radius: 5px; text-align: center; }
+        .image-item img { max-width: 100%; max-height: 200px; object-fit: cover; border-radius: 3px; }
+        .image-item .filename { font-size: 10px; color: #888; margin-top: 5px; word-break: break-all; }
+    </style>
+</head>
+<body>
+    <h1>📸 Downloaded Images</h1>
+    <div class="stats">
+        <p>Total Images: 0</p>
+        <p>Failed: 0</p>
+        <p>Skipped (already existed): 0</p>
+        <p>Location: ./public/images/downloaded</p>
+    </div>
+    <div class="image-grid">    </div>
+</body>
+</html>
