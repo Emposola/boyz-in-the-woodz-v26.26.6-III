@@ -8,11 +8,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/lib/AuthContext';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import {
   Clock, ArrowLeft, Share2, Heart, Twitter, Facebook,
-  Link as LinkIcon, BookOpen, ArrowRight, Trees, Tag
+  Link as LinkIcon, BookOpen, ArrowRight, Trees, Tag, Pencil
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -246,6 +247,7 @@ export default function JournalPost() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { user } = useAuth();
   const [liked, setLiked] = useState(false);
 
   const { data: post, isLoading, error } = useQuery({
@@ -332,68 +334,72 @@ export default function JournalPost() {
 
       <article className="min-h-screen">
         {/* Hero image */}
-        <header className="relative h-[50vh] md:h-[60vh] overflow-hidden">
+        <header className="relative h-[45vh] sm:h-[55vh] md:h-[65vh] overflow-hidden">
           {post.image_url ? (
             <img src={post.image_url} alt={post.title}
               className="w-full h-full object-cover"
               loading="eager" />
           ) : (
-            <div className="w-full h-full bg-secondary flex items-center justify-center">
+            <div className="w-full h-full flex items-center justify-center"
+              style={{ background: `linear-gradient(135deg, ${FG}22, ${FG}08)` }}>
               <Trees className="w-24 h-24 text-muted-foreground/10" />
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-black/20" />
 
           {/* Back button */}
-          <div className="absolute top-6 left-4 md:left-8">
+          <div className="absolute top-4 left-4 md:top-6 md:left-8 z-10">
             <button onClick={() => navigate('/journal')}
-              className="flex items-center gap-2 text-white/80 hover:text-white text-sm font-heading tracking-wider uppercase transition-colors bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-full">
-              <ArrowLeft className="w-3.5 h-3.5" /> Journal
+              className="flex items-center gap-1.5 text-white/90 hover:text-white text-xs font-heading tracking-wider uppercase transition-colors bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/10">
+              <ArrowLeft className="w-3 h-3" /> Journal
             </button>
           </div>
 
           {/* Category badge */}
-          <div className="absolute top-6 right-4 md:right-8">
-            <Badge className="text-[10px] font-heading tracking-wider uppercase"
-              style={{ background: FG, color: '#fff', border: 'none' }}>
+          <div className="absolute top-4 right-4 md:top-6 md:right-8 z-10">
+            <span className="text-[10px] font-heading tracking-wider uppercase px-2.5 py-1 rounded-full text-white"
+              style={{ background: FG }}>
               {post.category}
-            </Badge>
+            </span>
           </div>
         </header>
 
-        <div className="max-w-3xl mx-auto px-4 -mt-20 relative z-10 pb-16">
+        {/* Article content */}
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 -mt-16 relative z-10 pb-20">
 
           {/* Title block */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-            <h1 className="font-heading text-3xl md:text-5xl tracking-wide uppercase leading-tight mb-4 text-foreground">
+            <h1 className="font-heading text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-wide uppercase leading-tight mb-5 text-foreground">
               {post.title}
             </h1>
 
             {/* Meta row */}
-            <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap mb-6 pb-6 border-b border-border">
+            <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap mb-5 pb-5 border-b border-border">
               {post.author_name && (
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
                     style={{ background: FG }}>
                     {post.author_name[0]}
                   </div>
-                  <span className="font-medium text-foreground">{post.author_name}</span>
+                  <span className="font-medium text-foreground text-sm">{post.author_name}</span>
                 </div>
               )}
-              {readingDate && <span>{readingDate}</span>}
-              {post.read_time && (
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5" /> {post.read_time} min read
-                </span>
-              )}
-              {post.views > 0 && (
-                <span className="text-muted-foreground/60">{post.views.toLocaleString()} views</span>
-              )}
+              <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                {readingDate && <span>{readingDate}</span>}
+                {post.read_time && (
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> {post.read_time} min read
+                  </span>
+                )}
+                {post.views > 0 && (
+                  <span className="text-muted-foreground/50">{post.views.toLocaleString()} views</span>
+                )}
+              </div>
             </div>
 
             {/* Excerpt / lead */}
             {post.excerpt && (
-              <p className="text-lg text-muted-foreground leading-relaxed mb-8 font-light italic border-l-2 pl-4"
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8 italic border-l-[3px] pl-4"
                 style={{ borderColor: FG }}>
                 {post.excerpt}
               </p>
@@ -472,14 +478,15 @@ export default function JournalPost() {
           {/* Related posts */}
           {related.length > 0 && (
             <div className="mt-14">
-              <h2 className="font-heading text-xl tracking-wider uppercase mb-5 flex items-center gap-2">
-                <BookOpen className="w-5 h-5" style={{ color: FG }} />
+              <h2 className="font-heading text-lg tracking-wider uppercase mb-4 flex items-center gap-2">
+                <BookOpen className="w-4 h-4" style={{ color: FG }} />
                 More from the Journal
               </h2>
-              <div className="grid sm:grid-cols-3 gap-4">
+              {/* Horizontal scroll on mobile, grid on sm+ */}
+              <div className="flex gap-4 overflow-x-auto pb-3 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:overflow-visible">
                 {related.map(r => (
                   <Link key={r.id} to={`/journal/${r.slug}`}
-                    className="group bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 transition-all hover:-translate-y-0.5">
+                    className="group bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 transition-all flex-shrink-0 w-[72vw] sm:w-auto hover:-translate-y-0.5">
                     {r.image_url && (
                       <div className="aspect-video overflow-hidden">
                         <img src={r.image_url} alt={r.title}
@@ -488,8 +495,8 @@ export default function JournalPost() {
                       </div>
                     )}
                     <div className="p-3">
-                      <p className="text-xs text-muted-foreground mb-1">{r.category}</p>
-                      <h3 className="font-heading text-sm tracking-wide uppercase leading-tight group-hover:text-primary transition-colors line-clamp-2">
+                      <p className="text-[10px] text-muted-foreground mb-1 font-heading tracking-wider uppercase">{r.category}</p>
+                      <h3 className="font-heading text-xs tracking-wide uppercase leading-snug group-hover:text-primary transition-colors line-clamp-2">
                         {r.title}
                       </h3>
                       {r.read_time && (
@@ -513,6 +520,20 @@ export default function JournalPost() {
           </div>
         </div>
       </article>
+
+      {/* Floating admin edit button — only for admins */}
+      {user?.is_admin && post && (
+        <div className="fixed bottom-24 lg:bottom-8 right-4 lg:right-8 z-50">
+          <Link
+            to={`/admin/blog?edit=${post.id}`}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-full shadow-2xl text-sm font-heading tracking-wider uppercase text-white transition-all hover:scale-105 active:scale-95"
+            style={{ background: FG, boxShadow: `0 4px 24px ${FG}60` }}
+            title="Edit this post in Admin">
+            <Pencil className="w-4 h-4" />
+            <span className="hidden sm:inline">Edit Post</span>
+          </Link>
+        </div>
+      )}
     </>
   );
 }

@@ -3,11 +3,12 @@
    ============================================================ */
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Leaf, ShoppingBag, ChevronDown, ArrowRight, Home, Trees, Compass, Users, BookOpen, Zap, LayoutDashboard } from 'lucide-react';
+import { Search, Leaf, ShoppingBag, ChevronDown, ArrowRight, Home, Trees, Compass, Users, BookOpen, Zap, LayoutDashboard, Camera, Trophy, Heart, Shield } from 'lucide-react';
 import { FiShoppingBag, FiUser, FiMenu, FiX } from 'react-icons/fi';
 import { useCart } from '@/lib/cartContext';
 import { useAuth } from '@/lib/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useCategories, CATEGORY_META, GROUP_ORDER } from '@/lib/journalCategories';
 
 const LOGO_URL = '/images/logos/logo-navbar-about.jpg';
 const FG = '#2D5A27';
@@ -103,15 +104,9 @@ const NAV_MENUS = [
   {
     label: 'Journal',
     icon: BookOpen,
-    links: [
-      { label: 'All Posts', to: '/journal' },
-      { label: 'Brotherhood Stories', to: '/journal/category/brotherhood' },
-      { label: 'Mental Health', to: '/journal/category/mental-health' },
-      { label: 'Nature & Adventure', to: '/journal/category/nature' },
-      { label: 'Retreat Recaps', to: '/journal/category/retreats' },
-      { label: 'Guest Posts', to: '/journal/category/guest' },
-      { label: 'Write for Us', to: '/journal/submit' },
-    ],
+    mega: true,
+    dynamic: true,
+    cta: { label: 'Read All Stories', to: '/journal' },
   },
 ];
 
@@ -225,6 +220,9 @@ export default function Navbar() {
                 <div key={menu.label} className="rounded-2xl shadow-2xl overflow-hidden"
                   style={{ background: 'rgba(22,22,22,0.98)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)' }}>
                   {menu.mega ? (
+                    menu.dynamic ? (
+                      <JournalMegaMenu onClose={() => setOpenMenu(null)} />
+                    ) : (
                     <div className="p-6">
                       <div className="grid grid-cols-3 gap-8 mb-5">
                         {menu.columns.map(col => (
@@ -244,6 +242,7 @@ export default function Navbar() {
                           </div>
                         ))}
                       </div>
+                      {menu.cta && (
                       <div className="border-t border-white/10 pt-4 flex items-center gap-4">
                         <Link to={menu.cta.to} onClick={() => setOpenMenu(null)}
                           className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-heading tracking-wider uppercase text-white transition-all"
@@ -256,7 +255,9 @@ export default function Navbar() {
                           ))}
                         </div>
                       </div>
+                      )}
                     </div>
+                    )
                   ) : (
                     <div className="p-5 grid grid-cols-2 gap-1">
                       {menu.links.map(link => (
@@ -287,12 +288,21 @@ export default function Navbar() {
                 <div key={menu.label} className="border-b border-white/5 last:border-0 pb-1 last:pb-0">
                   <p className="text-[10px] font-heading tracking-[0.2em] uppercase px-3 pt-2 pb-1" style={{ color: SAND }}>{menu.label}</p>
                   <div className="grid grid-cols-2 gap-0.5">
-                    {(menu.mega ? menu.columns.flatMap(c => c.links) : menu.links).slice(0, 6).map(link => (
-                      <Link key={link.label} to={link.to} onClick={() => setMobileOpen(false)}
-                        className="px-3 py-2 rounded-xl text-sm text-white/60 hover:text-white hover:bg-white/10 transition-all">
-                        {link.label}
-                      </Link>
-                    ))}
+                    {menu.dynamic ? (
+                      ['All Stories','Field Notes','Retreat Recaps','Brotherhood Stories','Guest Posts','Write for the Journal'].map(label => (
+                        <Link key={label} to={label === 'All Stories' ? '/journal' : label === 'Write for the Journal' ? '/journal/submit' : `/journal/category/${encodeURIComponent(label)}`} onClick={() => setMobileOpen(false)}
+                          className="px-3 py-2 rounded-xl text-sm text-white/60 hover:text-white hover:bg-white/10 transition-all">
+                          {label === 'All Stories' ? '📖 All Stories' : label === 'Write for the Journal' ? '✍️ Write' : label}
+                        </Link>
+                      ))
+                    ) : (
+                      (menu.mega ? menu.columns.flatMap(c => c.links) : menu.links).slice(0, 6).map(link => (
+                        <Link key={link.label} to={link.to} onClick={() => setMobileOpen(false)}
+                          className="px-3 py-2 rounded-xl text-sm text-white/60 hover:text-white hover:bg-white/10 transition-all">
+                          {link.label}
+                        </Link>
+                      ))
+                    )}
                   </div>
                 </div>
               ))}
@@ -320,5 +330,83 @@ export default function Navbar() {
         </div>
       </div>
     </>
+  );
+}
+
+/* ── Journal Mega Menu — categories fetched from DB ── */
+const ICON_MAP = {
+  Camera, Trophy, Heart, Shield, Trees, BookOpen, Zap, Users,
+};
+
+function JournalMegaMenu({ onClose }) {
+  const { data: categories = [] } = useCategories();
+
+  const groups = { browse: [], topics: [] };
+  categories.forEach(cat => {
+    const meta = CATEGORY_META[cat];
+    if (!meta) return;
+    if (groups[meta.group]) groups[meta.group].push({ value: cat, ...meta });
+  });
+
+  const contributeLinks = [
+    { label: 'Write for the Journal', to: '/journal/submit' },
+  ];
+
+  return (
+    <div className="p-6">
+      <div className="grid grid-cols-3 gap-8 mb-5">
+        {Object.entries(GROUP_ORDER).sort((a,b) => a[1].order - b[1].order).map(([key, config]) => {
+          const items = groups[key];
+          const IconComp = ICON_MAP[CATEGORY_META[items[0]?.value]?.icon] || BookOpen;
+          return (
+            <div key={key}>
+              <p className="text-[10px] font-heading tracking-[0.25em] uppercase mb-3 pb-1 border-b border-white/10" style={{ color: SAND }}>
+                {config.heading}
+              </p>
+              <ul className="space-y-1">
+                {items.map(item => {
+                  const CatIcon = ICON_MAP[item.icon] || BookOpen;
+                  return (
+                    <li key={item.value}>
+                      <Link to={`/journal/category/${encodeURIComponent(item.value)}`} onClick={onClose}
+                        className="flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm text-white/60 hover:text-white hover:bg-white/8 transition-all group">
+                        <CatIcon className="w-3.5 h-3.5 opacity-50" />
+                        <span className="flex-1">{item.display}</span>
+                        <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        })}
+        {/* Contribute column (static) */}
+        <div>
+          <p className="text-[10px] font-heading tracking-[0.25em] uppercase mb-3 pb-1 border-b border-white/10" style={{ color: SAND }}>
+            Contribute
+          </p>
+          <ul className="space-y-1">
+            {contributeLinks.map(link => (
+              <li key={link.label}>
+                <Link to={link.to} onClick={onClose}
+                  className="flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm text-white/60 hover:text-white hover:bg-white/8 transition-all group">
+                  <Camera className="w-3.5 h-3.5 opacity-50" />
+                  <span className="flex-1">{link.label}</span>
+                  <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <div className="border-t border-white/10 pt-4 flex items-center gap-4">
+        <Link to="/journal" onClick={onClose}
+          className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-heading tracking-wider uppercase text-white transition-all"
+          style={{ background: FG }}>
+          Read All Stories <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
+    </div>
   );
 }

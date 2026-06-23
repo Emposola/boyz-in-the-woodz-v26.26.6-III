@@ -207,6 +207,31 @@ export default function ShopMain() {
     return () => clearInterval(t);
   }, []);
 
+  const { data: dbProducts } = useQuery({
+    queryKey: ['shop-products'],
+    queryFn: () => api.entities.Product.filter({ business: 'boyz', in_stock: true }, '-created_at', 100),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const allProducts = useMemo(() => {
+    if (dbProducts && dbProducts.length > 0) {
+      return dbProducts.map(p => ({
+        id: p.id,
+        name: p.product_name || p.name || 'Product',
+        color: p.color || '',
+        price: p.price || 0,
+        category: p.category || 'apparel',
+        tag: p.tag || null,
+        img: p.image_url || p.img || 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=500&q=75',
+        sizes: p.sizes || ['S','M','L','XL'],
+        points: p.points || Math.floor((p.price || 0) * 5),
+        bundle: p.bundle || false,
+        originalPrice: p.original_price || null,
+      }));
+    }
+    return ALL_PRODUCTS;
+  }, [dbProducts]);
+
   const toggleWishlist = (id) => setWishlist(w => w.includes(id) ? w.filter(x => x !== id) : [...w, id]);
 
   const filtered = useMemo(() => {

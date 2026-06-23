@@ -6,11 +6,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { api } from '@/api/supabaseClient';
+import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Coins, Gift, Settings, Copy, Calendar, 
   Trees, RotateCcw, User, Mail, LogOut, ChevronRight,
-  Star, Package, Users, Shield, Crown
+  Star, Package, Users, Shield, Crown, BookOpen, Check, X, Clock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -109,6 +110,18 @@ export default function Account() {
   const { data: retreatApps = [] } = useQuery({
     queryKey: ['retreat-apps', user?.id],
     queryFn: () => api.entities.RetreatApplication.filter({ user_id: user.id }, '-created_date', 10),
+  });
+
+  const { data: submissions = [] } = useQuery({
+    queryKey: ['my-submissions', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('blog_posts')
+        .select('id, title, slug, category, status, created_date, rejection_reason, read_time')
+        .eq('author_id', user.id)
+        .order('created_date', { ascending: false });
+      return data || [];
+    },
     enabled: !!user?.id,
   });
 
@@ -245,6 +258,10 @@ export default function Account() {
               <Package className="w-4 h-4 mr-1.5" />
               Orders
             </TabsTrigger>
+            <TabsTrigger value="submissions" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+              <BookOpen className="w-4 h-4 mr-1.5" />
+              Submissions
+            </TabsTrigger>
             <TabsTrigger value="points" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
               <Coins className="w-4 h-4 mr-1.5" />
               Points History
@@ -374,6 +391,56 @@ export default function Account() {
                       </Badge>
                     </div>
                   </div>
+                </div>
+              ))
+            )}
+          </TabsContent>
+
+          {/* Submissions Tab */}
+          <TabsContent value="submissions" className="mt-6 space-y-3">
+            {submissions.length === 0 ? (
+              <div className="text-center py-12 bg-gray-800/20 rounded-xl border border-gray-700/50">
+                <BookOpen className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                <p className="text-gray-400 text-sm">No submissions yet.</p>
+                <Button asChild variant="outline" className="mt-3 border-gray-600">
+                  <a href="/journal/submit">Write for the Journal</a>
+                </Button>
+              </div>
+            ) : (
+              submissions.map(post => (
+                <div key={post.id} className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-4 hover:border-primary/30 transition-all">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white truncate">{post.title}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {post.category} · {post.created_date && format(new Date(post.created_date), 'MMM d, yyyy')} · {post.read_time || '?'} min read
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {post.status === 'published' ? (
+                        <Badge className="bg-green-900/40 text-green-400 border-green-800/40 text-[10px]">
+                          <Check className="w-3 h-3 mr-1" /> Published
+                        </Badge>
+                      ) : post.status === 'rejected' ? (
+                        <Badge className="bg-red-900/40 text-red-400 border-red-800/40 text-[10px]">
+                          <X className="w-3 h-3 mr-1" /> Rejected
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-yellow-900/40 text-yellow-400 border-yellow-800/40 text-[10px]">
+                          <Clock className="w-3 h-3 mr-1" /> Pending
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  {post.status === 'rejected' && post.rejection_reason && (
+                    <p className="text-xs text-red-400 mt-2 ml-1">{post.rejection_reason}</p>
+                  )}
+                  {post.status === 'published' && post.slug && (
+                    <Link to={`/journal/${post.slug}`}
+                      className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-2 ml-1">
+                      View post <ChevronRight className="w-3 h-3" />
+                    </Link>
+                  )}
                 </div>
               ))
             )}

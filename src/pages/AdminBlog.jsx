@@ -12,14 +12,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { useCategories } from '@/lib/journalCategories';
 
 const FG = '#2D5A27';
 
-const CATEGORIES = [
+const FALLBACK_CATEGORIES = [
   'Brotherhood Stories', 'Mental Health', 'Nature & Adventure',
   'Retreat Recaps', 'Guest Posts', 'Science', 'Gear',
-  'Field Notes', 'Culture', 'Stories', 'Brotherhood', 'General',
+  'Field Notes', 'Culture', 'General',
 ];
 
 const STATUS_COLORS = {
@@ -39,7 +40,7 @@ function slugify(text) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
-function PostForm({ initial, onSave, onCancel, saving, currentUser }) {
+function PostForm({ initial, onSave, onCancel, saving, currentUser, categories }) {
   const [form, setForm] = useState(() => ({
     ...EMPTY_POST,
     author_name: currentUser?.full_name || currentUser?.email?.split('@')[0] || '',
@@ -138,7 +139,7 @@ function PostForm({ initial, onSave, onCancel, saving, currentUser }) {
             <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Category *</label>
             <select value={form.category} onChange={e => set('category', e.target.value)}
               className="w-full rounded-md border border-border bg-secondary px-3 py-2 text-sm text-foreground">
-              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              {(categories || FALLBACK_CATEGORIES).map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
           <div>
@@ -240,12 +241,16 @@ Another paragraph."
 
 export default function AdminBlog() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const editId = searchParams.get('edit');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showForm, setShowForm] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
   const [rejectModal, setRejectModal] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
   const qc = useQueryClient();
+
+  const { data: categories } = useCategories();
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ['admin-blog', statusFilter],
@@ -274,6 +279,16 @@ export default function AdminBlog() {
     qc.invalidateQueries({ queryKey: ['journal-posts'] });
   };
 
+  // Auto-open edit form when coming from ?edit=postId
+  React.useEffect(() => {
+    if (!editId || !posts.length) return;
+    const post = posts.find(p => p.id === editId);
+    if (post) {
+      setEditingPost(post);
+      setShowForm(false);
+    }
+  }, [editId, posts]);
+
   const savePost = useMutation({
     mutationFn: async (form) => {
       const payload = { ...form };
@@ -297,10 +312,28 @@ export default function AdminBlog() {
 
   const updatePost = useMutation({
     mutationFn: async ({ id, data }) => {
+      // If approving a pending post, award +500 points to author
+      if (data.status === 'published') {
+        const { data: post } = await supabase.from('blog_posts').select('author_id, status').eq('id', id).single();
+        if (post?.status !== 'published' && post?.author_id) {
+          const { error: ptError } = await supabase.from('loyalty_transactions').insert({
+            user_id: post.author_id,
+            points: 500,
+            type: 'earned',
+            source: 'journal_approval',
+            description: 'Journal post published — Guest Author reward',
+          });
+          if (ptError) console.error('Failed to award points:', ptError);
+        }
+      }
       const { error } = await supabase.from('blog_posts').update(data).eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => { invalidate(); toast.success('Updated'); },
+    onSuccess: (_, vars) => {
+      invalidate();
+      if (vars.data.status === 'published') toast.success('Approved! Author earned +500 points.');
+      else toast.success('Updated');
+    },
     onError: (e) => toast.error(e.message),
   });
 
@@ -358,6 +391,7 @@ export default function AdminBlog() {
               onCancel={() => { setShowForm(false); setEditingPost(null); }}
               saving={savePost.isPending}
               currentUser={user}
+              categories={categories}
             />
           </motion.div>
         )}

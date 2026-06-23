@@ -73,7 +73,21 @@ export default function ProductDetail() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
-      <SEO title="Product — BOYZ IN THE WOODZ Shop" description="Gear forged in the woods. Worn as proof." canonical="/shop/product" />
+      <SEO title="Product — BOYZ IN THE WOODZ Shop" description="Gear forged in the woods. Worn as proof." canonical="/shop/product"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: product.name,
+          description: product.description || "Gear forged in the woods. Worn as proof.",
+          image: product.image_url || undefined,
+          offers: {
+            "@type": "Offer",
+            price: product.price,
+            priceCurrency: "USD",
+            availability: "https://schema.org/InStock",
+          },
+          brand: { "@type": "Brand", name: "BOYZ IN THE WOODZ" },
+        }} />
       {/* Back Button */}
       <Link
         to={`/shop/${product.business}`}

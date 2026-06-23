@@ -140,13 +140,13 @@ export default function ImpactStories() {
           ))}
         </div>
 
-        {/* Share Your Story */}
+        {/* Write for the Journal */}
         <div className="bg-card border border-border rounded-2xl p-8 text-center mb-14" style={{ borderColor: `${FG}40` }}>
           <PenLine className="w-8 h-8 mx-auto mb-4" style={{ color: FG }} />
-          <h2 className="font-heading text-2xl tracking-wide uppercase mb-2">Share Your Story</h2>
+          <h2 className="font-heading text-2xl tracking-wide uppercase mb-2">Write for the Journal</h2>
           <p className="text-muted-foreground text-sm mb-6 max-w-md mx-auto">Your reset might be the reason a brother decides to go. Every story earns <strong className="text-foreground">500 Brotherhood Points</strong>.</p>
           <Button asChild className="font-heading tracking-wider uppercase" style={{ background: FG }}>
-            <Link to="/journal/submit">Write Your Story <ArrowRight className="w-4 h-4 ml-1" /></Link>
+            <Link to="/journal/submit">Write for the Journal <ArrowRight className="w-4 h-4 ml-1" /></Link>
           </Button>
         </div>
 

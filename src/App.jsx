@@ -2,6 +2,7 @@
    APP ROUTER — Boyz In The Woodz + Barbershop Ecosystem
    Phase 1 + Phase 2: Booking, Retreats, Waitlist, Events
    ============================================================ */
+import React, { Suspense } from 'react';
 
 /* --- Auth Pages --- */
 import { SignIn, SignUp, ForgotPassword, ResetPassword } from './pages/auth';
@@ -19,89 +20,80 @@ import ProtectedRoute from './components/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
 import AdminLayout from './components/admin/AdminLayout';
 
-/* --- Admin Pages --- */
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminRetreats from './pages/admin/AdminRetreats';
-import AdminProducts from './pages/admin/AdminProducts';
-import AdminMembers from './pages/admin/AdminMembers';
-import AdminOrders from './pages/admin/AdminOrders';
-import AdminSettings from './pages/admin/AdminSettings';
+/* --- Lazy loaded pages --- */
+const AdminDashboard = React.lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminRetreats = React.lazy(() => import('./pages/admin/AdminRetreats'));
+const AdminProducts = React.lazy(() => import('./pages/admin/AdminProducts'));
+const AdminMembers = React.lazy(() => import('./pages/admin/AdminMembers'));
+const AdminOrders = React.lazy(() => import('./pages/admin/AdminOrders'));
+const AdminSettings = React.lazy(() => import('./pages/admin/AdminSettings'));
+const Home = React.lazy(() => import('./pages/Home'));
+const Shop = React.lazy(() => import('./pages/Shop'));
+const ProductDetail = React.lazy(() => import('./pages/ProductDetail'));
+const TheCode = React.lazy(() => import('./pages/TheCode'));
+const Science = React.lazy(() => import('./pages/Science'));
+const Archetypes = React.lazy(() => import('./pages/Archetypes'));
+const Journal = React.lazy(() => import('./pages/Journal'));
+const JournalPost = React.lazy(() => import('./pages/JournalPost'));
+const Points = React.lazy(() => import('./pages/Points'));
+const Cart = React.lazy(() => import('./pages/Cart'));
+const Locations = React.lazy(() => import('./pages/Locations'));
+const About = React.lazy(() => import('./pages/About'));
+const BarberServices = React.lazy(() => import('./pages/BarberServices'));
+const BarberTeam = React.lazy(() => import('./pages/BarberTeam'));
+const BarberGallery = React.lazy(() => import('./pages/BarberGallery'));
+const Membership = React.lazy(() => import('./pages/Membership'));
+const BarberFAQ = React.lazy(() => import('./pages/BarberFAQ'));
+const BookAppointment = React.lazy(() => import('./pages/BookAppointment'));
+const WalkInWaitlistLive = React.lazy(() => import('./pages/WalkInWaitlistLive'));
+const BarberProfile = React.lazy(() => import('./pages/BarberProfile'));
+const AdminBookingCalendar = React.lazy(() => import('./pages/AdminBookingCalendar'));
+const RetreatApply = React.lazy(() => import('./pages/RetreatApply'));
+const RetreatWaitlist = React.lazy(() => import('./pages/RetreatWaitlist'));
+const RetreatConfirmed = React.lazy(() => import('./pages/RetreatConfirmed'));
+const RetreatSurvey = React.lazy(() => import('./pages/RetreatSurvey'));
+const Events = React.lazy(() => import('./pages/Events'));
+const Account = React.lazy(() => import('./pages/Account'));
+const Legal = React.lazy(() => import('./pages/Legal'));
+const TheProblem = React.lazy(() => import('./pages/TheProblem'));
+const WhoWeServe = React.lazy(() => import('./pages/WhoWeServe'));
+const HowItWorks = React.lazy(() => import('./pages/HowItWorks'));
+const Welcome = React.lazy(() => import('./pages/Welcome'));
+const Contact = React.lazy(() => import('./pages/Contact'));
+const CaseStudies = React.lazy(() => import('./pages/CaseStudies'));
+const StudioLive = React.lazy(() => import('./pages/StudioLive'));
+const AdminStudio = React.lazy(() => import('./pages/AdminStudio'));
+const Sitemap = React.lazy(() => import('./pages/Sitemap'));
+const Services = React.lazy(() => import('./pages/Services'));
+const RetreatCalendar = React.lazy(() => import('./pages/RetreatCalendar'));
+const LegalRetreat = React.lazy(() => import('./pages/LegalRetreat'));
+const GearLoan = React.lazy(() => import('./pages/GearLoan'));
+const ShopMain = React.lazy(() => import('./pages/ShopMain'));
+const RetreatDetail = React.lazy(() => import('./pages/RetreatDetail'));
+const RetreatPages = React.lazy(() => import('./pages/RetreatPages'));
+const BrotherhoodDirectory = React.lazy(() => import('./pages/BrotherhoodDirectory'));
+const BrotherhoodHub = React.lazy(() => import('./pages/BrotherhoodHub'));
+const ScienceHub = React.lazy(() => import('./pages/ScienceHub'));
+const JournalSubmit = React.lazy(() => import('./pages/JournalSubmit'));
+const AdminBlog = React.lazy(() => import('./pages/AdminBlog'));
+const ImpactStories = React.lazy(() => import('./pages/ImpactStories'));
+const BrotherhoodLetters = React.lazy(() => import('./pages/BrotherhoodLetters'));
+const BreathingTool = React.lazy(() => import('./pages/BreathingTool'));
+const DailyReset = React.lazy(() => import('./pages/DailyReset'));
+const BadgesPage = React.lazy(() => import('./pages/BadgesPage'));
+const MonthlyChallenge = React.lazy(() => import('./pages/MonthlyChallenge'));
+const LimitedDrops = React.lazy(() => import('./pages/LimitedDrops'));
+const TimeCapsule = React.lazy(() => import('./pages/TimeCapsule'));
+const MoodTracker = React.lazy(() => import('./pages/MoodTracker'));
 
-/* --- Phase 1: Public Pages --- */
-import Home from './pages/Home';
-import Shop from './pages/Shop';
-import ProductDetail from './pages/ProductDetail';
-import TheCode from './pages/TheCode';
-import Science from './pages/Science';
-import Archetypes from './pages/Archetypes';
-import Journal from './pages/Journal';
-import JournalPost from './pages/JournalPost';
-import Points from './pages/Points';
-import Cart from './pages/Cart';
-import Locations from './pages/Locations';
-import About from './pages/About';
-
-/* --- Phase 1: Barber Pages --- */
-import BarberServices from './pages/BarberServices';
-import BarberTeam from './pages/BarberTeam';
-import BarberGallery from './pages/BarberGallery';
-import Membership from './pages/Membership';
-import BarberFAQ from './pages/BarberFAQ';
-
-/* --- Phase 2: Barber Booking --- */
-import BookAppointment from './pages/BookAppointment';
-import WalkInWaitlistLive from './pages/WalkInWaitlistLive';
-import BarberProfile from './pages/BarberProfile';
-import AdminBookingCalendar from './pages/AdminBookingCalendar';
-
-/* --- Phase 2: Retreats --- */
-import RetreatApply from './pages/RetreatApply';
-import RetreatWaitlist from './pages/RetreatWaitlist';
-import RetreatConfirmed from './pages/RetreatConfirmed';
-import RetreatSurvey from './pages/RetreatSurvey';
-
-/* --- Phase 2: Events --- */
-import Events from './pages/Events';
-
-/* --- Account & Legal --- */
-import Account from './pages/Account';
-import Legal from './pages/Legal';
-
-/* --- Brand Pages --- */
-import TheProblem from './pages/TheProblem';
-import WhoWeServe from './pages/WhoWeServe';
-import HowItWorks from './pages/HowItWorks';
-
-/* --- Phase 3: New Pages --- */
-import Welcome from './pages/Welcome';
-import Contact from './pages/Contact';
-import CaseStudies from './pages/CaseStudies';
-import StudioLive from './pages/StudioLive';
-import AdminStudio from './pages/AdminStudio';
-import Sitemap from './pages/Sitemap';
-
-/* --- New Brand Pages --- */
-import Services from './pages/Services';
-import RetreatCalendar from './pages/RetreatCalendar';
-import LegalRetreat from './pages/LegalRetreat';
-import GearLoan from './pages/GearLoan';
-import ShopMain from './pages/ShopMain';
-import RetreatDetail from './pages/RetreatDetail';
-import RetreatPages from './pages/RetreatPages';
-import BrotherhoodDirectory from './pages/BrotherhoodDirectory';
-import BrotherhoodHub from './pages/BrotherhoodHub';
-import ScienceHub from './pages/ScienceHub';
-import JournalSubmit from './pages/JournalSubmit';
-import AdminBlog from './pages/AdminBlog';
-import ImpactStories from './pages/ImpactStories';
-import BrotherhoodLetters from './pages/BrotherhoodLetters';
-import BreathingTool from './pages/BreathingTool';
-import DailyReset from './pages/DailyReset';
-import BadgesPage from './pages/BadgesPage';
-import MonthlyChallenge from './pages/MonthlyChallenge';
-import LimitedDrops from './pages/LimitedDrops';
-import TimeCapsule from './pages/TimeCapsule';
-import MoodTracker from './pages/MoodTracker';
+const PageLoader = () => (
+  <div className="fixed inset-0 flex items-center justify-center bg-background">
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-8 h-8 border-4 rounded-full border-primary/30 border-t-primary animate-spin" />
+      <p className="text-xs font-heading tracking-wider uppercase text-muted-foreground animate-pulse">Loading...</p>
+    </div>
+  </div>
+);
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -124,6 +116,7 @@ const AuthenticatedApp = () => {
   return (
     <CartProvider>
       <PledgeProvider>
+        <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* ── Auth Routes (no layout) ── */}
           <Route path="/auth/signin" element={<SignIn />} />
@@ -300,6 +293,7 @@ const AuthenticatedApp = () => {
             </ProtectedRoute>
           } />
         </Routes>
+        </Suspense>
       </PledgeProvider>
     </CartProvider>
   );
