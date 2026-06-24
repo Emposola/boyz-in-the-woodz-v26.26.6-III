@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '@/lib/cartContext';
 import { useAuth } from '@/lib/AuthContext';
-import api from '@/api/supabaseClient';
+import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -70,26 +70,43 @@ export default function Cart() {
         })),
         subtotal,
         discount: discountApplied ? discount : 0,
-        shipping,
-        total,
-        discount_code: discountApplied ? 'BROTHER10' : null,
+        shipping_cost: shipping,
+        total_amount: total,
         status: 'pending',
-        created_at: new Date().toISOString(),
+        payment_status: 'pending',
       };
 
-      const order = await api.entities.Order.create(orderData);
-      if (!order) {
+      const { data: orderResult, error: orderError } = await supabase
+        .from('orders')
+        .insert(orderData)
+        .select()
+        .single();
+
+      if (orderError || !orderResult) {
         toast.error('Failed to place order. Please try again.');
         return;
       }
 
-      await api.entities.LoyaltyTransaction.create({
+      // Award loyalty points
+      await supabase.from('loyalty_transactions').insert({
         user_id: user.id,
-        points: pointsEarned,
-        type: 'earned',
+        points_amount: pointsEarned,
+        type: 'credit',
         source: 'purchase',
-        description: `Order #${order.id.slice(0, 8)}`,
+        description: `Order #${orderResult.id.slice(0, 8)}`,
       });
+
+      // Update profile loyalty_points
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('loyalty_points')
+        .eq('id', user.id)
+        .single();
+
+      await supabase
+        .from('profiles')
+        .update({ loyalty_points: (profile?.loyalty_points || 0) + pointsEarned })
+        .eq('id', user.id);
 
       toast.success(`Order placed! You earned ${pointsEarned} Brotherhood Points.`);
       clearCart();

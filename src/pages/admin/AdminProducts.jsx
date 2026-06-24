@@ -1,23 +1,18 @@
-/* ============================================================
-   ADMIN PRODUCTS — Full CRUD for the shop
-   ============================================================ */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Plus, Pencil, Trash2, Save, X, Search, Package } from 'lucide-react';
+import { ShoppingBag, Plus, Pencil, Trash2, Save, X, Search, Package, Upload, ImageIcon, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
+import { useProductCategories } from '@/lib/productCategories';
 
 const FG = '#2D5A27';
 
-const CATEGORIES = [
-  'hoodies','tees','crewnecks','caps','beanies','jackets','accessories',
-  'water-bottles','patches','journals','stickers','towels','flasks','keychains',
-  'bundles','sale','limited-edition','gift-cards','new',
-];
+const QUICK_SIZES = ['XS','S','M','L','XL','XXL','3XL','OS'];
 
 const EMPTY_PRODUCT = {
   name: '', business: 'boyz', category: 'tees', price: '',
@@ -29,8 +24,10 @@ const EMPTY_PRODUCT = {
 function ProductForm({ initial, onSave, onCancel, saving }) {
   const [form, setForm] = useState(initial || EMPTY_PRODUCT);
   const [sizeInput, setSizeInput] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+  const { categories } = useProductCategories();
 
-  // sync if initial changes (edit mode)
   useEffect(() => { if (initial) setForm(initial); }, [initial?.id]);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -44,6 +41,31 @@ function ProductForm({ initial, onSave, onCancel, saving }) {
   };
 
   const removeSize = (s) => set('sizes', form.sizes.filter(x => x !== s));
+  const toggleQuickSize = (s) => {
+    form.sizes?.includes(s) ? removeSize(s) : set('sizes', [...(form.sizes || []), s]);
+  };
+
+  const uploadImage = async (file) => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be under 5MB.');
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `products/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
+      set('image_url', publicUrl);
+      toast.success('Image uploaded successfully');
+    } catch (err) {
+      toast.error(err?.message || 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSubmit = () => {
     if (!form.name) { toast.error('Product name is required'); return; }
@@ -82,7 +104,7 @@ function ProductForm({ initial, onSave, onCancel, saving }) {
           <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Category *</label>
           <select value={form.category} onChange={e => set('category', e.target.value)}
             className="w-full rounded-md border border-border bg-secondary px-3 py-2 text-sm text-foreground">
-            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            {categories.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
 
@@ -114,13 +136,25 @@ function ProductForm({ initial, onSave, onCancel, saving }) {
         </div>
 
         <div className="sm:col-span-2">
-          <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Image URL</label>
-          <Input value={form.image_url || ''} onChange={e => set('image_url', e.target.value)}
-            placeholder="https://..." className="bg-secondary border-border" />
-          {form.image_url && (
-            <img src={form.image_url} alt="preview"
-              className="mt-2 h-20 w-20 rounded-lg object-cover border border-border" />
-          )}
+          <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Image</label>
+          <div className="flex gap-3 items-start">
+            <div className="flex-1 space-y-2">
+              <Input value={form.image_url || ''} onChange={e => set('image_url', e.target.value)}
+                placeholder="https://... or upload below" className="bg-secondary border-border" />
+              <div className="flex gap-2">
+                <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
+                  onChange={e => { const f = e.target.files?.[0]; if (f) uploadImage(f); }} />
+                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading} className="text-xs">
+                  <Upload className="w-3 h-3 mr-1.5" /> {uploading ? 'Uploading...' : 'Upload Image'}
+                </Button>
+              </div>
+            </div>
+            {form.image_url && (
+              <img src={form.image_url} alt="preview"
+                className="h-20 w-20 rounded-lg object-cover border border-border flex-shrink-0" />
+            )}
+          </div>
         </div>
 
         <div className="sm:col-span-2">
@@ -132,14 +166,26 @@ function ProductForm({ initial, onSave, onCancel, saving }) {
 
         <div className="sm:col-span-2">
           <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Sizes</label>
-          <div className="flex gap-2 mb-2">
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {QUICK_SIZES.map(s => (
+              <button key={s} type="button" onClick={() => toggleQuickSize(s)}
+                className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                  form.sizes?.includes(s)
+                    ? 'bg-primary/20 text-primary border-primary/40'
+                    : 'bg-secondary text-muted-foreground border-border hover:border-foreground'
+                }`}>
+                {s}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
             <Input value={sizeInput} onChange={e => setSizeInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && addSize()}
-              placeholder="XS, S, M, L, XL, XXL..." className="bg-secondary border-border" />
+              placeholder="Custom size..." className="bg-secondary border-border" />
             <Button type="button" onClick={addSize} variant="outline" size="sm">Add</Button>
           </div>
           {form.sizes?.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1.5 mt-2">
               {form.sizes.map(s => (
                 <span key={s} className="flex items-center gap-1 bg-secondary text-xs px-2 py-1 rounded-full border border-border">
                   {s}
@@ -177,12 +223,14 @@ function ProductForm({ initial, onSave, onCancel, saving }) {
 
 export default function AdminProducts() {
   const [searchParams] = useSearchParams();
+  const editId = searchParams.get('edit');
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [businessFilter, setBusinessFilter] = useState('all');
   const [showForm, setShowForm] = useState(searchParams.get('new') === '1');
   const [editingProduct, setEditingProduct] = useState(null);
   const qc = useQueryClient();
+  const { categories, navItems } = useProductCategories();
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['admin-products'],
@@ -195,6 +243,13 @@ export default function AdminProducts() {
       return data || [];
     },
   });
+
+  // Auto-open edit form when coming from product page ?edit=id
+  useEffect(() => {
+    if (!editId || !products.length) return;
+    const product = products.find(p => p.id === editId);
+    if (product) { setEditingProduct(product); setShowForm(false); }
+  }, [editId, products]);
 
   const saveProduct = useMutation({
     mutationFn: async (form) => {
@@ -210,6 +265,7 @@ export default function AdminProducts() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-products'] });
       qc.invalidateQueries({ queryKey: ['admin-dashboard-stats'] });
+      qc.invalidateQueries({ queryKey: ['product-categories'] });
       toast.success('Product saved');
       setShowForm(false);
       setEditingProduct(null);
@@ -238,6 +294,19 @@ export default function AdminProducts() {
     onError: (e) => toast.error(e.message),
   });
 
+  const duplicateProduct = useMutation({
+    mutationFn: async (product) => {
+      const { id, created_date, ...rest } = product;
+      const { error } = await supabase.from('products').insert({ ...rest, name: rest.name + ' (copy)' });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-products'] });
+      toast.success('Product duplicated');
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
   const filtered = products.filter(p => {
     const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase());
     const matchCat = categoryFilter === 'all' || p.category === categoryFilter;
@@ -247,7 +316,6 @@ export default function AdminProducts() {
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           <h1 className="font-heading text-3xl tracking-wide uppercase text-foreground flex items-center gap-2">
@@ -255,13 +323,17 @@ export default function AdminProducts() {
           </h1>
           <p className="text-muted-foreground text-sm mt-1">{products.length} total products</p>
         </div>
-        <Button onClick={() => { setShowForm(true); setEditingProduct(null); }}
-          className="font-heading tracking-wider uppercase text-xs gap-2" style={{ background: FG }}>
-          <Plus className="w-4 h-4" /> Add Product
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline" className="font-heading tracking-wider uppercase text-xs gap-2">
+            <Link to="/shop" target="_blank"><Eye className="w-3.5 h-3.5" /> View Shop</Link>
+          </Button>
+          <Button onClick={() => { setShowForm(true); setEditingProduct(null); }}
+            className="font-heading tracking-wider uppercase text-xs gap-2" style={{ background: FG }}>
+            <Plus className="w-4 h-4" /> Add Product
+          </Button>
+        </div>
       </div>
 
-      {/* Form */}
       <AnimatePresence>
         {(showForm || editingProduct) && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
@@ -276,7 +348,6 @@ export default function AdminProducts() {
         )}
       </AnimatePresence>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-5">
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -292,11 +363,10 @@ export default function AdminProducts() {
         <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}
           className="rounded-md border border-border bg-secondary px-3 py-2 text-sm text-foreground">
           <option value="all">All Categories</option>
-          {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+          {categories.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
       </div>
 
-      {/* Products table */}
       {isLoading ? (
         <div className="flex justify-center py-16">
           <div className="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
@@ -367,13 +437,25 @@ export default function AdminProducts() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">
+                        <Link to={`/product/${p.id}`} target="_blank"
+                          className="p-1.5 text-muted-foreground hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
+                          title="View Live">
+                          <Eye className="w-4 h-4" />
+                        </Link>
                         <button onClick={() => { setEditingProduct(p); setShowForm(false); }}
-                          className="p-1.5 text-muted-foreground hover:text-primary rounded-lg hover:bg-primary/10 transition-colors">
+                          className="p-1.5 text-muted-foreground hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
+                          title="Edit">
                           <Pencil className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => duplicateProduct.mutate(p)}
+                          className="p-1.5 text-muted-foreground hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
+                          title="Duplicate">
+                          <Save className="w-4 h-4" />
                         </button>
                         <button onClick={() => {
                           if (confirm(`Delete "${p.name}"? This cannot be undone.`)) deleteProduct.mutate(p.id);
-                        }} className="p-1.5 text-muted-foreground hover:text-red-400 rounded-lg hover:bg-red-400/10 transition-colors">
+                        }} className="p-1.5 text-muted-foreground hover:text-red-400 rounded-lg hover:bg-red-400/10 transition-colors"
+                          title="Delete">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>

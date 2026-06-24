@@ -1,51 +1,71 @@
 /* ============================================================
-   FEATURED PRODUCTS — Shows top products from each business
-   Used on homepage to cross-promote
+   FEATURED PRODUCTS — Shows featured products from DB
+   Used on homepage — reflects admin changes immediately
    ============================================================ */
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { api } from '@/api/supabaseClient';
+import { supabase } from '@/lib/supabase';
 import ProductCard from '../shared/ProductCard';
 import SectionHeading from '../shared/SectionHeading';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 
-export default function FeaturedProducts({ business, title, subtitle }) {
-  /* --- Fetch featured products for the given business --- */
-  const { data: products, isLoading } = useQuery({
+const FG = '#2D5A27';
+
+export default function FeaturedProducts({ business = 'boyz', title, subtitle }) {
+  const { data: products = [], isLoading } = useQuery({
     queryKey: ['featured-products', business],
-    queryFn: () => api.entities.Product.filter(
-      { business, featured: true, active: true },
-      '-created_date',
-      4
-    ),
-    initialData: [],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('business', business)
+        .eq('featured', true)
+        .eq('active', true)
+        .order('created_date', { ascending: false })
+        .limit(4);
+      if (error) return [];
+      return data || [];
+    },
+    staleTime: 2 * 60 * 1000,
   });
+
+  // Don't render section at all if no featured products and not loading
+  if (!isLoading && products.length === 0) return null;
 
   return (
     <section className="py-16 md:py-20">
       <div className="max-w-7xl mx-auto px-4">
-        <SectionHeading title={title} subtitle={subtitle} />
+        <div className="flex items-end justify-between mb-10">
+          <SectionHeading title={title} subtitle={subtitle} />
+          <Link to="/shop"
+            className="hidden md:flex items-center gap-1.5 text-xs font-heading tracking-wider uppercase text-muted-foreground hover:text-foreground transition-colors flex-shrink-0 ml-4">
+            View All <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
 
-        <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {isLoading ? (
-            /* Loading skeletons */
             Array(4).fill(0).map((_, i) => (
               <div key={i} className="space-y-3">
-                <Skeleton className="aspect-[3/4] rounded-lg" />
+                <Skeleton className="aspect-square rounded-xl" />
                 <Skeleton className="h-4 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
               </div>
             ))
-          ) : products.length > 0 ? (
+          ) : (
             products.map(product => (
               <ProductCard key={product.id} product={product} />
             ))
-          ) : (
-            /* Empty state */
-            <div className="col-span-full text-center py-12 text-muted-foreground text-sm">
-              Products coming soon.
-            </div>
           )}
+        </div>
+
+        <div className="text-center mt-8 md:hidden">
+          <Link to="/shop"
+            className="inline-flex items-center gap-1.5 text-xs font-heading tracking-wider uppercase px-5 py-2.5 rounded-full border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all">
+            View All Products <ArrowRight className="w-3 h-3" />
+          </Link>
         </div>
       </div>
     </section>
