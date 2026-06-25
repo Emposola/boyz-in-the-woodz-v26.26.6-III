@@ -62,6 +62,7 @@ const Welcome = React.lazy(() => import('./pages/Welcome'));
 const Contact = React.lazy(() => import('./pages/Contact'));
 const CaseStudies = React.lazy(() => import('./pages/CaseStudies'));
 const StudioLive = React.lazy(() => import('./pages/StudioLive'));
+const StudioSession = React.lazy(() => import('./pages/StudioSession'));
 const AdminStudio = React.lazy(() => import('./pages/AdminStudio'));
 const Sitemap = React.lazy(() => import('./pages/Sitemap'));
 const Services = React.lazy(() => import('./pages/Services'));
@@ -173,7 +174,7 @@ const AuthenticatedApp = () => {
             {/* ── New Features ── */}
             <Route path="/case-studies" element={<CaseStudies />} />
             <Route path="/studio" element={<StudioLive />} />
-            <Route path="/admin/studio" element={<ProtectedRoute requiredRole="admin"><AdminStudio /></ProtectedRoute>} />
+            <Route path="/studio/:slug" element={<StudioSession />} />
 
             {/* ── Shop ── */}
             <Route path="/shop" element={<ShopMain />} />

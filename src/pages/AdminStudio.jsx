@@ -1,10 +1,3 @@
-/* ============================================================
-   ADMIN STUDIO — Manage live/upcoming/recorded sessions
-   Columns: title, description, host_name, session_type,
-            scheduled_at, duration_minutes, meeting_url,
-            recording_url, max_participants, current_participants,
-            active, featured
-   ============================================================ */
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
@@ -12,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import {
   Radio, Plus, Pencil, Trash2, Eye, Video, Calendar,
-  Clock, Mic, Save, CheckCircle2, Shield, Users
+  Clock, Mic, Save, CheckCircle2, Shield, Users, Tags, Image
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,19 +29,31 @@ const STATUS_CONFIG = {
   recorded: { label: 'Recorded', color: 'bg-secondary text-muted-foreground border-border' },
 };
 
+function slugify(text) {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 80);
+}
+
 const EMPTY_FORM = {
   title: '', description: '', host_name: '', session_type: 'campfire_talk',
   scheduled_at: '', duration_minutes: 60, meeting_url: '', recording_url: '',
-  max_participants: 100, current_participants: 0, featured: false, active: true,
+  thumbnail_url: '', max_participants: 100, current_participants: 0,
+  viewer_count: 0, featured: false, active: true, slug: '',
 };
 
 function SessionForm({ initial, onSave, onCancel, saving }) {
   const [form, setForm] = useState(initial || EMPTY_FORM);
   const [status, setStatus] = useState(initial?.status || 'upcoming');
+  const [slugEdited, setSlugEdited] = useState(!!initial?.slug);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleTitleChange = (val) => {
+    set('title', val);
+    if (!slugEdited) set('slug', slugify(val));
+  };
 
   const handleSave = () => {
     if (!form.title || !form.host_name) { toast.error('Title and host are required'); return; }
+    if (!form.slug) { toast.error('Slug is required for the session page URL'); return; }
     onSave({ ...form, status });
   };
 
@@ -60,8 +65,14 @@ function SessionForm({ initial, onSave, onCancel, saving }) {
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Title *</label>
-          <Input value={form.title} onChange={e => set('title', e.target.value)}
+          <Input value={form.title} onChange={e => handleTitleChange(e.target.value)}
             placeholder="Live from Broken Bow..." className="bg-secondary border-border" />
+        </div>
+        <div>
+          <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Slug *</label>
+          <Input value={form.slug} onChange={e => { set('slug', slugify(e.target.value)); setSlugEdited(true); }}
+            placeholder="live-from-broken-bow" className="bg-secondary border-border font-mono text-xs" />
+          <p className="text-[10px] text-muted-foreground mt-1">URL: /studio/{form.slug || '...'}</p>
         </div>
         <div>
           <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Host *</label>
@@ -96,11 +107,25 @@ function SessionForm({ initial, onSave, onCancel, saving }) {
             onChange={e => set('duration_minutes', parseInt(e.target.value) || 60)}
             className="bg-secondary border-border" />
         </div>
+        <div>
+          <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Viewer Count</label>
+          <Input type="number" value={form.viewer_count || 0}
+            onChange={e => set('viewer_count', parseInt(e.target.value) || 0)}
+            className="bg-secondary border-border" />
+        </div>
         <div className="sm:col-span-2">
           <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Description</label>
           <textarea value={form.description || ''} onChange={e => set('description', e.target.value)}
             rows={2} placeholder="Session description..."
             className="w-full rounded-md border border-border bg-secondary px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-1 focus:ring-ring" />
+        </div>
+        <div className="sm:col-span-2">
+          <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block flex items-center gap-1.5">
+            <Image className="w-3 h-3" /> Thumbnail Image URL
+          </label>
+          <Input value={form.thumbnail_url || ''} onChange={e => set('thumbnail_url', e.target.value)}
+            placeholder="https://images.unsplash.com/photo-...?w=1200&q=85"
+            className="bg-secondary border-border" />
         </div>
         <div className="sm:col-span-2">
           <label className="text-xs font-heading tracking-wider uppercase text-muted-foreground mb-1 block">Meeting / Stream URL</label>
@@ -167,11 +192,15 @@ export default function AdminStudio() {
         const { id, created_date, ...rest } = form;
         const { error } = await supabase.from('studio_sessions').update({
           ...rest,
-          updated_date: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         }).eq('id', id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('studio_sessions').insert(form);
+        const { error } = await supabase.from('studio_sessions').insert({
+          ...form,
+          created_date: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
         if (error) throw error;
       }
     },
@@ -200,7 +229,7 @@ export default function AdminStudio() {
     mutationFn: async ({ id, status }) => {
       const { error } = await supabase.from('studio_sessions').update({
         status,
-        updated_date: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       }).eq('id', id);
       if (error) throw error;
     },
@@ -215,7 +244,6 @@ export default function AdminStudio() {
 
   return (
     <div className="p-4 md:p-6 max-w-5xl mx-auto">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           <h1 className="font-heading text-3xl tracking-wide uppercase text-foreground flex items-center gap-2">
@@ -234,7 +262,6 @@ export default function AdminStudio() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
           { icon: Radio,    color: 'text-red-400',    bg: 'bg-red-900/20',   v: liveCount,     l: 'Live Now' },
@@ -253,7 +280,6 @@ export default function AdminStudio() {
         ))}
       </div>
 
-      {/* Form */}
       <AnimatePresence>
         {(showForm || editing) && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
@@ -268,7 +294,6 @@ export default function AdminStudio() {
         )}
       </AnimatePresence>
 
-      {/* Filter tabs */}
       <div className="flex gap-2 mb-5 flex-wrap">
         {[
           { v: 'all',      l: `All (${sessions.length})` },
@@ -285,7 +310,6 @@ export default function AdminStudio() {
         ))}
       </div>
 
-      {/* Sessions list */}
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
@@ -313,13 +337,16 @@ export default function AdminStudio() {
                     {s.featured && (
                       <span className="text-[9px] font-heading tracking-wider uppercase text-primary bg-primary/10 px-2 py-0.5 rounded-full">Featured</span>
                     )}
+                    {s.slug && (
+                      <span className="text-[9px] font-heading tracking-wider uppercase text-muted-foreground/50 px-2 py-0.5 rounded-full font-mono">/{s.slug}</span>
+                    )}
                   </div>
                   <h4 className="font-heading text-sm tracking-wide uppercase leading-tight">{s.title}</h4>
                   <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{s.description}</p>
                   <div className="flex items-center gap-3 mt-1.5 text-[10px] text-muted-foreground flex-wrap">
                     <span className="flex items-center gap-0.5"><Mic className="w-2.5 h-2.5" /> {s.host_name}</span>
-                    {s.current_participants > 0 && (
-                      <span className="flex items-center gap-0.5"><Users className="w-2.5 h-2.5" /> {s.current_participants?.toLocaleString()}</span>
+                    {s.viewer_count > 0 && (
+                      <span className="flex items-center gap-0.5"><Eye className="w-2.5 h-2.5" /> {s.viewer_count?.toLocaleString()}</span>
                     )}
                     {s.scheduled_at && (
                       <span className="flex items-center gap-0.5"><Calendar className="w-2.5 h-2.5" /> {format(new Date(s.scheduled_at), 'MMM d, h:mm a')}</span>
@@ -351,7 +378,6 @@ export default function AdminStudio() {
         </div>
       )}
 
-      {/* Tips */}
       <div className="mt-10 bg-primary/5 border border-primary/20 rounded-xl p-5">
         <h3 className="font-heading text-sm tracking-wider uppercase text-primary mb-3 flex items-center gap-2">
           <Shield className="w-4 h-4" /> Studio Tips
@@ -362,6 +388,8 @@ export default function AdminStudio() {
             'Paste a YouTube embed URL (youtube.com/embed/VIDEO_ID) in Meeting URL for instant playback.',
             'After a session ends, paste the recording URL and change status to "Recorded" so it archives.',
             'Mark a session as "Featured" to pin it as the hero on the Studio page.',
+            'The slug auto-generates from the title. Edit it manually for custom URLs like /studio/my-session-name.',
+            'Add a thumbnail URL for the session card hero image. Unsplash images work great.',
           ].map((tip, i) => (
             <li key={i} className="flex items-start gap-2">
               <CheckCircle2 className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />{tip}
