@@ -72,6 +72,11 @@ const NAV_MENUS = [
     ],
   },
   {
+    label: 'Our Story',
+    icon: Users,
+    to: '/about',
+  },
+  {
     label: 'Brotherhood',
     icon: Users,
     links: [
@@ -179,6 +184,12 @@ export default function Navbar() {
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-0.5">
             {NAV_MENUS.map(menu => (
+              menu.to ? (
+                <Link key={menu.label} to={menu.to} onClick={() => setOpenMenu(null)}
+                  className="flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-medium text-white/70 hover:text-white hover:bg-white/8 transition-all">
+                  {menu.label}
+                </Link>
+              ) : (
               <div key={menu.label} className="relative" onMouseEnter={() => enter(menu.label)} onMouseLeave={leave}>
                 <button
                   className={`flex items-center gap-1 px-3 py-2 rounded-xl text-sm font-medium transition-colors duration-200 ${openMenu === menu.label ? 'text-white bg-white/10' : 'text-white/70 hover:text-white hover:bg-white/8'}`}
@@ -188,6 +199,7 @@ export default function Navbar() {
                   <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${openMenu === menu.label ? 'rotate-180' : ''}`} />
                 </button>
               </div>
+              )
             ))}
           </div>
 
@@ -294,6 +306,14 @@ export default function Navbar() {
           style={{ background: 'rgba(22,22,22,0.98)', border: '1px solid rgba(255,255,255,0.14)' }}>
           <div className="max-h-[70vh] overflow-y-auto p-4 space-y-1">
             {NAV_MENUS.map(menu => {
+              if (menu.to) {
+                return (
+                  <Link key={menu.label} to={menu.to} onClick={() => setMobileOpen(false)}
+                    className="flex items-center px-3 py-3 rounded-xl text-sm font-heading tracking-wider uppercase text-white/80 hover:text-white hover:bg-white/10 transition-all">
+                    {menu.label}
+                  </Link>
+                );
+              }
               const isOpen = mobileExpanded === menu.label;
               const links = menu.dynamic
                 ? [{ label: 'All Stories', to: '/journal' }, { label: 'Field Notes', to: '/journal/category/Field%20Notes' }, { label: 'Retreat Recaps', to: '/journal/category/Retreat%20Recaps' }, { label: 'Brotherhood Stories', to: '/journal/category/Brotherhood%20Stories' }, { label: 'Write for the Journal', to: '/journal/submit' }]
