@@ -7,7 +7,6 @@ import { Search, Leaf, ShoppingBag, ChevronDown, ArrowRight, Home, Trees, Compas
 import { FiShoppingBag, FiUser, FiMenu, FiX } from 'react-icons/fi';
 import { useCart } from '@/lib/cartContext';
 import { useAuth } from '@/lib/AuthContext';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useCategories, CATEGORY_META, GROUP_ORDER } from '@/lib/journalCategories';
 
 const LOGO_URL = '/images/logos/logo-navbar-about.jpg';
@@ -119,16 +118,19 @@ const MOBILE_NAV = [
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileExpanded, setMobileExpanded] = useState(null);
   const [openMenu, setOpenMenu] = useState(null);
   const { itemCount } = useCart();
   const { user } = useAuth();
   const location = useLocation();
   const timeoutRef = useRef(null);
+  const lastClosedRef = useRef(0);
 
   useEffect(() => {
     clearTimeout(timeoutRef.current);
     setOpenMenu(null);
     setMobileOpen(false);
+    setMobileExpanded(null);
   }, [location.pathname, location.search, location.key]);
 
   useEffect(() => {
@@ -140,9 +142,23 @@ export default function Navbar() {
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
 
-  const enter = (label) => { clearTimeout(timeoutRef.current); setOpenMenu(label); };
+  useEffect(() => {
+    if (!openMenu) return;
+    const close = () => { clearTimeout(timeoutRef.current); setOpenMenu(null); lastClosedRef.current = Date.now(); };
+    const onKeyDown = (e) => { if (e.key === 'Escape') close(); };
+    const onScroll = () => close();
+    document.addEventListener('keydown', onKeyDown);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => { document.removeEventListener('keydown', onKeyDown); window.removeEventListener('scroll', onScroll); };
+  }, [openMenu]);
+
+  const enter = (label) => {
+    if (Date.now() - lastClosedRef.current < 300) return;
+    clearTimeout(timeoutRef.current);
+    setOpenMenu(label);
+  };
   const leave = () => { timeoutRef.current = setTimeout(() => setOpenMenu(null), 180); };
-  const closeMenu = () => { clearTimeout(timeoutRef.current); setOpenMenu(null); };
+  const closeMenu = () => { clearTimeout(timeoutRef.current); setOpenMenu(null); lastClosedRef.current = Date.now(); };
 
   return (
     <>
@@ -207,113 +223,119 @@ export default function Navbar() {
         </nav>
 
         {/* Mega / Dropdown Panel - Full Width */}
-        <AnimatePresence>
-          {openMenu && (
-            <motion.div
-              key={openMenu}
-              initial={{ opacity: 0, y: -6, scale: 0.99 }}
-              animate={{ opacity: 1, y: 4, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.99 }}
-              transition={{ duration: 0.15 }}
-              className="absolute left-[10px] right-[10px] mt-0"
-              style={{ top: '76px' }}
-              onMouseEnter={() => enter(openMenu)}
-              onMouseLeave={leave}
-            >
-              {NAV_MENUS.filter(m => m.label === openMenu).map(menu => (
-                <div key={menu.label} className="rounded-2xl shadow-2xl overflow-hidden"
-                  style={{ background: 'rgba(22,22,22,0.98)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)' }}>
-                  {menu.mega ? (
-                    menu.dynamic ? (
-                      <JournalMegaMenu onClose={closeMenu} />
-                    ) : (
-                    <div className="p-6">
-                      <div className="grid grid-cols-3 gap-8 mb-5">
-                        {menu.columns.map(col => (
-                          <div key={col.heading}>
-                            <p className="text-[10px] font-heading tracking-[0.25em] uppercase mb-3 pb-1 border-b border-white/10" style={{ color: SAND }}>{col.heading}</p>
-                            <ul className="space-y-1">
-                              {col.links.map(link => (
-                                <li key={link.label}>
-                                  <Link to={link.to} onClick={closeMenu}
-                                    className="flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm text-white/60 hover:text-white hover:bg-white/8 transition-all group">
-                                    <span className="flex-1">{link.label}</span>
-                                    <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
+        {openMenu && (
+          <div className="absolute left-[10px] right-[10px] mt-0"
+            style={{ top: '76px' }}
+            onMouseEnter={() => enter(openMenu)}
+            onMouseLeave={leave}
+          >
+            {NAV_MENUS.filter(m => m.label === openMenu).map(menu => (
+              <div key={menu.label} className="rounded-2xl shadow-2xl overflow-hidden"
+                style={{ background: 'rgba(22,22,22,0.98)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)' }}>
+                {menu.mega ? (
+                  menu.dynamic ? (
+                    <JournalMegaMenu onClose={closeMenu} />
+                  ) : (
+                  <div className="p-6">
+                    <div className="grid grid-cols-3 gap-8 mb-5">
+                      {menu.columns.map(col => (
+                        <div key={col.heading}>
+                          <p className="text-[10px] font-heading tracking-[0.25em] uppercase mb-3 pb-1 border-b border-white/10" style={{ color: SAND }}>{col.heading}</p>
+                          <ul className="space-y-1">
+                            {col.links.map(link => (
+                              <li key={link.label}>
+                                <Link to={link.to} onClick={closeMenu}
+                                  className="flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm text-white/60 hover:text-white hover:bg-white/8 transition-all group">
+                                  <span className="flex-1">{link.label}</span>
+                                  <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                    {menu.cta && (
+                    <div className="border-t border-white/10 pt-4 flex items-center gap-4">
+                      <Link to={menu.cta.to} onClick={closeMenu}
+                        className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-heading tracking-wider uppercase text-white transition-all"
+                        style={{ background: FG }}>
+                        {menu.cta.label} <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                      <div className="flex gap-3 text-xs text-white/40">
+                        {['New Arrivals', 'Bestsellers', 'Sale'].map(c => (
+                          <Link key={c} to="/shop" onClick={closeMenu} className="hover:text-white transition-colors">{c}</Link>
                         ))}
                       </div>
-                      {menu.cta && (
-                      <div className="border-t border-white/10 pt-4 flex items-center gap-4">
-                        <Link to={menu.cta.to} onClick={closeMenu}
-                          className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-heading tracking-wider uppercase text-white transition-all"
-                          style={{ background: FG }}>
-                          {menu.cta.label} <ArrowRight className="w-3.5 h-3.5" />
-                        </Link>
-                        <div className="flex gap-3 text-xs text-white/40">
-                          {['New Arrivals', 'Bestsellers', 'Sale'].map(c => (
-                            <Link key={c} to="/shop" onClick={closeMenu} className="hover:text-white transition-colors">{c}</Link>
-                          ))}
-                        </div>
-                      </div>
-                      )}
                     </div>
-                    )
-                  ) : (
-                    <div className="p-5 grid grid-cols-2 gap-1">
-                      {menu.links.map(link => (
-                        <Link key={link.label} to={link.to} onClick={closeMenu}
-                          className="flex items-center gap-2 py-2 px-3 rounded-xl text-sm text-white/60 hover:text-white hover:bg-white/8 transition-all group">
-                          <span className="flex-1">{link.label}</span>
-                          <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </Link>
-                      ))}
+                    )}
+                  </div>
+                  )
+                ) : (
+                  <div className="p-5 grid grid-cols-2 gap-1">
+                    {menu.links.map(link => (
+                      <Link key={link.label} to={link.to} onClick={closeMenu}
+                        className="flex items-center gap-2 py-2 px-3 rounded-xl text-sm text-white/60 hover:text-white hover:bg-white/8 transition-all group">
+                        <span className="flex-1">{link.label}</span>
+                        <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Mobile Drawer — Accordion style */}
+      {mobileOpen && (
+        <div className="fixed top-[80px] left-[7px] right-[7px] z-40 rounded-2xl overflow-hidden shadow-2xl"
+          style={{ background: 'rgba(22,22,22,0.98)', border: '1px solid rgba(255,255,255,0.14)' }}>
+          <div className="max-h-[70vh] overflow-y-auto p-4 space-y-1">
+            {NAV_MENUS.map(menu => {
+              const isOpen = mobileExpanded === menu.label;
+              const links = menu.dynamic
+                ? [{ label: 'All Stories', to: '/journal' }, { label: 'Field Notes', to: '/journal/category/Field%20Notes' }, { label: 'Retreat Recaps', to: '/journal/category/Retreat%20Recaps' }, { label: 'Brotherhood Stories', to: '/journal/category/Brotherhood%20Stories' }, { label: 'Write for the Journal', to: '/journal/submit' }]
+                : menu.mega ? menu.columns.flatMap(c => c.links) : menu.links;
+              return (
+                <div key={menu.label}>
+                  <button onClick={() => setMobileExpanded(isOpen ? null : menu.label)}
+                    className="w-full flex items-center justify-between px-3 py-3 rounded-xl text-sm font-heading tracking-wider uppercase text-white/80 hover:text-white hover:bg-white/10 transition-all">
+                    <span>{menu.label}</span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {isOpen && (
+                    <div className="overflow-hidden">
+                      <div className="pl-3 pb-2 space-y-0.5">
+                        {links.map(link => (
+                          <Link key={link.label} to={link.to} onClick={() => setMobileOpen(false)}
+                            className="block px-3 py-2 rounded-xl text-sm text-white/60 hover:text-white hover:bg-white/10 transition-all">
+                            {link.label}
+                          </Link>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Mobile Dropdown */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.18 }}
-            className="fixed top-[80px] left-[7px] right-[7px] z-40 rounded-2xl overflow-hidden shadow-2xl"
-            style={{ background: 'rgba(22,22,22,0.98)', border: '1px solid rgba(255,255,255,0.14)' }}>
-            <div className="p-4 space-y-0.5">
-              {NAV_MENUS.map(menu => (
-                <div key={menu.label} className="border-b border-white/5 last:border-0 pb-1 last:pb-0">
-                  <p className="text-[10px] font-heading tracking-[0.2em] uppercase px-3 pt-2 pb-1" style={{ color: SAND }}>{menu.label}</p>
-                  <div className="grid grid-cols-2 gap-0.5">
-                    {menu.dynamic ? (
-                      ['All Stories','Field Notes','Retreat Recaps','Brotherhood Stories','Guest Posts','Write for the Journal'].map(label => (
-                        <Link key={label} to={label === 'All Stories' ? '/journal' : label === 'Write for the Journal' ? '/journal/submit' : `/journal/category/${encodeURIComponent(label)}`} onClick={() => setMobileOpen(false)}
-                          className="px-3 py-2 rounded-xl text-sm text-white/60 hover:text-white hover:bg-white/10 transition-all">
-                          {label === 'All Stories' ? '📖 All Stories' : label === 'Write for the Journal' ? '✍️ Write' : label}
-                        </Link>
-                      ))
-                    ) : (
-                      (menu.mega ? menu.columns.flatMap(c => c.links) : menu.links).slice(0, 6).map(link => (
-                        <Link key={link.label} to={link.to} onClick={() => setMobileOpen(false)}
-                          className="px-3 py-2 rounded-xl text-sm text-white/60 hover:text-white hover:bg-white/10 transition-all">
-                          {link.label}
-                        </Link>
-                      ))
-                    )}
-                  </div>
-                </div>
-              ))}
+              );
+            })}
+            {/* Extra links */}
+            <div className="border-t border-white/10 pt-3 mt-2 space-y-1">
+              <Link to="/account" onClick={() => setMobileOpen(false)}
+                className="block px-3 py-2.5 rounded-xl text-sm text-white/60 hover:text-white hover:bg-white/10 transition-all">
+                My Account
+              </Link>
+              {user?.is_admin && (
+                <Link to="/admin" onClick={() => setMobileOpen(false)}
+                  className="block px-3 py-2.5 rounded-xl text-sm text-white/60 hover:text-white hover:bg-white/10 transition-all">
+                  Admin Panel
+                </Link>
+              )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Bottom Nav */}
       <div className="lg:hidden fixed bottom-3 left-[7px] right-[7px] z-50 rounded-[32px] shadow-2xl overflow-hidden"
