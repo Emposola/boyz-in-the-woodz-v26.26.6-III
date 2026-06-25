@@ -5,8 +5,8 @@
    Step 3: Health Info
    Step 4: Accept The Code
    Step 5: Review
-   Step 6: Secure Your Spot (Deposit — Stripe placeholder)
-   ============================================================ */
+   Step 6: Secure Your Spot (Deposit — Stripe)
+    ============================================================ */
 import React, { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -15,12 +15,13 @@ import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Trees, MapPin, Heart, Shield, CheckCircle, ArrowLeft,
-  ArrowRight, CreditCard, Lock, Clock, Users, Calendar, DollarSign
+  ArrowRight, CreditCard, Lock, Clock, Users, Calendar, DollarSign, Check
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/use-toast';
 import SEO from '@/components/shared/SEO';
+import StripePaymentForm from '@/components/shared/StripePaymentForm';
 import { format } from 'date-fns';
 
 const FG = '#2D5A27';
@@ -79,6 +80,7 @@ export default function RetreatApply() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [depositConfirmed, setDepositConfirmed] = useState(false);
+  const [depositPaid, setDepositPaid] = useState(false);
 
   const [form, setForm] = useState({
     retreat: null,
@@ -491,17 +493,19 @@ export default function RetreatApply() {
                   </span>
                 </div>
 
-                {/* Stripe placeholder */}
-                <div className="rounded-xl border-2 border-dashed border-border bg-secondary/50 p-6 text-center">
-                  <CreditCard className="w-8 h-8 text-muted-foreground/40 mx-auto mb-3" />
-                  <p className="text-sm font-heading tracking-wider uppercase text-muted-foreground mb-1">
-                    Online Payment Coming Soon
-                  </p>
-                  <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-                    Stripe payment integration is being set up. Submit your application now
-                    and we'll contact you within 24 hours with secure payment instructions.
-                  </p>
-                </div>
+                {/* Stripe payment */}
+                {depositPaid ? (
+                  <div className="bg-green-900/20 border border-green-800/30 rounded-lg p-4 text-center">
+                    <Check className="w-8 h-8 text-green-400 mx-auto mb-2" />
+                    <p className="text-sm font-medium text-green-300">Deposit Paid — ${depositAmount}</p>
+                  </div>
+                ) : (
+                  <StripePaymentForm
+                    amount={depositAmount}
+                    onSuccess={() => setDepositPaid(true)}
+                    buttonText={`Pay Deposit — $${depositAmount}`}
+                  />
+                )}
 
                 {/* Policy */}
                 <div className="bg-amber-900/10 border border-amber-800/30 rounded-lg p-3 text-xs text-amber-400 flex items-start gap-2">

@@ -125,7 +125,11 @@ export default function Navbar() {
   const location = useLocation();
   const timeoutRef = useRef(null);
 
-  useEffect(() => { setOpenMenu(null); setMobileOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    clearTimeout(timeoutRef.current);
+    setOpenMenu(null);
+    setMobileOpen(false);
+  }, [location.pathname, location.search, location.key]);
 
   useEffect(() => {
     if (mobileOpen) {
@@ -138,6 +142,7 @@ export default function Navbar() {
 
   const enter = (label) => { clearTimeout(timeoutRef.current); setOpenMenu(label); };
   const leave = () => { timeoutRef.current = setTimeout(() => setOpenMenu(null), 180); };
+  const closeMenu = () => { clearTimeout(timeoutRef.current); setOpenMenu(null); };
 
   return (
     <>
@@ -220,7 +225,7 @@ export default function Navbar() {
                   style={{ background: 'rgba(22,22,22,0.98)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(20px)' }}>
                   {menu.mega ? (
                     menu.dynamic ? (
-                      <JournalMegaMenu onClose={() => setOpenMenu(null)} />
+                      <JournalMegaMenu onClose={closeMenu} />
                     ) : (
                     <div className="p-6">
                       <div className="grid grid-cols-3 gap-8 mb-5">
@@ -230,7 +235,7 @@ export default function Navbar() {
                             <ul className="space-y-1">
                               {col.links.map(link => (
                                 <li key={link.label}>
-                                  <Link to={link.to} onClick={() => setOpenMenu(null)}
+                                  <Link to={link.to} onClick={closeMenu}
                                     className="flex items-center gap-2 py-1.5 px-2 rounded-lg text-sm text-white/60 hover:text-white hover:bg-white/8 transition-all group">
                                     <span className="flex-1">{link.label}</span>
                                     <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -243,14 +248,14 @@ export default function Navbar() {
                       </div>
                       {menu.cta && (
                       <div className="border-t border-white/10 pt-4 flex items-center gap-4">
-                        <Link to={menu.cta.to} onClick={() => setOpenMenu(null)}
+                        <Link to={menu.cta.to} onClick={closeMenu}
                           className="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-heading tracking-wider uppercase text-white transition-all"
                           style={{ background: FG }}>
                           {menu.cta.label} <ArrowRight className="w-3.5 h-3.5" />
                         </Link>
                         <div className="flex gap-3 text-xs text-white/40">
                           {['New Arrivals', 'Bestsellers', 'Sale'].map(c => (
-                            <Link key={c} to="/shop" onClick={() => setOpenMenu(null)} className="hover:text-white transition-colors">{c}</Link>
+                            <Link key={c} to="/shop" onClick={closeMenu} className="hover:text-white transition-colors">{c}</Link>
                           ))}
                         </div>
                       </div>
@@ -260,7 +265,7 @@ export default function Navbar() {
                   ) : (
                     <div className="p-5 grid grid-cols-2 gap-1">
                       {menu.links.map(link => (
-                        <Link key={link.label} to={link.to} onClick={() => setOpenMenu(null)}
+                        <Link key={link.label} to={link.to} onClick={closeMenu}
                           className="flex items-center gap-2 py-2 px-3 rounded-xl text-sm text-white/60 hover:text-white hover:bg-white/8 transition-all group">
                           <span className="flex-1">{link.label}</span>
                           <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />

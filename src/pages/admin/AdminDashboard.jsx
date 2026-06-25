@@ -9,7 +9,7 @@ import { format } from 'date-fns';
 import {
   Trees, ShoppingBag, Users, BookOpen, CalendarDays,
   Radio, Clock, CheckCircle, AlertCircle, ArrowRight,
-  TrendingUp, Package
+  TrendingUp, Package, DollarSign
 } from 'lucide-react';
 
 const FG = '#2D5A27';
@@ -46,6 +46,7 @@ export default function AdminDashboard() {
         { count: activeProducts },
         { data: recentApps },
         { data: recentMembers },
+        { count: pendingPayments },
       ] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('retreat_applications').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
@@ -63,11 +64,12 @@ export default function AdminDashboard() {
           .select('id, full_name, email, created_at, loyalty_points')
           .order('created_at', { ascending: false })
           .limit(5),
+        supabase.from('orders').select('*', { count: 'exact', head: true }).eq('payment_status', 'pending'),
       ]);
 
       return {
         totalMembers, pendingApps, totalOrders, pendingPosts,
-        todayBookings, activeProducts, recentApps, recentMembers,
+        todayBookings, activeProducts, recentApps, recentMembers, pendingPayments,
       };
     },
     refetchInterval: 30000,
@@ -80,6 +82,7 @@ export default function AdminDashboard() {
     { icon: BookOpen,    label: 'Posts Pending',      value: stats?.pendingPosts,    color: '#f59e0b', to: '/admin/blog' },
     { icon: CalendarDays,label: "Today's Bookings",  value: stats?.todayBookings,   color: '#06b6d4', to: '/admin/calendar' },
     { icon: ShoppingBag, label: 'Active Products',   value: stats?.activeProducts,  color: '#ec4899', to: '/admin/products' },
+    { icon: DollarSign,  label: 'Pending Payments',   value: stats?.pendingPayments, color: '#22c55e', to: '/admin/orders' },
   ];
 
   return (
@@ -181,7 +184,7 @@ export default function AdminDashboard() {
         {[
           { label: 'Add Product',     to: '/admin/products?new=1',   icon: ShoppingBag },
           { label: 'New Event',       to: '/admin/retreats?tab=events', icon: Trees },
-          { label: 'New Studio Session', to: '/admin/studio',        icon: Radio },
+          { label: 'View Orders',     to: '/admin/orders',            icon: Package },
           { label: 'View Site',       to: '/',                       icon: ArrowRight },
         ].map(q => (
           <Link key={q.label} to={q.to}
