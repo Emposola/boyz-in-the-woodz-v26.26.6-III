@@ -15,7 +15,7 @@ function SubscribersTab() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
 
-  const { data: subscribers = [], isLoading } = useQuery({
+  const { data: subscribers = [], isLoading, error: queryError } = useQuery({
     queryKey: ['admin-newsletter-subs', filter],
     queryFn: async () => {
       let q = supabase.from('newsletter_subscribers').select('*').order('created_at', { ascending: false });
@@ -64,6 +64,11 @@ function SubscribersTab() {
 
       {isLoading ? (
         <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+      ) : queryError ? (
+        <div className="text-center py-16 text-red-400">
+          <p className="font-heading tracking-wider uppercase text-sm mb-1">Failed to load subscribers</p>
+          <p className="text-xs text-muted-foreground">{queryError.message}</p>
+        </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
           <Mail className="w-10 h-10 mx-auto mb-3 opacity-20" />

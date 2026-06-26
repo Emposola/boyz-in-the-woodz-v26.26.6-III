@@ -10,7 +10,7 @@ const BASE_URL = Deno.env.get('PUBLIC_BASE_URL') ?? 'http://localhost:5173';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-client-info, apikey, x-supabase-auth',
 };
 
 Deno.serve(async (req) => {
