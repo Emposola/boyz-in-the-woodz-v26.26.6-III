@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const FG = '#2D5A27';
@@ -322,9 +322,9 @@ export default function AdminRetreats() {
       qc.invalidateQueries({ queryKey: ['admin-retreat-apps'] });
       qc.invalidateQueries({ queryKey: ['admin-retreat-app-counts'] });
       qc.invalidateQueries({ queryKey: ['admin-dashboard-stats'] });
-      toast.success('Application updated');
+      toast({ title: 'Application updated' });
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) => toast({ variant: 'destructive', title: 'Error', description: e.message }),
   });
 
   const durationDays = { '2-day': 2, '3-day': 3, '5-day': 5 };
@@ -346,11 +346,11 @@ export default function AdminRetreats() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-retreat-events'] });
-      toast.success('Event saved');
+      toast({ title: 'Event saved' });
       setShowEventForm(false);
       setEditingEvent(null);
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) => toast({ variant: 'destructive', title: 'Error', description: e.message }),
   });
 
   const deleteEvent = useMutation({
@@ -360,9 +360,9 @@ export default function AdminRetreats() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-retreat-events'] });
-      toast.success('Event deleted');
+      toast({ title: 'Event deleted' });
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) => toast({ variant: 'destructive', title: 'Error', description: e.message }),
   });
 
   const APP_FILTERS = [
