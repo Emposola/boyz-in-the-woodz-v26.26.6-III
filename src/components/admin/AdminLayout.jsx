@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/AuthContext';
 import {
   LayoutDashboard, Trees, ShoppingBag, BookOpen, Radio,
   CalendarDays, Users, Settings, LogOut, Menu, X,
-  ChevronRight, AlertCircle
+  ChevronRight, AlertCircle, Mail
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -22,6 +22,7 @@ const NAV_ITEMS = [
   { label: 'Blog',          to: '/admin/blog',           icon: BookOpen },
   { label: 'Studio',        to: '/admin/studio',         icon: Radio },
   { label: 'Bookings',      to: '/admin/calendar',       icon: CalendarDays },
+  { label: 'Newsletter',    to: '/admin/newsletter',     icon: Mail },
   { label: 'Members',       to: '/admin/members',        icon: Users },
   { label: 'Settings',      to: '/admin/settings',       icon: Settings },
 ];

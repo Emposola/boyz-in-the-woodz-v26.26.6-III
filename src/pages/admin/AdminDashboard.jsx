@@ -9,7 +9,7 @@ import { format } from 'date-fns';
 import {
   Trees, ShoppingBag, Users, BookOpen, CalendarDays,
   Radio, Clock, CheckCircle, AlertCircle, ArrowRight,
-  TrendingUp, Package, DollarSign
+  TrendingUp, Package, DollarSign, Mail
 } from 'lucide-react';
 
 const FG = '#2D5A27';
@@ -47,6 +47,7 @@ export default function AdminDashboard() {
         { data: recentApps },
         { data: recentMembers },
         { count: pendingPayments },
+        { count: newsletterSubs },
       ] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('retreat_applications').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
@@ -65,11 +66,12 @@ export default function AdminDashboard() {
           .order('created_at', { ascending: false })
           .limit(5),
         supabase.from('orders').select('*', { count: 'exact', head: true }).eq('payment_status', 'pending'),
+        supabase.from('newsletter_subscribers').select('*', { count: 'exact', head: true }),
       ]);
 
       return {
         totalMembers, pendingApps, totalOrders, pendingPosts,
-        todayBookings, activeProducts, recentApps, recentMembers, pendingPayments,
+        todayBookings, activeProducts, recentApps, recentMembers, pendingPayments, newsletterSubs,
       };
     },
     refetchInterval: 30000,
@@ -83,6 +85,7 @@ export default function AdminDashboard() {
     { icon: CalendarDays,label: "Today's Bookings",  value: stats?.todayBookings,   color: '#06b6d4', to: '/admin/calendar' },
     { icon: ShoppingBag, label: 'Active Products',   value: stats?.activeProducts,  color: '#ec4899', to: '/admin/products' },
     { icon: DollarSign,  label: 'Pending Payments',   value: stats?.pendingPayments, color: '#22c55e', to: '/admin/orders?payment_status=pending' },
+    { icon: Mail,        label: 'Newsletter Subs',    value: stats?.newsletterSubs,  color: '#f97316', to: '/admin/newsletter' },
   ];
 
   return (

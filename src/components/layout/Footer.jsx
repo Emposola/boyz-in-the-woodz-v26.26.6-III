@@ -4,10 +4,12 @@
    ============================================================ */
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Instagram, Twitter, Youtube, Facebook, ArrowRight, ExternalLink, Mail } from 'lucide-react';
+import { Instagram, Twitter, Youtube, Facebook, ArrowRight, ExternalLink, Mail, CheckCircle, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 const TikTokIcon = () => (
   <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
@@ -68,10 +70,37 @@ const THE_CODE = ['No Phones', 'Show Up Physically', 'Respect Everyone', 'No Ego
 export default function Footer() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
-    if (email) { setSubscribed(true); setEmail(''); }
+    if (!email?.trim()) return;
+    setSubscribing(true);
+    try {
+      const { error } = await supabase
+        .from('newsletter_subscribers')
+        .insert({ email: email.trim(), source: 'footer' });
+      if (error) {
+        if (error.code === '23505') {
+          setSubscribed(true);
+          toast.success('Already subscribed, brother.');
+        } else {
+          throw error;
+        }
+      } else {
+        const { error: fnErr } = await supabase.functions.invoke('send-newsletter', {
+          body: { action: 'welcome', email: email.trim() },
+        });
+        if (fnErr) console.warn('Welcome email not sent:', fnErr.message);
+      }
+      setSubscribed(true);
+      setEmail('');
+    } catch (err) {
+      console.error('Subscribe error:', err);
+      toast.error('Something went wrong. Try again.');
+    } finally {
+      setSubscribing(false);
+    }
   };
 
   return (
@@ -123,13 +152,16 @@ export default function Footer() {
             </div>
             {/* Newsletter */}
             {subscribed ? (
-              <p className="text-sm font-heading" style={{ color: FOREST_GREEN }}>Welcome to the brotherhood.</p>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4" style={{ color: FOREST_GREEN }} />
+                <p className="text-sm font-heading" style={{ color: FOREST_GREEN }}>Welcome to the brotherhood.</p>
+              </div>
             ) : (
               <form onSubmit={handleSubscribe} className="flex gap-2">
-                <Input type="email" placeholder="Your email" value={email} onChange={e => setEmail(e.target.value)}
+                <Input type="email" placeholder="Your email" value={email} onChange={e => setEmail(e.target.value)} required
                   className="bg-white/10 border-white/20 text-white text-sm placeholder:text-white/30 focus-visible:ring-0" />
-                <Button type="submit" size="icon" className="flex-shrink-0" style={{ background: FOREST_GREEN }}>
-                  <ArrowRight className="w-4 h-4 text-white" />
+                <Button type="submit" size="icon" disabled={subscribing} className="flex-shrink-0" style={{ background: FOREST_GREEN }}>
+                  {subscribing ? <Loader2 className="w-4 h-4 text-white animate-spin" /> : <ArrowRight className="w-4 h-4 text-white" />}
                 </Button>
               </form>
             )}

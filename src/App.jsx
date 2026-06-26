@@ -27,6 +27,7 @@ const AdminProducts = React.lazy(() => import('./pages/admin/AdminProducts'));
 const AdminMembers = React.lazy(() => import('./pages/admin/AdminMembers'));
 const AdminOrders = React.lazy(() => import('./pages/admin/AdminOrders'));
 const AdminSettings = React.lazy(() => import('./pages/admin/AdminSettings'));
+const AdminNewsletter = React.lazy(() => import('./pages/admin/AdminNewsletter'));
 const Home = React.lazy(() => import('./pages/Home'));
 const Shop = React.lazy(() => import('./pages/Shop'));
 const ProductDetail = React.lazy(() => import('./pages/ProductDetail'));
@@ -65,6 +66,7 @@ const StudioLive = React.lazy(() => import('./pages/StudioLive'));
 const StudioSession = React.lazy(() => import('./pages/StudioSession'));
 const AdminStudio = React.lazy(() => import('./pages/AdminStudio'));
 const Sitemap = React.lazy(() => import('./pages/Sitemap'));
+const NewsletterUnsubscribe = React.lazy(() => import('./pages/NewsletterUnsubscribe'));
 const Services = React.lazy(() => import('./pages/Services'));
 const RetreatCalendar = React.lazy(() => import('./pages/RetreatCalendar'));
 const LegalRetreat = React.lazy(() => import('./pages/LegalRetreat'));
@@ -124,6 +126,7 @@ const AuthenticatedApp = () => {
           <Route path="/auth/signup" element={<SignUp />} />
           <Route path="/auth/forgot-password" element={<ForgotPassword />} />
           <Route path="/auth/reset-password" element={<ResetPassword />} />
+          <Route path="/newsletter/unsubscribe" element={<NewsletterUnsubscribe />} />
 
           {/* ── Protected Routes with Layout ── */}
           <Route element={<MainLayout />}>
@@ -291,6 +294,11 @@ const AuthenticatedApp = () => {
           <Route path="/admin/settings" element={
             <ProtectedRoute requiredRole="admin">
               <AdminLayout><AdminSettings /></AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/newsletter" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout><AdminNewsletter /></AdminLayout>
             </ProtectedRoute>
           } />
         </Routes>
