@@ -4,8 +4,9 @@ const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') ?? '';
 const FROM_EMAIL = Deno.env.get('NEWSLETTER_FROM_EMAIL') ?? 'noreply@boyzinthewoodz.com';
 const FROM_NAME = 'BOYZ IN THE WOODZ';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const BASE_URL = Deno.env.get('PUBLIC_BASE_URL') ?? 'http://localhost:5173';
+const TEST_RECIPIENT = Deno.env.get('TEST_RECIPIENT_EMAIL') ?? '';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -32,20 +33,12 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json();
     const { action, campaign_id, email: singleEmail } = body;
-    const authHeader = req.headers.get('Authorization') || '';
-
-    console.log('send-newsletter action:', action, 'campaign:', campaign_id, 'email:', singleEmail);
 
     if (!RESEND_API_KEY) {
       return new Response(JSON.stringify({ error: 'RESEND_API_KEY not configured' }), {
         status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
-
-    // Create Supabase client with anon key, pass auth header if present
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: authHeader } },
-    });
 
     // --- Welcome email ---
     if (action === 'welcome') {
@@ -79,21 +72,24 @@ Deno.serve(async (req) => {
     // --- Broadcast campaign ---
     if (action === 'broadcast') {
       if (!campaign_id) throw new Error('campaign_id required');
+      if (!SUPABASE_SERVICE_KEY) throw new Error('SUPABASE_SERVICE_ROLE_KEY not configured');
+
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
       const { data: campaign, error: campErr } = await supabase
         .from('newsletter_campaigns').select('*').eq('id', campaign_id).single();
-      if (campErr || !campaign) {
-        console.error('Campaign query error:', campErr);
-        throw new Error('Campaign not found');
-      }
+      if (campErr || !campaign) throw new Error('Campaign not found');
 
-      const { data: subscribers, error: subErr } = await supabase
+      const { data: subscribers } = await supabase
         .from('newsletter_subscribers').select('email').eq('active', true);
-      console.log('Subscribers query result:', subscribers?.length, 'error:', subErr?.message);
-
       if (!subscribers?.length) throw new Error('No active subscribers');
 
-      const emails = subscribers.map(s => s.email);
+      let emails = subscribers.map(s => s.email);
+      // If TEST_RECIPIENT_EMAIL is set, only send to that email (for Resend test mode)
+      if (TEST_RECIPIENT) {
+        emails = emails.filter(e => e === TEST_RECIPIENT);
+        if (!emails.length) throw new Error(`TEST_RECIPIENT_EMAIL (${TEST_RECIPIENT}) not found among active subscribers`);
+      }
       const batchSize = 50;
       let sent = 0;
 
@@ -113,11 +109,9 @@ Deno.serve(async (req) => {
         sent += batch.length;
       }
 
-      const { error: updErr } = await supabase
-        .from('newsletter_campaigns')
+      await supabase.from('newsletter_campaigns')
         .update({ status: 'sent', sent_at: new Date().toISOString(), recipient_count: sent })
         .eq('id', campaign_id);
-      if (updErr) console.error('Campaign update error:', updErr);
 
       return new Response(JSON.stringify({ ok: true, sent }), {
         status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders },
@@ -127,6 +121,7 @@ Deno.serve(async (req) => {
     // --- Unsubscribe ---
     if (action === 'unsubscribe') {
       if (!singleEmail) throw new Error('Email required');
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
       await supabase.from('newsletter_unsubscribes').insert({ email: singleEmail });
       await supabase.from('newsletter_subscribers').update({ active: false }).eq('email', singleEmail);
       return new Response(JSON.stringify({ ok: true }), {
