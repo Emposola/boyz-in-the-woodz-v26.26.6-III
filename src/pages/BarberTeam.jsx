@@ -17,7 +17,7 @@ const FALLBACK_BARBERS = [
   { id: 'f3', name: 'Tomás Rivera', bio: 'Hot towel shave specialist who trained in traditional barbering. Retreat facilitator on weekends.', specialties: ['Hot Towel Shave', 'Classic Cuts'], image_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&h=700&fit=crop&q=85', first_aid_certified: true, wilderness_certified: true },
 ];
 
-export default function BarberImg({ src, name }) {
+function BarberImg({ src, name }) {
   const [failed, setFailed] = React.useState(false);
   const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
   if (failed || !src) {
@@ -26,7 +26,7 @@ export default function BarberImg({ src, name }) {
   return <img src={src} alt={name} className="w-full h-full object-cover" onError={() => setFailed(true)} loading="lazy" />;
 }
 
-function BarberTeam() {
+export default function BarberTeam() {
   /* --- Fetch barbers from DB --- */
   const { data: barbers, isLoading } = useQuery({
     queryKey: ['barbers'],
