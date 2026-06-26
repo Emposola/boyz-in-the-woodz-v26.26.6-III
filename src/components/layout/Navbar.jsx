@@ -3,7 +3,7 @@
    ============================================================ */
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Leaf, ShoppingBag, ChevronDown, ArrowRight, Home, Trees, Compass, Users, BookOpen, Zap, LayoutDashboard, Camera, Trophy, Heart, Shield } from 'lucide-react';
+import { Search, Leaf, ShoppingBag, ChevronDown, ArrowRight, Home, Trees, Compass, Users, BookOpen, Zap, LayoutDashboard, Camera, Trophy, Heart, Shield, Scissors } from 'lucide-react';
 import { FiShoppingBag, FiUser, FiMenu, FiX } from 'react-icons/fi';
 import { useCart } from '@/lib/cartContext';
 import { useAuth } from '@/lib/AuthContext';
@@ -55,6 +55,17 @@ const NAV_MENUS = [
       },
     ],
     cta: { label: 'Shop All Products', to: '/shop' },
+  },
+  {
+    label: 'Men\'s Grooming',
+    icon: Scissors,
+    links: [
+      { label: 'Book a Cut', to: '/barber/book' },
+      { label: 'Services & Pricing', to: '/grooming-lodge' },
+      { label: 'Our Barbers', to: '/barber' },
+      { label: 'Membership', to: '/barber/membership' },
+      { label: 'Walk-in Waitlist', to: '/waitlist' },
+    ],
   },
   {
     label: 'The Experience',

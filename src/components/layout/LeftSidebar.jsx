@@ -13,7 +13,7 @@ import {
 const ICONS = [
   { icon: FiHome, to: '/', label: 'Home' },
   { icon: FiShoppingBag, to: '/shop/boyz', label: 'Shop' },
-  { icon: FiScissors, to: '/barber/book', label: 'Book Cut' },
+  { icon: FiScissors, to: '/grooming-lodge', label: 'Grooming' },
   { icon: FiCalendar, to: '/events', label: 'Events' },
   { icon: FiUsers, to: '/about', label: 'About' },
   { icon: FiMapPin, to: '/locations', label: 'Locations' },

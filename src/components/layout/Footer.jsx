@@ -48,6 +48,14 @@ const COLUMN_BROTHERHOOD = [
   { label: 'Confessions', to: '/journal' },
 ];
 
+const COLUMN_GROOMING = [
+  { label: 'Book a Cut', to: '/barber/book' },
+  { label: 'Services & Pricing', to: '/grooming-lodge' },
+  { label: 'Our Barbers', to: '/barber' },
+  { label: 'Membership', to: '/barber/membership' },
+  { label: 'Walk-in Waitlist', to: '/waitlist' },
+];
+
 const COLUMN_RETREATS = [
   { label: 'Upcoming Retreats', to: '/retreat-calendar' },
   { label: 'Apply Now', to: '/retreat/apply' },
@@ -127,7 +135,7 @@ export default function Footer() {
         </div>
 
         {/* Main 5-column grid */}
-        <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+        <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
 
           {/* Col 1 – Brand */}
           <div className="sm:col-span-2 md:col-span-3 lg:col-span-1">
@@ -190,7 +198,18 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Col 4 – Retreats */}
+          {/* Col 4 – Men's Grooming Lodge */}
+          <div>
+            <h4 className="text-xs font-heading tracking-[0.25em] uppercase mb-4" style={{ color: FOREST_GREEN }}>Men's Grooming Lodge</h4>
+            <div className="space-y-2.5">
+              {COLUMN_GROOMING.map(link => (
+                <Link key={link.label} to={link.to}
+                  className="block text-sm text-white/50 hover:text-white transition-colors">{link.label}</Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Col 5 – Retreats */}
           <div>
             <h4 className="text-xs font-heading tracking-[0.25em] uppercase mb-4" style={{ color: FOREST_GREEN }}>Retreats</h4>
             <div className="space-y-2.5">

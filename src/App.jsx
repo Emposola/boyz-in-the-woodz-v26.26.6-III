@@ -46,6 +46,7 @@ const BarberGallery = React.lazy(() => import('./pages/BarberGallery'));
 const Membership = React.lazy(() => import('./pages/Membership'));
 const BarberFAQ = React.lazy(() => import('./pages/BarberFAQ'));
 const BookAppointment = React.lazy(() => import('./pages/BookAppointment'));
+const GroomingLodge = React.lazy(() => import('./pages/GroomingLodge'));
 const WalkInWaitlistLive = React.lazy(() => import('./pages/WalkInWaitlistLive'));
 const BarberProfile = React.lazy(() => import('./pages/BarberProfile'));
 const AdminBookingCalendar = React.lazy(() => import('./pages/AdminBookingCalendar'));
@@ -170,6 +171,7 @@ const AuthenticatedApp = () => {
             <Route path="/barber/faq" element={<BarberFAQ />} />
 
             {/* ── Barbershop Phase 2 ── */}
+            <Route path="/grooming-lodge" element={<GroomingLodge />} />
             <Route path="/barber/book" element={<ProtectedRoute><BookAppointment /></ProtectedRoute>} />
             <Route path="/barber/walkin" element={<WalkInWaitlistLive />} />
             <Route path="/barber/profile/:id" element={<BarberProfile />} />
