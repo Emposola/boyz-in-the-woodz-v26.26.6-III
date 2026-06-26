@@ -62,7 +62,7 @@ const NAV_MENUS = [
     links: [
       { label: 'Book a Cut', to: '/barber/book' },
       { label: 'Services & Pricing', to: '/grooming-lodge' },
-      { label: 'Our Barbers', to: '/barber' },
+      { label: 'Our Barbers', to: '/barber/team' },
       { label: 'Membership', to: '/barber/membership' },
       { label: 'Walk-in Waitlist', to: '/waitlist' },
     ],
