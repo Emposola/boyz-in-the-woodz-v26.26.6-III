@@ -300,6 +300,11 @@ export default function Navbar() {
         )}
       </div>
 
+      {/* Mobile drawer backdrop */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-30 lg:hidden" onClick={() => { setMobileOpen(false); setMobileExpanded(null); }} />
+      )}
+
       {/* Mobile Drawer — Accordion style */}
       {mobileOpen && (
         <div className="fixed top-[80px] left-[7px] right-[7px] z-40 rounded-2xl overflow-hidden shadow-2xl"
