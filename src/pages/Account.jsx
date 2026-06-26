@@ -77,6 +77,7 @@ export default function Account() {
   const { user, logout: logoutAuth, isAuthenticated, isLoadingAuth } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
   const { pledgeAccepted } = usePledge();
 
   const logout = async () => {
@@ -375,24 +376,94 @@ export default function Account() {
                 </Button>
               </div>
             ) : (
-              orders.map(order => (
-                <div key={order.id} className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-4 hover:border-primary/30 transition-all">
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                    <div>
-                      <p className="text-sm font-medium text-white">{order.items?.length || 0} items</p>
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        {order.created_date && format(new Date(order.created_date), 'MMM d, yyyy')}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="font-semibold text-white">${order.total_amount?.toFixed(2)}</span>
-                      <Badge variant="secondary" className="text-[10px] bg-gray-700/50">
-                        {order.status || 'pending'}
-                      </Badge>
-                    </div>
+              orders.map(order => {
+                const isExpanded = expandedOrderId === order.id;
+                const payStatus = order.payment_status || (order.total_amount === 0 ? 'paid' : 'pending');
+                const items = Array.isArray(order.items) ? order.items : [];
+                return (
+                  <div key={order.id} className="bg-gray-800/30 border border-gray-700/50 rounded-xl overflow-hidden hover:border-primary/30 transition-all">
+                    <button onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
+                      className="w-full text-left p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 hover:bg-white/5 transition-colors">
+                      <div>
+                        <p className="text-sm font-medium text-white">{items.length} item{items.length !== 1 ? 's' : ''}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          {order.order_number && <span className="font-mono text-gray-500 mr-2">{order.order_number}</span>}
+                          {order.created_date && format(new Date(order.created_date), 'MMM d, yyyy')}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-white">${parseFloat(order.total_amount || 0).toFixed(2)}</span>
+                        <Badge className={`text-[10px] border ${payStatus === 'paid' ? 'bg-green-900/40 text-green-400 border-green-800/40' : 'bg-yellow-900/40 text-yellow-400 border-yellow-800/40'}`}>
+                          {payStatus === 'paid' ? 'Paid' : 'Pending'}
+                        </Badge>
+                        <Badge variant="secondary" className="text-[10px] bg-gray-700/50">
+                          {order.status || 'pending'}
+                        </Badge>
+                      </div>
+                    </button>
+                    {isExpanded && (
+                      <div className="px-4 pb-4 border-t border-gray-700/50 pt-3 space-y-4">
+                        {/* Order timeline */}
+                        <div className="flex items-start gap-2">
+                          {[
+                            { key: 'placed', label: 'Placed', done: true, date: order.created_date },
+                            { key: 'paid', label: 'Paid', done: payStatus === 'paid', date: order.created_date },
+                            { key: 'processing', label: 'Processing', done: ['processing','shipped','delivered'].includes(order.status), date: order.updated_date },
+                            { key: 'shipped', label: 'Shipped', done: ['shipped','delivered'].includes(order.status), date: null },
+                            { key: 'delivered', label: 'Delivered', done: order.status === 'delivered', date: null },
+                          ].map((step, i, arr) => (
+                            <React.Fragment key={step.key}>
+                              <div className="flex flex-col items-center flex-1 min-w-0">
+                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 ${
+                                  step.done ? 'border-primary bg-primary text-white' : 'border-gray-600 bg-gray-800 text-gray-500'
+                                }`}>
+                                  {step.done ? <Check className="w-3 h-3" /> : i + 1}
+                                </div>
+                                <span className={`text-[9px] font-heading tracking-wider uppercase mt-1 ${step.done ? 'text-primary' : 'text-gray-500'}`}>
+                                  {step.label}
+                                </span>
+                              </div>
+                              {i < arr.length - 1 && (
+                                <div className={`flex-1 h-px mt-3 ${step.done && arr[i+1]?.done ? 'bg-primary' : 'bg-gray-700'}`} />
+                              )}
+                            </React.Fragment>
+                          ))}
+                        </div>
+
+                        {/* Items */}
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-heading tracking-wider uppercase text-gray-500 mb-1.5">Items</p>
+                          {items.map((item, i) => (
+                            <div key={i} className="flex items-center justify-between text-sm bg-gray-900/50 rounded-lg px-3 py-2">
+                              <span className="text-gray-300">{item.product_name || item.name}{item.size ? ` (${item.size})` : ''}</span>
+                              <span className="text-gray-500">×{item.quantity || 1}</span>
+                            </div>
+                          ))}
+                          <div className="flex justify-end gap-4 text-xs text-gray-400 pt-1">
+                            {order.shipping_cost > 0 && <span>Shipping: ${parseFloat(order.shipping_cost).toFixed(2)}</span>}
+                            <span className="font-medium text-white">Total: ${parseFloat(order.total_amount || 0).toFixed(2)}</span>
+                          </div>
+                        </div>
+
+                        {/* Shipping + Tracking */}
+                        {order.shipping_address && (
+                          <div className="text-xs text-gray-500">
+                            <span className="text-gray-400 font-medium">Ship to:</span>{' '}
+                            {[order.shipping_address.name, order.shipping_address.line1, order.shipping_address.city, order.shipping_address.state].filter(Boolean).join(', ')}
+                          </div>
+                        )}
+                        {order.tracking_number && (
+                          <div className="text-xs flex items-center gap-2 p-2 bg-gray-900/50 rounded-lg">
+                            <Package className="w-3.5 h-3.5 text-primary" />
+                            <span className="text-gray-400 font-medium">Tracking:</span>{' '}
+                            <span className="text-primary font-mono">{order.tracking_number}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </TabsContent>
 

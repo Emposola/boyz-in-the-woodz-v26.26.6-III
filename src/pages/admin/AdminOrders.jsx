@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
-import { Package, Search, ChevronDown, ChevronUp, Save } from 'lucide-react';
+import { Package, Search, ChevronDown, ChevronUp, Save, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -42,6 +42,12 @@ function OrderRow({ order, onUpdate }) {
             <p className="font-medium text-sm">{order.order_number || `#${order.id.slice(-8).toUpperCase()}`}</p>
             <span className={`text-[10px] font-heading tracking-wider uppercase px-2 py-0.5 rounded-full border ${STATUS_COLORS[order.status] || STATUS_COLORS.pending}`}>
               {order.status}
+            </span>
+            <span className={`text-[10px] font-heading tracking-wider uppercase px-2 py-0.5 rounded-full border ${
+              order.payment_status === 'paid' ? 'bg-green-900/40 text-green-400 border-green-800/40' :
+              'bg-yellow-900/40 text-yellow-400 border-yellow-800/40'
+            }`}>
+              {order.payment_status === 'paid' ? 'Paid' : 'Pending'}
             </span>
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
@@ -134,13 +140,17 @@ function OrderRow({ order, onUpdate }) {
 export default function AdminOrders() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [paymentFilter, setPaymentFilter] = useState(
+    new URLSearchParams(window.location.search).get('payment_status') || 'all'
+  );
   const qc = useQueryClient();
 
   const { data: orders = [], isLoading } = useQuery({
-    queryKey: ['admin-orders', statusFilter],
+    queryKey: ['admin-orders', statusFilter, paymentFilter],
     queryFn: async () => {
       let q = supabase.from('orders').select('*').order('created_date', { ascending: false });
       if (statusFilter !== 'all') q = q.eq('status', statusFilter);
+      if (paymentFilter !== 'all') q = q.eq('payment_status', paymentFilter);
       const { data, error } = await q;
       if (error) throw error;
       return data || [];
@@ -194,7 +204,7 @@ export default function AdminOrders() {
           <Input value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search order number..." className="pl-9 bg-secondary border-border" />
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
           {['all', ...ORDER_STATUSES].map(s => (
             <button key={s} onClick={() => setStatusFilter(s)}
               className={`px-3 py-1.5 rounded-full text-xs font-heading tracking-wider uppercase border transition-all ${
@@ -202,6 +212,20 @@ export default function AdminOrders() {
               }`}
               style={statusFilter === s ? { background: FG } : {}}>
               {s === 'all' ? `All (${orders.length})` : `${s} (${statusCounts[s] || 0})`}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-2 flex-wrap items-center border-l border-border pl-3">
+          <span className="text-[10px] font-heading tracking-wider uppercase text-muted-foreground mr-1">
+            <DollarSign className="w-3 h-3 inline" />
+          </span>
+          {[['all', 'All'], ['paid', 'Paid'], ['pending', 'Pending']].map(([key, label]) => (
+            <button key={key} onClick={() => setPaymentFilter(key)}
+              className={`px-2.5 py-1 rounded-full text-[10px] font-heading tracking-wider uppercase border transition-all ${
+                paymentFilter === key ? 'text-white border-transparent' : 'border-border text-muted-foreground hover:border-primary/40'
+              }`}
+              style={paymentFilter === key ? { background: FG } : {}}>
+              {label}
             </button>
           ))}
         </div>

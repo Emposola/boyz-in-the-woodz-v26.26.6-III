@@ -1,4 +1,3 @@
-// Follow the deployment steps in SUPABASE_EDGE_FUNCTION.md
 import Stripe from 'https://esm.sh/stripe@17.3.0?target=deno';
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
@@ -6,10 +5,20 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
   httpClient: Stripe.createFetchHttpClient(),
 });
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-supabase-auth',
+};
+
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405, headers: { 'Content-Type': 'application/json' },
+      status: 405, headers: { 'Content-Type': 'application/json', ...corsHeaders },
     });
   }
 
@@ -18,7 +27,7 @@ Deno.serve(async (req) => {
 
     if (!amount || amount <= 0) {
       return new Response(JSON.stringify({ error: 'Invalid amount' }), {
-        status: 400, headers: { 'Content-Type': 'application/json' },
+        status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
 
@@ -30,12 +39,12 @@ Deno.serve(async (req) => {
     });
 
     return new Response(JSON.stringify({ clientSecret: paymentIntent.client_secret }), {
-      status: 200, headers: { 'Content-Type': 'application/json' },
+      status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders },
     });
   } catch (err) {
     console.error('create-payment-intent error:', err);
     return new Response(JSON.stringify({ error: err.message }), {
-      status: 500, headers: { 'Content-Type': 'application/json' },
+      status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders },
     });
   }
 });

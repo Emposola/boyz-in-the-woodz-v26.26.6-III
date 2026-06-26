@@ -82,7 +82,7 @@ export default function AdminDashboard() {
     { icon: BookOpen,    label: 'Posts Pending',      value: stats?.pendingPosts,    color: '#f59e0b', to: '/admin/blog' },
     { icon: CalendarDays,label: "Today's Bookings",  value: stats?.todayBookings,   color: '#06b6d4', to: '/admin/calendar' },
     { icon: ShoppingBag, label: 'Active Products',   value: stats?.activeProducts,  color: '#ec4899', to: '/admin/products' },
-    { icon: DollarSign,  label: 'Pending Payments',   value: stats?.pendingPayments, color: '#22c55e', to: '/admin/orders' },
+    { icon: DollarSign,  label: 'Pending Payments',   value: stats?.pendingPayments, color: '#22c55e', to: '/admin/orders?payment_status=pending' },
   ];
 
   return (

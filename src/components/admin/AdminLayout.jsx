@@ -18,7 +18,7 @@ const NAV_ITEMS = [
   { label: 'Dashboard',     to: '/admin',                icon: LayoutDashboard },
   { label: 'Retreats',      to: '/admin/retreats',       icon: Trees },
   { label: 'Products',      to: '/admin/products',       icon: ShoppingBag },
-  { label: 'Orders',        to: '/admin/orders',         icon: ShoppingBag,  hide: true },
+  { label: 'Orders',        to: '/admin/orders',         icon: ShoppingBag },
   { label: 'Blog',          to: '/admin/blog',           icon: BookOpen },
   { label: 'Studio',        to: '/admin/studio',         icon: Radio },
   { label: 'Bookings',      to: '/admin/calendar',       icon: CalendarDays },

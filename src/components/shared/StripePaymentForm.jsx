@@ -36,11 +36,12 @@ function PaymentFormInner({ amount, onSuccess, onError, buttonText }) {
 
       const { clientSecret } = await createPaymentIntent(
         Math.round(amount * 100),
-        paymentMethod.id,
-        { payment_method: paymentMethod.id }
+        paymentMethod.id
       );
 
-      const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret);
+      const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: paymentMethod.id,
+      });
       if (confirmError) { throw confirmError; }
 
       if (paymentIntent.status === 'succeeded') {
