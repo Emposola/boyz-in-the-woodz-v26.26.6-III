@@ -1,19 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Scissors, ArrowRight, Star, Clock, Shield, Award, Users, MapPin } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+import { Scissors, ArrowRight, Star, Clock, Shield, Award, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SEO from '@/components/shared/SEO';
 
 const FG = '#2D5A27';
 const SAND = '#D2B48C';
-
-const SERVICES = [
-  { name: 'Haircut', price: '$35', time: '45 min', desc: 'Precision cut + hot towel finish' },
-  { name: 'Beard Trim', price: '$20', time: '20 min', desc: 'Shape, line-up, and condition' },
-  { name: 'Hot Towel Shave', price: '$45', time: '40 min', desc: 'Old-school straight razor experience' },
-  { name: "Kid's Cut", price: '$25', time: '30 min', desc: 'Patient and fun for all ages' },
-  { name: 'VIP Package', price: '$80', time: '90 min', desc: 'Cut + shave + shoulder massage + cold drink' },
-];
 
 const FEATURES = [
   { icon: Award, title: 'Master Barbers', desc: 'Years of craft. Every cut is intentional.' },
@@ -23,15 +17,18 @@ const FEATURES = [
 ];
 
 export default function GroomingLodge() {
+  const { data: services = [] } = useQuery({
+    queryKey: ['services-lodge'],
+    queryFn: async () => {
+      const { data } = await supabase.from('services').select('*').eq('active', true).order('price');
+      return data || [];
+    },
+  });
+
   return (
     <div className="min-h-screen">
-      <SEO
-        title="The Men's Grooming Lodge — BOYZ IN THE WOODZ"
-        description="Premium men's grooming in a space built for brotherhood. Book a cut, join the waitlist, or become a member."
-        canonical="/grooming-lodge"
-      />
+      <SEO title="The Men's Grooming Lodge — BOYZ IN THE WOODZ" description="Premium men's grooming in a space built for brotherhood." canonical="/grooming-lodge" />
 
-      {/* Hero */}
       <section className="relative min-h-[70vh] flex items-center justify-center px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-background z-10" />
         <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, rgba(45,90,39,0.2) 0%, transparent 70%)' }} />
@@ -61,7 +58,6 @@ export default function GroomingLodge() {
         </div>
       </section>
 
-      {/* Features */}
       <section className="max-w-6xl mx-auto px-4 py-20">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {FEATURES.map(f => (
@@ -76,43 +72,45 @@ export default function GroomingLodge() {
         </div>
       </section>
 
-      {/* Services */}
       <section className="max-w-4xl mx-auto px-4 py-20">
         <div className="text-center mb-12">
           <h2 className="font-heading text-3xl md:text-4xl tracking-wide uppercase mb-3">Services & Pricing</h2>
           <p className="text-muted-foreground text-sm">Premium grooming. Transparent pricing. No surprises.</p>
         </div>
-        <div className="space-y-3">
-          {SERVICES.map(s => (
-            <div key={s.name} className="bg-card border border-border rounded-xl p-5 flex items-center justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="font-heading text-sm tracking-wider uppercase">{s.name}</h3>
-                  <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" />{s.time}</span>
+        {services.length === 0 ? (
+          <p className="text-center text-muted-foreground text-sm py-8">Loading services...</p>
+        ) : (
+          <div className="space-y-3">
+            {services.map(s => (
+              <div key={s.id} className="bg-card border border-border rounded-xl p-5 flex items-center justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-heading text-sm tracking-wider uppercase">{s.name}</h3>
+                    <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" />{s.duration_minutes} min</span>
+                    {s.featured && <span className="text-[10px] font-heading tracking-wider uppercase px-2 py-0.5 rounded-full bg-yellow-900/40 text-yellow-400">Popular</span>}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">{s.description}</p>
                 </div>
-                <p className="text-xs text-muted-foreground mt-0.5">{s.desc}</p>
+                <div className="flex items-center gap-4 flex-shrink-0">
+                  <span className="font-heading text-xl" style={{ color: FG }}>${s.price}</span>
+                  <Link to="/barber/book">
+                    <Button size="sm" className="font-heading tracking-wider uppercase text-xs" style={{ background: FG }}>
+                      Book <ArrowRight className="w-3 h-3 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
               </div>
-              <div className="flex items-center gap-4 flex-shrink-0">
-                <span className="font-heading text-xl" style={{ color: FG }}>{s.price}</span>
-                <Link to="/barber/book">
-                  <Button size="sm" className="font-heading tracking-wider uppercase text-xs" style={{ background: FG }}>
-                    Book <ArrowRight className="w-3 h-3 ml-1" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* CTA */}
       <section className="max-w-4xl mx-auto px-4 py-20 text-center">
         <div className="bg-card border border-border rounded-2xl p-10 md:p-16">
           <Scissors className="w-8 h-8 mx-auto mb-4" style={{ color: SAND }} />
           <h2 className="font-heading text-3xl md:text-4xl tracking-wide uppercase mb-3">Ready for a Reset?</h2>
           <p className="text-muted-foreground text-sm max-w-md mx-auto mb-8">
-            Walk in, sit down, and leave sharper than you arrived. 
-            The Lodge is open Tuesday through Saturday.
+            Walk in, sit down, and leave sharper than you arrived. The Lodge is open Tuesday through Saturday.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/barber/book">

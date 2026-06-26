@@ -188,6 +188,9 @@ export const api = {
     // RetreatApplication entity
     RetreatApplication: createEntity('retreat_applications'),
 
+    // Service entity
+    Service: createEntity('services'),
+
     // Location entity
     Location: createEntity('locations'),
 

@@ -80,6 +80,7 @@ const BrotherhoodHub = React.lazy(() => import('./pages/BrotherhoodHub'));
 const ScienceHub = React.lazy(() => import('./pages/ScienceHub'));
 const JournalSubmit = React.lazy(() => import('./pages/JournalSubmit'));
 const AdminBlog = React.lazy(() => import('./pages/AdminBlog'));
+const AdminServices = React.lazy(() => import('./pages/admin/AdminServices'));
 const ImpactStories = React.lazy(() => import('./pages/ImpactStories'));
 const BrotherhoodLetters = React.lazy(() => import('./pages/BrotherhoodLetters'));
 const BreathingTool = React.lazy(() => import('./pages/BreathingTool'));
@@ -261,6 +262,11 @@ const AuthenticatedApp = () => {
           <Route path="/admin/products" element={
             <ProtectedRoute requiredRole="admin">
               <AdminLayout><AdminProducts /></AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/services" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout><AdminServices /></AdminLayout>
             </ProtectedRoute>
           } />
           <Route path="/admin/orders" element={
