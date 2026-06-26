@@ -6,7 +6,6 @@ const FROM_NAME = 'BOYZ IN THE WOODZ';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const BASE_URL = Deno.env.get('PUBLIC_BASE_URL') ?? 'http://localhost:5173';
-const TEST_RECIPIENT = Deno.env.get('TEST_RECIPIENT_EMAIL') ?? '';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -84,29 +83,27 @@ Deno.serve(async (req) => {
         .from('newsletter_subscribers').select('email').eq('active', true);
       if (!subscribers?.length) throw new Error('No active subscribers');
 
-      let emails = subscribers.map(s => s.email);
-      // If TEST_RECIPIENT_EMAIL is set, only send to that email (for Resend test mode)
-      if (TEST_RECIPIENT) {
-        emails = emails.filter(e => e === TEST_RECIPIENT);
-        if (!emails.length) throw new Error(`TEST_RECIPIENT_EMAIL (${TEST_RECIPIENT}) not found among active subscribers`);
-      }
-      const batchSize = 50;
+      const emails = subscribers.map(s => s.email);
       let sent = 0;
 
-      for (let i = 0; i < emails.length; i += batchSize) {
-        const batch = emails.slice(i, i + batchSize);
-        const res = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            from: `${FROM_NAME} <${FROM_EMAIL}>`,
-            to: FROM_EMAIL, bcc: batch,
-            subject: campaign.subject,
-            html: htmlTemplate(campaign.body_html),
-          }),
-        });
-        if (!res.ok) { console.error('Batch error:', await res.text()); continue; }
-        sent += batch.length;
+      for (const email of emails) {
+        try {
+          const res = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              from: `${FROM_NAME} <${FROM_EMAIL}>`,
+              to: email,
+              subject: campaign.subject,
+              html: htmlTemplate(campaign.body_html, `${BASE_URL}/newsletter/unsubscribe?email=${encodeURIComponent(email)}`),
+            }),
+          });
+          if (res.ok) { sent++; continue; }
+          const errText = await res.text();
+          console.error(`Failed to send to ${email}:`, errText.slice(0, 200));
+        } catch (e) {
+          console.error(`Error sending to ${email}:`, e.message);
+        }
       }
 
       await supabase.from('newsletter_campaigns')
