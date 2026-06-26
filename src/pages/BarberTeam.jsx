@@ -12,12 +12,21 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 /* --- Fallback barber data (shown when DB is empty) --- */
 const FALLBACK_BARBERS = [
-  { id: 'f1', name: 'Marcus "Steady" Cole', bio: 'Master barber with 12 years behind the chair. Specializes in fades and beard sculpting. Also a trained wilderness EMT.', specialties: ['Fades', 'Beard Sculpting'], image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80', first_aid_certified: true, wilderness_certified: true },
-  { id: 'f2', name: 'Dre Washington', bio: 'Known for razor-sharp lineups and patience with kids. Dre brings energy to every chair session.', specialties: ['Lineups', "Kids' Cuts"], image_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&q=80', first_aid_certified: false, wilderness_certified: false },
-  { id: 'f3', name: 'Tomás Rivera', bio: 'Hot towel shave specialist who trained in traditional barbering. Retreat facilitator on weekends.', specialties: ['Hot Towel Shave', 'Classic Cuts'], image_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80', first_aid_certified: true, wilderness_certified: true },
+  { id: 'f1', name: 'Marcus "Steady" Cole', bio: 'Master barber with 12 years behind the chair. Specializes in fades and beard sculpting. Also a trained wilderness EMT.', specialties: ['Fades', 'Beard Sculpting'], image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=700&fit=crop&q=85', first_aid_certified: true, wilderness_certified: true },
+  { id: 'f2', name: 'Dre Washington', bio: 'Known for razor-sharp lineups and patience with kids. Dre brings energy to every chair session.', specialties: ['Lineups', "Kids' Cuts"], image_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&h=700&fit=crop&q=85', first_aid_certified: false, wilderness_certified: false },
+  { id: 'f3', name: 'Tomás Rivera', bio: 'Hot towel shave specialist who trained in traditional barbering. Retreat facilitator on weekends.', specialties: ['Hot Towel Shave', 'Classic Cuts'], image_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&h=700&fit=crop&q=85', first_aid_certified: true, wilderness_certified: true },
 ];
 
-export default function BarberTeam() {
+export default function BarberImg({ src, name }) {
+  const [failed, setFailed] = React.useState(false);
+  const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  if (failed || !src) {
+    return <div className="w-full h-full flex items-center justify-center text-muted-foreground text-2xl font-heading tracking-wider uppercase" style={{ background: '#1a1a1a' }}>{initials}</div>;
+  }
+  return <img src={src} alt={name} className="w-full h-full object-cover" onError={() => setFailed(true)} loading="lazy" />;
+}
+
+function BarberTeam() {
   /* --- Fetch barbers from DB --- */
   const { data: barbers, isLoading } = useQuery({
     queryKey: ['barbers'],
@@ -60,13 +69,7 @@ export default function BarberTeam() {
             >
               {/* Photo */}
               <div className="aspect-[3/4] bg-secondary overflow-hidden">
-                {barber.image_url ? (
-                  <img src={barber.image_url} alt={barber.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                    <Scissors className="w-12 h-12 opacity-20" />
-                  </div>
-                )}
+                <BarberImg src={barber.image_url} name={barber.name} />
               </div>
 
               {/* Info */}
