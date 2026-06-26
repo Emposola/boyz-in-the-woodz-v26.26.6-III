@@ -148,8 +148,8 @@ export default function RetreatApply() {
         user_id: user.id,
         event_id: isRealEvent ? selectedRetreat.id : null,
         status: 'pending',
-        deposit_paid: false,
-        payment_pending: true,
+        deposit_paid: depositPaid,
+        payment_pending: !depositPaid,
         deposit_amount: depositAmount,
         balance_amount: balanceAmount,
         total_amount: fullPrice,
@@ -227,8 +227,7 @@ export default function RetreatApply() {
             </div>
           </div>
           <p className="text-xs text-muted-foreground mb-6">
-            We'll reach out within 24 hours with deposit payment instructions.
-            Your spot is held pending payment.
+            Your deposit is confirmed. The remaining balance of ${balanceAmount} is due on or before the retreat start date.
           </p>
           <div className="flex gap-3 justify-center">
             <Button onClick={() => navigate('/retreat/waitlist')}
@@ -511,8 +510,8 @@ export default function RetreatApply() {
                 <div className="bg-amber-900/10 border border-amber-800/30 rounded-lg p-3 text-xs text-amber-400 flex items-start gap-2">
                   <Clock className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
                   <span>
-                    Your spot is held for <strong>24 hours</strong> pending deposit payment.
                     The deposit is <strong>non-refundable</strong> but transferable to another retreat date.
+                    The remaining balance is due on or before the retreat start date.
                   </span>
                 </div>
 
@@ -523,19 +522,12 @@ export default function RetreatApply() {
                     onChange={e => setDepositConfirmed(e.target.checked)}
                     className="mt-0.5 w-4 h-4 accent-primary rounded" />
                   <span className="text-sm text-muted-foreground">
-                    I understand the <strong className="text-foreground">${depositAmount} deposit is non-refundable</strong> and
-                    agree to complete payment within 24 hours to secure my spot.
+                    I understand the <strong className="text-foreground">${depositAmount} deposit is non-refundable</strong>.
+                    The remaining balance of <strong className="text-foreground">${balanceAmount}</strong> is due before the retreat.
                   </span>
                 </label>
               </div>
 
-              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-xs text-primary flex items-start gap-2">
-                <Shield className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
-                <span>
-                  We'll review your application and contact you at <strong>{user?.email}</strong> with
-                  payment instructions. Once paid, your spot is confirmed.
-                </span>
-              </div>
             </div>
           )}
         </motion.div>
