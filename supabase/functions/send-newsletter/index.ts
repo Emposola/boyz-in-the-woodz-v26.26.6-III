@@ -71,7 +71,12 @@ Deno.serve(async (req) => {
     // --- Broadcast campaign ---
     if (action === 'broadcast') {
       if (!campaign_id) throw new Error('campaign_id required');
-      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // Use the admin's JWT from the Authorization header so RLS policies apply
+      const authHeader = req.headers.get('Authorization') || '';
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        global: { headers: { Authorization: authHeader } },
+      });
 
       const { data: campaign, error: campErr } = await supabase
         .from('newsletter_campaigns').select('*').eq('id', campaign_id).single();
