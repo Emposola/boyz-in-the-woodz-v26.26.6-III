@@ -4,7 +4,7 @@ const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') ?? '';
 const FROM_EMAIL = Deno.env.get('NEWSLETTER_FROM_EMAIL') ?? 'noreply@boyzinthewoodz.com';
 const FROM_NAME = 'BOYZ IN THE WOODZ';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const BASE_URL = Deno.env.get('PUBLIC_BASE_URL') ?? 'http://localhost:5173';
 
 const corsHeaders = {
@@ -71,12 +71,9 @@ Deno.serve(async (req) => {
     // --- Broadcast campaign ---
     if (action === 'broadcast') {
       if (!campaign_id) throw new Error('campaign_id required');
+      if (!SUPABASE_SERVICE_KEY) throw new Error('SUPABASE_SERVICE_ROLE_KEY not configured');
 
-      // Use the admin's JWT from the Authorization header so RLS policies apply
-      const authHeader = req.headers.get('Authorization') || '';
-      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        global: { headers: { Authorization: authHeader } },
-      });
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
       const { data: campaign, error: campErr } = await supabase
         .from('newsletter_campaigns').select('*').eq('id', campaign_id).single();
@@ -118,7 +115,7 @@ Deno.serve(async (req) => {
     // --- Unsubscribe ---
     if (action === 'unsubscribe') {
       if (!singleEmail) throw new Error('Email required');
-      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
       await supabase.from('newsletter_unsubscribes').insert({ email: singleEmail });
       await supabase.from('newsletter_subscribers').update({ active: false }).eq('email', singleEmail);
       return new Response(JSON.stringify({ ok: true }), {
