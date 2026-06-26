@@ -327,14 +327,20 @@ export default function AdminRetreats() {
     onError: (e) => toast.error(e.message),
   });
 
+  const durationDays = { '2-day': 2, '3-day': 3, '5-day': 5 };
+
   const saveEvent = useMutation({
     mutationFn: async (form) => {
       if (!form.title || !form.start_date) throw new Error('Title and date are required');
+      const start = new Date(form.start_date);
+      const days = durationDays[form.duration] || 2;
+      const endDate = new Date(start.getTime() + days * 86400000).toISOString();
+      const payload = { ...form, end_date: endDate, spots_remaining: form.spots_remaining ?? form.capacity ?? 0 };
       if (form.id) {
-        const { error } = await supabase.from('events').update(form).eq('id', form.id);
+        const { error } = await supabase.from('events').update(payload).eq('id', form.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('events').insert(form);
+        const { error } = await supabase.from('events').insert(payload);
         if (error) throw error;
       }
     },
@@ -478,7 +484,7 @@ export default function AdminRetreats() {
                       </span>
                     </div>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
-                      <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{r.location_name || '—'}</span>
+<span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{ev.location_name || '—'}</span>
                       <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />
                         {ev.start_date ? format(new Date(ev.start_date), 'MMM d, yyyy') : '—'}
                       </span>

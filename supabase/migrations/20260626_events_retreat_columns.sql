@@ -1,0 +1,9 @@
+ALTER TABLE events ADD COLUMN IF NOT EXISTS location_name text;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS spots_remaining integer DEFAULT 0;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS full_price numeric(10,2) DEFAULT 0;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS deposit_amount numeric(10,2) DEFAULT 0;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS difficulty text DEFAULT 'Easy';
+ALTER TABLE events ADD COLUMN IF NOT EXISTS duration text DEFAULT '2-day';
+ALTER TABLE events ADD COLUMN IF NOT EXISTS featured boolean DEFAULT false;
+ALTER TABLE events ALTER COLUMN end_date DROP NOT NULL;
+ALTER TABLE events ALTER COLUMN end_date SET DEFAULT NULL;
