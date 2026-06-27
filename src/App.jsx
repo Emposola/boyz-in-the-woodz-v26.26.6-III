@@ -81,6 +81,8 @@ const ScienceHub = React.lazy(() => import('./pages/ScienceHub'));
 const JournalSubmit = React.lazy(() => import('./pages/JournalSubmit'));
 const AdminBlog = React.lazy(() => import('./pages/AdminBlog'));
 const AdminServices = React.lazy(() => import('./pages/admin/AdminServices'));
+const AdminBarbers = React.lazy(() => import('./pages/admin/AdminBarbers'));
+const AdminAddons = React.lazy(() => import('./pages/admin/AdminAddons'));
 const ImpactStories = React.lazy(() => import('./pages/ImpactStories'));
 const BrotherhoodLetters = React.lazy(() => import('./pages/BrotherhoodLetters'));
 const BreathingTool = React.lazy(() => import('./pages/BreathingTool'));
@@ -307,6 +309,16 @@ const AuthenticatedApp = () => {
           <Route path="/admin/newsletter" element={
             <ProtectedRoute requiredRole="admin">
               <AdminLayout><AdminNewsletter /></AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/barbers" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout><AdminBarbers /></AdminLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/addons" element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminLayout><AdminAddons /></AdminLayout>
             </ProtectedRoute>
           } />
         </Routes>

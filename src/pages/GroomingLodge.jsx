@@ -2,7 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { Scissors, ArrowRight, Star, Clock, Shield, Award, Users } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Scissors, ArrowRight, Star, Clock, Shield, Award, Users, Sparkles, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SEO from '@/components/shared/SEO';
 
@@ -103,6 +104,48 @@ export default function GroomingLodge() {
             ))}
           </div>
         )}
+      </section>
+
+      {/* Gallery */}
+      <section className="max-w-6xl mx-auto px-4 py-20">
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
+          <h2 className="font-heading text-3xl md:text-4xl tracking-wide uppercase mb-3">The Lodge Experience</h2>
+          <p className="text-muted-foreground text-sm">Step inside. Every detail is built for brotherhood.</p>
+        </motion.div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { src: 'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=400&q=80', alt: 'Precision haircut' },
+            { src: 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=400&q=80', alt: 'Beard trim' },
+            { src: 'https://images.unsplash.com/photo-1585747861115-d7d2a6b8c2be?w=400&q=80', alt: 'Hot towel shave' },
+            { src: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&q=80', alt: 'Interior' },
+            { src: 'https://images.unsplash.com/photo-1560869713-7d0a29430803?w=400&q=80', alt: 'Kid haircut' },
+            { src: 'https://images.unsplash.com/photo-1596728325488-58c87691e9af?w=400&q=80', alt: 'Barber tools' },
+            { src: 'https://images.unsplash.com/photo-1567894340315-735d7c361db7?w=400&q=80', alt: 'Barber chair' },
+            { src: 'https://images.unsplash.com/photo-1634302086806-9e77b40037dc?w=400&q=80', alt: 'Products' },
+          ].map((img, i) => (
+            <motion.div key={i} initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
+              className={`overflow-hidden rounded-xl bg-secondary ${i === 0 ? 'row-span-2 col-span-2' : ''}`}>
+              <img src={img.src} alt={img.alt} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Loyalty strip */}
+      <section className="max-w-4xl mx-auto px-4 pb-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+          className="bg-card border border-border rounded-xl p-6 flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${FG}22` }}>
+            <Crown className="w-6 h-6" style={{ color: FG }} />
+          </div>
+          <div className="flex-1 text-center sm:text-left">
+            <h3 className="font-heading text-sm tracking-wider uppercase">Earn Brotherhood Points on Every Service</h3>
+            <p className="text-xs text-muted-foreground mt-1">Every dollar spent = 10 points. Redeem for free cuts, exclusive merch, and retreat discounts.</p>
+          </div>
+          <Link to="/barber/membership">
+            <Button variant="outline" size="sm" className="font-heading tracking-wider uppercase text-xs">Join Free</Button>
+          </Link>
+        </motion.div>
       </section>
 
       <section className="max-w-4xl mx-auto px-4 py-20 text-center">

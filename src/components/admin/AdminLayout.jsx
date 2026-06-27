@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/AuthContext';
 import {
   LayoutDashboard, Trees, ShoppingBag, BookOpen, Radio,
   CalendarDays, Users, Settings, LogOut, Menu, X,
-  ChevronRight, AlertCircle, Mail, Scissors
+  ChevronRight, AlertCircle, Mail, Scissors, UserCheck, Sparkles
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -19,6 +19,8 @@ const NAV_ITEMS = [
   { label: 'Retreats',      to: '/admin/retreats',       icon: Trees },
   { label: 'Products',      to: '/admin/products',       icon: ShoppingBag },
   { label: 'Services',      to: '/admin/services',       icon: Scissors },
+  { label: 'Barbers',       to: '/admin/barbers',        icon: UserCheck },
+  { label: 'Add-ons',       to: '/admin/addons',         icon: Sparkles },
   { label: 'Orders',        to: '/admin/orders',         icon: ShoppingBag },
   { label: 'Blog',          to: '/admin/blog',           icon: BookOpen },
   { label: 'Studio',        to: '/admin/studio',         icon: Radio },

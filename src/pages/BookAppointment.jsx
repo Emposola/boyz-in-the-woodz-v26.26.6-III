@@ -12,13 +12,6 @@ import { format, addDays, setHours, setMinutes, isBefore } from 'date-fns';
 import SEO from '@/components/shared/SEO';
 import StripePaymentForm from '@/components/shared/StripePaymentForm';
 
-const ADDONS = [
-  { id: 'a1', name: 'Shampoo & Condition', price: 8 },
-  { id: 'a2', name: 'Hold Steady Pomade', price: 12 },
-  { id: 'a3', name: 'Beard Oil Treatment', price: 10 },
-  { id: 'a4', name: 'Scalp Massage (10 min)', price: 15 },
-];
-
 function generateSlots(date) {
   const slots = [];
   const start = 9;
@@ -56,6 +49,14 @@ export default function BookAppointment() {
     queryKey: ['barbers-active'],
     queryFn: () => api.entities.Barber.filter({ active: true }),
     initialData: [],
+  });
+
+  const { data: addons = [] } = useQuery({
+    queryKey: ['addons-active'],
+    queryFn: async () => {
+      const { data } = await supabase.from('addons').select('*').eq('active', true).order('name');
+      return data || [];
+    },
   });
 
   const calendarDays = Array.from({ length: 14 }, (_, i) => addDays(new Date(), i + 1))
@@ -222,7 +223,7 @@ export default function BookAppointment() {
             <div>
               <h2 className="font-heading text-xl tracking-wider uppercase mb-4">Add-ons (Optional)</h2>
               <div className="grid grid-cols-2 gap-3">
-                {ADDONS.map(addon => {
+                {addons.map(addon => {
                   const isSelected = selected.addons.find(a => a.id === addon.id);
                   return (
                     <button key={addon.id} onClick={() => toggleAddon(addon)}

@@ -11,19 +11,24 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /* --- Fallback barber data (shown when DB is empty) --- */
+const COLORS = ['#2D5A27', '#5C4033', '#4A6741'];
 const FALLBACK_BARBERS = [
-  { id: 'f1', name: 'Marcus "Steady" Cole', bio: 'Master barber with 12 years behind the chair. Specializes in fades and beard sculpting. Also a trained wilderness EMT.', specialties: ['Fades', 'Beard Sculpting'], image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=700&fit=crop&q=85', first_aid_certified: true, wilderness_certified: true },
-  { id: 'f2', name: 'Dre Washington', bio: 'Known for razor-sharp lineups and patience with kids. Dre brings energy to every chair session.', specialties: ['Lineups', "Kids' Cuts"], image_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&h=700&fit=crop&q=85', first_aid_certified: false, wilderness_certified: false },
-  { id: 'f3', name: 'Tomás Rivera', bio: 'Hot towel shave specialist who trained in traditional barbering. Retreat facilitator on weekends.', specialties: ['Hot Towel Shave', 'Classic Cuts'], image_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&h=700&fit=crop&q=85', first_aid_certified: true, wilderness_certified: true },
+  { id: 'f1', name: 'Marcus "Steady" Cole', bio: 'Master barber with 12 years behind the chair. Specializes in fades and beard sculpting. Also a trained wilderness EMT.', specialties: ['Fades', 'Beard Sculpting'], image_url: '/images/logos/team-photo.png', first_aid_certified: true, wilderness_certified: true },
+  { id: 'f2', name: 'Dre Washington', bio: 'Known for razor-sharp lineups and patience with kids. Dre brings energy to every chair session.', specialties: ['Lineups', "Kids' Cuts"], image_url: '/images/logos/team-photo.png', first_aid_certified: false, wilderness_certified: false },
+  { id: 'f3', name: 'Tomás Rivera', bio: 'Hot towel shave specialist who trained in traditional barbering. Retreat facilitator on weekends.', specialties: ['Hot Towel Shave', 'Classic Cuts'], image_url: '/images/logos/team-photo.png', first_aid_certified: true, wilderness_certified: true },
 ];
 
-function BarberImg({ src, name }) {
-  const [failed, setFailed] = React.useState(false);
+function BarberImg({ src, name, index = 0 }) {
   const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-  if (failed || !src) {
-    return <div className="w-full h-full flex items-center justify-center text-muted-foreground text-2xl font-heading tracking-wider uppercase" style={{ background: '#1a1a1a' }}>{initials}</div>;
-  }
-  return <img src={src} alt={name} className="w-full h-full object-cover" onError={() => setFailed(true)} />;
+  const bgColor = COLORS[index % COLORS.length];
+  return (
+    <div className="w-full h-full relative overflow-hidden" style={{ background: bgColor }}>
+      <img src={src} alt={name} className="w-full h-full object-cover opacity-0 transition-opacity duration-300" onLoad={e => e.target.classList.remove('opacity-0')} />
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none" style={{ zIndex: -1 }}>
+        <span className="text-4xl font-heading tracking-wider uppercase text-white/80">{initials}</span>
+      </div>
+    </div>
+  );
 }
 
 export default function BarberTeam() {
@@ -34,7 +39,9 @@ export default function BarberTeam() {
     initialData: [],
   });
 
-  const displayBarbers = barbers.length > 0 ? barbers : FALLBACK_BARBERS;
+  const displayBarbers = barbers.length > 0
+    ? barbers.map((b, i) => ({ ...FALLBACK_BARBERS[i % FALLBACK_BARBERS.length], ...b, image_url: b.image_url || FALLBACK_BARBERS[i % FALLBACK_BARBERS.length].image_url }))
+    : FALLBACK_BARBERS;
 
   return (
     <div className="min-h-screen">
@@ -69,7 +76,7 @@ export default function BarberTeam() {
             >
               {/* Photo */}
               <div className="aspect-[3/4] bg-secondary overflow-hidden">
-                <BarberImg src={barber.image_url} name={barber.name} />
+                <BarberImg src={barber.image_url} name={barber.name} index={i} />
               </div>
 
               {/* Info */}
