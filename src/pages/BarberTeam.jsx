@@ -23,7 +23,7 @@ function BarberImg({ src, name }) {
   if (failed || !src) {
     return <div className="w-full h-full flex items-center justify-center text-muted-foreground text-2xl font-heading tracking-wider uppercase" style={{ background: '#1a1a1a' }}>{initials}</div>;
   }
-  return <img src={src} alt={name} className="w-full h-full object-cover" onError={() => setFailed(true)} loading="lazy" />;
+  return <img src={src} alt={name} className="w-full h-full object-cover" onError={() => setFailed(true)} />;
 }
 
 export default function BarberTeam() {
