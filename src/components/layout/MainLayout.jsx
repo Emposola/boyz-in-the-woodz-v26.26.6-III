@@ -1,6 +1,5 @@
 /* ============================================================
-   MAIN LAYOUT — Wraps all public pages
-   Includes cookie consent + marketing popup
+   MAIN LAYOUT  
    ============================================================ */
 import React from 'react';
 import { Outlet } from 'react-router-dom';
@@ -16,8 +15,8 @@ export default function MainLayout() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <LeftSidebar />
-      {/* pt-[76px] on mobile, pt-[80px] on desktop to account for fixed navbar */}
-      <main className="flex-1 pt-[76px] lg:pt-[80px] xl:ml-[48px]">
+      
+      <main className="flex-1 pt-[70px] lg:pt-[135px]">
         <Outlet />
       </main>
       <Footer />

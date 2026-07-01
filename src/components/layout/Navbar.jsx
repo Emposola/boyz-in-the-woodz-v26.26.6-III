@@ -540,7 +540,7 @@ export default function Navbar() {
   return (
     <>
       {/* ─── NAVBAR ─── */}
-      <header ref={headerRef} className="fixed top-0 left-0 right-0 z-40 flex flex-col items-center" style={{ padding: '1px 5px' }} role="banner" aria-label="Main navigation">
+      <header ref={headerRef} className="fixed top-0 left-0 right-0 z-40 flex flex-col items-center" style={{ padding: '6px 6px' }} role="banner" aria-label="Main navigation">
         <motion.nav
           ref={navRef}
           animate={{
