@@ -1,32 +1,63 @@
 /* ============================================================
-   HOME HERO — Cinematic hook + dual CTA
+   HOME HERO — Cinematic hook + dual CTA — ULTRA CONVERTING
+   SEO Optimized | Mobile-First | Premium Design
    Brand deck: "You don't need to escape your life..."
-   Upgrades: staggered text reveal, floating ember particles,
-   crossfading video slideshow background
    ============================================================ */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Trees, ArrowRight } from 'lucide-react';
+import { Trees, ArrowRight, Leaf, Shield, Star, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import HeroSlideshow from './HeroSlideshow';
 
+// ============================================================
+// HEADLINE — Premium cinematic reveal
+// ============================================================
 const headlineWords = [
-  { text: 'You', delay: 0.4 },
-  { text: "Don't Need", delay: 0.7 },
-  { text: 'To Escape', delay: 1.0 },
-  { text: 'Your Life.', delay: 1.3, accent: true },
+  { text: 'You', delay: 0.3, mobile: true },
+  { text: "Don't Need", delay: 0.6, mobile: true },
+  { text: 'To Escape', delay: 0.9, mobile: true },
+  { text: 'Your Life.', delay: 1.2, accent: true, mobile: true },
 ];
 
+// ============================================================
+// TRUST BADGES — Social proof data
+// ============================================================
+const TRUST_BADGES = [
+  { label: 'Brothers Pledged', value: '12,800+', icon: Users },
+  { label: 'Retreats Completed', value: '23+', icon: Shield },
+  { label: 'Active Chapters', value: '5', icon: Star },
+];
+
+// ============================================================
+// SEO STRUCTURED DATA
+// ============================================================
+const seoData = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'BOYZ IN THE WOODZ',
+  description: 'Wilderness retreats for men. Brotherhood. Freedom. Nature. Outdoor clothing and barber shop for men who need space to breathe.',
+  url: 'https://boyzinthewoodz.com',
+  logo: 'https://boyzinthewoodz.com/images/logos/logo-navbar-about.jpg',
+  sameAs: [
+    'https://instagram.com/boyzinthewoodz',
+    'https://tiktok.com/@boyzinthewoodz',
+    'https://youtube.com/@boyzinthewoodz',
+  ],
+};
+
+// ============================================================
+// ANIMATION VARIANTS
+// ============================================================
 const container = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: 0.25, delayChildren: 0.3 },
+    transition: { staggerChildren: 0.18, delayChildren: 0.25 },
   },
 };
 
 const wordVariant = {
-  hidden: { opacity: 0, y: 40, filter: 'blur(8px)' },
+  hidden: { opacity: 0, y: 50, filter: 'blur(12px)' },
   visible: {
     opacity: 1,
     y: 0,
@@ -35,121 +66,204 @@ const wordVariant = {
   },
 };
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 25 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, ease: 'easeOut' },
+  },
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.6, ease: 'easeOut' },
+  },
+};
+
+// ============================================================
+// MAIN COMPONENT
+// ============================================================
 export default function HomeHero() {
   return (
-    <section className="relative h-[90vh] min-h-[480px] md:h-[95vh] flex overflow-hidden">
-      {/* Background — crossfading video/image slideshow */}
-      <HeroSlideshow />
-      <div className="absolute inset-0 z-[2] bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
+    <>
+      {/* ─── SEO STRUCTURED DATA ─── */}
+      <script type="application/ld+json">
+        {JSON.stringify(seoData)}
+      </script>
 
-      {/* Ember particles */}
-      <div className="hero-embers">
-        {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} className="hero-ember" />
-        ))}
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 w-full flex flex-col justify-end p-8 md:p-16 lg:p-24 max-w-6xl">
-        {/* Tagline chip */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-          className="flex items-center gap-2 mb-6"
-        >
-          <Trees className="w-4 h-4 text-primary" />
-          <span className="text-[11px] font-heading tracking-[0.35em] text-primary uppercase">
-            Brotherhood. Freedom. Nature.
-          </span>
-        </motion.div>
-
-        {/* Headline — staggered word reveal */}
-        <motion.h1
-          variants={container}
-          initial="hidden"
-          animate="visible"
-          className="font-heading text-3xl sm:text-5xl md:text-7xl lg:text-[5.5rem] tracking-wide uppercase text-white leading-[0.95] mb-6"
-        >
-          {headlineWords.map((w, i) => (
-            <motion.span
-              key={i}
-              variants={wordVariant}
-              className={`inline-block mr-[0.3em] ${w.accent ? 'text-primary' : ''}`}
-            >
-              {w.text}
-            </motion.span>
-          ))}
-        </motion.h1>
-
-        {/* Subheadline — fade in after headline */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.8, duration: 0.8 }}
-        >
-          <p className="text-white/60 text-base md:text-lg max-w-xl mb-3 leading-relaxed">
-            You just need a place to breathe. Wilderness retreats for men who are great at
-            taking care of everyone else and terrible at filling their own cup.
-          </p>
-          <p className="text-white/40 text-sm max-w-lg mb-8 leading-relaxed">
-            Brotherhood built through nature. Gear that proves you were there.
-            A barber shop that opens men up. One ecosystem — two businesses — one code.
-          </p>
-        </motion.div>
-
-        {/* CTAs — slide up */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 2.2, duration: 0.7 }}
-          className="flex flex-wrap gap-4"
-        >
-          <Button asChild size="lg" className="font-heading tracking-wider uppercase text-sm bg-primary hover:bg-primary/90 text-primary-foreground px-8">
-            <Link to="/retreat/apply">
-              Apply for Retreat <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
-          </Button>
-          <Button asChild size="lg" variant="outline" className="font-heading tracking-wider uppercase text-sm border-white/25 text-white hover:bg-white/10 px-8">
-            <Link to="/shop/boyz">
-              Shop Survival Pack <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
-          </Button>
-        </motion.div>
-
-        {/* Trust badges — fade in last */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2.6, duration: 0.8 }}
-          className="flex flex-wrap items-center gap-4 mt-10 text-[10px] text-white/30 font-heading tracking-wider uppercase"
-        >
-          <span>12,800+ Brothers Pledged</span>
-          <span className="w-px h-3 bg-white/15" />
-          <span>23+ Retreats Completed</span>
-          <span className="w-px h-3 bg-white/15" />
-          <span>5 Chapters Active</span>
-        </motion.div>
-      </div>
-
-      {/* Scroll indicator — improved */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 3, duration: 1 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
+      <section 
+        className="relative flex overflow-hidden"
+        style={{ 
+          height: 'calc(100vh - 90px)',
+          minHeight: '480px',
+          maxHeight: '800px',
+        }}
+        aria-label="BOYZ IN THE WOODZ - Wilderness retreats for men"
+        role="banner"
       >
-        <span className="text-[9px] font-heading tracking-[0.3em] uppercase text-white/30">
-          The data is below
-        </span>
-        <div className="w-5 h-8 rounded-full border border-white/20 flex justify-center pt-1.5">
-          <motion.div
-            className="w-1 h-2 rounded-full bg-primary/60"
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-          />
+        {/* ─── BACKGROUND ─── */}
+        <HeroSlideshow />
+        
+        {/* ─── OVERLAY GRADIENT ─── */}
+        <div className="absolute inset-0 z-[2] bg-gradient-to-t from-black/85 via-black/40 to-black/15" />
+        
+        {/* ─── AMBIENT GLOW ─── */}
+        <div className="absolute inset-0 z-[1] pointer-events-none">
+          <div className="absolute top-1/3 right-1/4 w-[40vw] h-[40vw] bg-primary/5 rounded-full blur-[120px] animate-pulse" />
+          <div className="absolute bottom-1/4 left-1/4 w-[30vw] h-[30vw] bg-amber-500/5 rounded-full blur-[100px] animate-pulse delay-1000" />
         </div>
-      </motion.div>
-    </section>
+
+        {/* ─── EMBER PARTICLES ─── */}
+        <div className="hero-embers">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={i} className="hero-ember" />
+          ))}
+        </div>
+
+        {/* ─── CONTENT ─── */}
+        <div className="relative z-10 w-full flex flex-col justify-end px-4 sm:px-6 md:px-12 lg:px-20 max-w-7xl mx-auto pb-8 sm:pb-12 md:pb-16">
+          
+          {/* ── Tagline ── */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, duration: 0.6, ease: 'easeOut' }}
+            className="flex items-center gap-2 mb-3 sm:mb-4 md:mb-5"
+          >
+            <div className="p-1 rounded-full bg-primary/20 border border-primary/20">
+              <Leaf className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary" />
+            </div>
+            <span className="text-[8px] sm:text-[9px] md:text-[10px] font-heading tracking-[0.3em] sm:tracking-[0.35em] text-primary/90 uppercase">
+              Brotherhood. Freedom. Nature.
+            </span>
+            <span className="w-8 sm:w-12 h-px bg-primary/30 hidden sm:block" />
+          </motion.div>
+
+          {/* ── Headline ── */}
+          <motion.h1
+            variants={container}
+            initial="hidden"
+            animate="visible"
+            className="font-heading text-white leading-[0.92] mb-3 sm:mb-4 md:mb-5 max-w-5xl"
+            style={{
+              fontSize: 'clamp(1.8rem, 6vw, 5.5rem)',
+              letterSpacing: '0.02em',
+            }}
+          >
+            {headlineWords.map((w, i) => (
+              <motion.span
+                key={i}
+                variants={wordVariant}
+                className={`inline-block mr-[0.25em] ${w.accent ? 'text-primary drop-shadow-[0_0_30px_rgba(45,90,39,0.3)]' : ''}`}
+              >
+                {w.text}
+              </motion.span>
+            ))}
+          </motion.h1>
+
+          {/* ── Subheadline ── */}
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 1.6 }}
+            className="max-w-xl"
+          >
+            {/* Desktop subheadline */}
+            <p className="hidden sm:block text-white/70 text-sm sm:text-base md:text-lg leading-relaxed font-light tracking-wide">
+              You just need a place to breathe. Wilderness retreats for men who are great at
+              taking care of everyone else and terrible at filling their own cup.
+            </p>
+            <p className="hidden sm:block text-white/40 text-xs sm:text-sm max-w-lg mt-1 sm:mt-2 leading-relaxed">
+              Brotherhood built through nature. Gear that proves you were there.
+              A barber shop that opens men up.
+            </p>
+            
+            {/* Mobile subheadline — shorter, more punchy */}
+            <p className="sm:hidden text-white/70 text-sm leading-relaxed font-light tracking-wide max-w-sm">
+              Wilderness retreats for men who are great at taking care of everyone else.
+            </p>
+            <p className="sm:hidden text-white/40 text-xs mt-1 leading-relaxed">
+              Brotherhood. Nature. Gear. A place to breathe.
+            </p>
+          </motion.div>
+
+          {/* ── CTAs — Side by side on desktop, stacked on mobile ── */}
+          <motion.div
+            variants={scaleIn}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 2.0 }}
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-4 sm:mt-6"
+            style={{
+              paddingLeft: '20px',
+              paddingRight: '20px',
+              marginLeft: '-20px',
+              marginRight: '-20px',
+            }}
+          >
+            <Button 
+              asChild 
+              size="lg" 
+              className="w-full sm:w-auto flex-1 font-heading tracking-wider uppercase text-[10px] sm:text-xs md:text-sm bg-primary hover:bg-primary/90 text-primary-foreground px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 rounded-full shadow-[0_0_40px_rgba(45,90,39,0.3)] hover:shadow-[0_0_60px_rgba(45,90,39,0.5)] transition-all duration-300 group"
+            >
+              <Link to="/retreat/apply" className="flex items-center justify-center w-full">
+                <span className="hidden xs:inline">Apply for Retreat</span>
+                <span className="xs:hidden">Apply Now</span>
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5 sm:ml-2 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </Button>
+            
+            <Button 
+              asChild 
+              size="lg" 
+              variant="outline" 
+              className="w-full sm:w-auto flex-1 font-heading tracking-wider uppercase text-[10px] sm:text-xs md:text-sm border-white/25 text-white hover:bg-white/10 hover:border-white/50 px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 rounded-full transition-all duration-300 group"
+            >
+              <Link to="/shop/boyz" className="flex items-center justify-center w-full">
+                <span className="hidden xs:inline">Shop Survival Pack</span>
+                <span className="xs:hidden">Shop Gear</span>
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5 sm:ml-2 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </Button>
+          </motion.div>
+
+          {/* ── Trust Badges ── */}
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 2.4 }}
+            className="flex flex-wrap items-center gap-4 sm:gap-6 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-white/5"
+          >
+            {TRUST_BADGES.map((badge, index) => (
+              <div key={index} className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 rounded-full bg-white/5 border border-white/5">
+                  <badge.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary/70" />
+                </div>
+                <div>
+                  <span className="text-white font-heading text-xs sm:text-sm tracking-wide block">
+                    {badge.value}
+                  </span>
+                  <span className="text-[7px] sm:text-[9px] text-white/30 font-heading tracking-wider uppercase">
+                    {badge.label}
+                  </span>
+                </div>
+                {index < TRUST_BADGES.length - 1 && (
+                  <span className="w-px h-6 sm:h-8 bg-white/5 hidden xs:block" />
+                )}
+              </div>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* ─── DECORATIVE LINE ─── */}
+        <div className="absolute bottom-0 left-0 right-0 z-[2] h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+      </section>
+    </>
   );
 }

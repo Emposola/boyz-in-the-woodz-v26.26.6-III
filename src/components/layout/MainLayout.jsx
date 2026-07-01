@@ -16,7 +16,8 @@ export default function MainLayout() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <LeftSidebar />
-      <main className="flex-1 pt-0 xl:ml-[48px]">
+      {/* pt-[76px] on mobile, pt-[80px] on desktop to account for fixed navbar */}
+      <main className="flex-1 pt-[76px] lg:pt-[80px] xl:ml-[48px]">
         <Outlet />
       </main>
       <Footer />

@@ -1,10 +1,16 @@
 /* ============================================================
-   FOOTER — Boyz In The Woodz — Floating 5-Column Design
+   FOOTER — BOYZ IN THE WOODZ — Premium Modern Design
+   Zero Side Padding | 6-Column Layout | Enhanced UX
    Credits: Design & Dev by Emposola | emposola.co
    ============================================================ */
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Instagram, Twitter, Youtube, Facebook, ArrowRight, ExternalLink, Mail, CheckCircle, Loader2 } from 'lucide-react';
+import { 
+  Instagram, Twitter, Youtube, Facebook, ArrowRight, 
+  ExternalLink, Mail, CheckCircle, Loader2, 
+  Leaf, Shield, Users, Compass, Scissors, TreePine,
+  MapPin, Phone, Clock
+} from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -18,59 +24,76 @@ const TikTokIcon = () => (
 );
 
 const SOCIALS = [
-  { Icon: Instagram, href: '#', label: 'Instagram' },
-  { Icon: Twitter, href: '#', label: 'X / Twitter' },
-  { Icon: TikTokIcon, href: '#', label: 'TikTok' },
-  { Icon: Youtube, href: '#', label: 'YouTube' },
-  { Icon: Facebook, href: '#', label: 'Facebook' },
+  { Icon: Instagram, href: 'https://instagram.com/boyzinthewoodz', label: 'Instagram' },
+  { Icon: Twitter, href: 'https://twitter.com/boyzinthewoodz', label: 'X / Twitter' },
+  { Icon: TikTokIcon, href: 'https://tiktok.com/@boyzinthewoodz', label: 'TikTok' },
+  { Icon: Youtube, href: 'https://youtube.com/@boyzinthewoodz', label: 'YouTube' },
+  { Icon: Facebook, href: 'https://facebook.com/boyzinthewoodz', label: 'Facebook' },
 ];
 
 const FOREST_GREEN = '#2D5A27';
 const SAND = '#D2B48C';
 
-const COLUMN_EXPLORE = [
-  { label: 'The Experience', to: '/how-it-works' },
-  { label: 'The Problem', to: '/the-problem' },
-  { label: 'Who We Serve', to: '/who-we-serve' },
-  { label: 'Survival Pack', to: '/shop/boyz' },
-  { label: 'Brotherhood', to: '/about' },
-  { label: 'The Code', to: '/the-code' },
-  { label: 'Science', to: '/science' },
-  { label: 'Journal', to: '/journal' },
-];
-
-const COLUMN_BROTHERHOOD = [
-  { label: 'Take the Pledge', to: '/the-code' },
-  { label: 'Find a Chapter', to: '/locations' },
-  { label: 'Brotherhood Map', to: '/locations' },
-  { label: 'Proof Gallery', to: '/brotherhood/impact-stories' },
-  { label: 'Virtual Campfire', to: '/studio' },
-  { label: 'Confessions', to: '/journal' },
-];
-
-const COLUMN_GROOMING = [
-  { label: 'Book a Cut', to: '/barber/book' },
-  { label: 'Services & Pricing', to: '/grooming-lodge' },
-  { label: 'Our Barbers', to: '/barber/team' },
-  { label: 'Membership', to: '/barber/membership' },
-  { label: 'Walk-in Waitlist', to: '/waitlist' },
-];
-
-const COLUMN_RETREATS = [
-  { label: 'Upcoming Retreats', to: '/retreat-calendar' },
-  { label: 'Apply Now', to: '/retreat/apply' },
-  { label: 'Gear Loan', to: '/gear' },
-  { label: 'Waitlist', to: '/retreat/waitlist' },
-  { label: 'FAQ', to: '/about' },
-  { label: 'Retreat Waiver', to: '/legal/retreat-waiver' },
-];
-
-const COLUMN_LEGAL = [
-  { label: 'Privacy Policy', to: '/privacy' },
-  { label: 'Terms of Service', to: '/terms' },
-  { label: 'Retreat Cancellation', to: '/legal/retreat-cancellation' },
-  { label: 'Returns', to: '/returns' },
-  { label: 'Accessibility', to: '/privacy' },
+const COLUMNS = [
+  {
+    title: 'Explore',
+    icon: Compass,
+    links: [
+      { label: 'The Experience', to: '/how-it-works' },
+      { label: 'The Problem', to: '/the-problem' },
+      { label: 'Who We Serve', to: '/who-we-serve' },
+      { label: 'Survival Pack', to: '/shop/boyz' },
+      { label: 'Brotherhood', to: '/about' },
+      { label: 'The Code', to: '/the-code' },
+      { label: 'Science', to: '/science' },
+      { label: 'Journal', to: '/journal' },
+    ]
+  },
+  {
+    title: 'Brotherhood',
+    icon: Users,
+    links: [
+      { label: 'Take the Pledge', to: '/the-code' },
+      { label: 'Find a Chapter', to: '/locations' },
+      { label: 'Brotherhood Map', to: '/locations' },
+      { label: 'Proof Gallery', to: '/brotherhood/impact-stories' },
+      { label: 'Virtual Campfire', to: '/studio' },
+      { label: 'Confessions', to: '/journal' },
+    ]
+  },
+  {
+    title: 'Grooming',
+    icon: Scissors,
+    links: [
+      { label: 'Book a Cut', to: '/barber/book' },
+      { label: 'Services & Pricing', to: '/grooming-lodge' },
+      { label: 'Our Barbers', to: '/barber/team' },
+      { label: 'Membership', to: '/barber/membership' },
+      { label: 'Walk-in Waitlist', to: '/waitlist' },
+    ]
+  },
+  {
+    title: 'Retreats',
+    icon: TreePine,
+    links: [
+      { label: 'Upcoming Retreats', to: '/retreat-calendar' },
+      { label: 'Apply Now', to: '/retreat/apply' },
+      { label: 'Gear Loan', to: '/gear' },
+      { label: 'Waitlist', to: '/retreat/waitlist' },
+      { label: 'FAQ', to: '/about' },
+      { label: 'Retreat Waiver', to: '/legal/retreat-waiver' },
+    ]
+  },
+  {
+    title: 'Contact',
+    icon: Mail,
+    links: [
+      { label: 'Email Us', to: 'mailto:info@boyzinthewoodz.com', external: true },
+      { label: 'Call Us', to: 'tel:+16033543034', external: true },
+      { label: 'Find Us', to: '/locations' },
+      { label: 'Support', to: '/contact' },
+    ]
+  },
 ];
 
 const THE_CODE = ['No Phones', 'Show Up Physically', 'Respect Everyone', 'No Ego', 'Leave Better'];
@@ -95,11 +118,6 @@ export default function Footer() {
         } else {
           throw error;
         }
-      } else {
-        const { error: fnErr } = await supabase.functions.invoke('send-newsletter', {
-          body: { action: 'welcome', email: email.trim() },
-        });
-        if (fnErr) console.warn('Welcome email not sent:', fnErr.message);
       }
       setSubscribed(true);
       setEmail('');
@@ -112,146 +130,208 @@ export default function Footer() {
   };
 
   return (
-    <footer className="pb-20 lg:pb-4 px-4 mt-12">
-      <div
-        className="rounded-[28px] overflow-hidden"
-        style={{
-          background: 'rgba(28,28,28,0.95)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.1)',
-        }}
-      >
-        {/* The Code Strip */}
-        <div className="border-b border-white/10 py-3 bg-white/5">
-          <div className="max-w-7xl mx-auto px-6 flex flex-wrap items-center justify-center gap-3 md:gap-8">
-            <span className="text-xs font-heading tracking-widest uppercase" style={{ color: FOREST_GREEN }}>The Code</span>
+    <footer className="mt-auto pb-20 lg:pb-0">
+      <div className="w-full overflow-hidden" style={{
+        background: 'rgba(18,18,18,0.98)',
+        backdropFilter: 'blur(20px)',
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+      }}>
+        
+        {/* ─── THE CODE STRIP ─── */}
+        <div className="border-b border-white/5 py-3 bg-white/3">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-center gap-2 sm:gap-6">
+            <span className="text-[10px] font-heading tracking-[0.3em] uppercase" style={{ color: FOREST_GREEN }}>
+              The Code
+            </span>
+            <span className="w-px h-4 bg-white/10" />
             {THE_CODE.map((rule, i) => (
               <React.Fragment key={rule}>
-                <span className="text-xs tracking-wide uppercase text-white/50">{rule}</span>
-                {i < THE_CODE.length - 1 && <span className="text-white/20 hidden sm:inline">·</span>}
+                <span className="text-[10px] tracking-wide uppercase text-white/40 hover:text-white/70 transition-colors">
+                  {rule}
+                </span>
+                {i < THE_CODE.length - 1 && <span className="text-white/10">·</span>}
               </React.Fragment>
             ))}
           </div>
         </div>
 
-        {/* Main 5-column grid */}
-        <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
-
-          {/* Col 1 – Brand */}
-          <div className="sm:col-span-2 md:col-span-3 lg:col-span-1">
-            <div className="font-heading text-xl tracking-wider mb-1" style={{ color: FOREST_GREEN }}>
-              BOYZ IN THE WOODZ
-            </div>
-            <div className="text-xs tracking-widest mb-3" style={{ color: SAND }}>
-              Brotherhood. Freedom. Nature.
-            </div>
-            <p className="text-sm text-white/50 leading-relaxed mb-5">
-              A brotherhood movement and outdoor clothing brand for men who need space to breathe — and brothers to breathe with.
-            </p>
-            <div className="flex gap-2 flex-wrap mb-5">
-              {SOCIALS.map(({ Icon: SIcon, href, label }) => (
-                <motion.a key={label} href={href} aria-label={label} target="_blank" rel="noopener noreferrer"
-                  whileHover={{ y: -3, scale: 1.15 }} transition={{ type: 'spring', stiffness: 400 }}
-                  className="w-9 h-9 rounded-full flex items-center justify-center transition-all"
-                  style={{ background: 'rgba(255,255,255,0.08)', color: SAND }}>
-                  <SIcon className="w-4 h-4" />
-                </motion.a>
-              ))}
-            </div>
-            {/* Newsletter */}
-            {subscribed ? (
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4" style={{ color: FOREST_GREEN }} />
-                <p className="text-sm font-heading" style={{ color: FOREST_GREEN }}>Welcome to the brotherhood.</p>
+        {/* ─── MAIN FOOTER ─── */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
+          
+          {/* ─── TOP SECTION: Brand + Contact + Social + Newsletter ─── */}
+          <div className="grid lg:grid-cols-5 gap-8 lg:gap-12 mb-10 lg:mb-14">
+            {/* Brand - Left */}
+            <div className="lg:col-span-2">
+              <div className="flex items-center gap-3 mb-3">
+                <img 
+                  src="/images/logos/favicon-logo__2.png" 
+                  alt="BOYZ IN THE WOODZ" 
+                  className="w-10 h-10 object-contain"
+                />
+                <div>
+                  <div className="font-heading text-xl tracking-wider" style={{ color: FOREST_GREEN }}>
+                    BOYZ IN THE WOODZ
+                  </div>
+                  <div className="text-[10px] tracking-[0.2em] uppercase" style={{ color: SAND }}>
+                    Brotherhood. Freedom. Nature.
+                  </div>
+                </div>
               </div>
-            ) : (
-              <form onSubmit={handleSubscribe} className="flex gap-2">
-                <Input type="email" placeholder="Your email" value={email} onChange={e => setEmail(e.target.value)} required
-                  className="bg-white/10 border-white/20 text-white text-sm placeholder:text-white/30 focus-visible:ring-0" />
-                <Button type="submit" size="icon" disabled={subscribing} className="flex-shrink-0" style={{ background: FOREST_GREEN }}>
-                  {subscribing ? <Loader2 className="w-4 h-4 text-white animate-spin" /> : <ArrowRight className="w-4 h-4 text-white" />}
-                </Button>
-              </form>
-            )}
-            <p className="text-xs text-white/30 mt-2">No spam, only brotherhood drops.</p>
+              
+              <p className="text-sm text-white/40 leading-relaxed max-w-md">
+                A brotherhood movement and outdoor brand for men who need space to breathe — 
+                and brothers to breathe with.
+              </p>
+            </div>
+
+            {/* ─── CONTACT + SOCIAL + NEWSLETTER ─── */}
+            <div className="lg:col-span-3 space-y-4">
+              
+              {/* Contact - Email & Phone side by side */}
+              <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+                <a 
+                  href="mailto:info@boyzinthewoodz.com" 
+                  className="flex items-center gap-2 text-sm text-white/40 hover:text-white/70 transition-colors group"
+                >
+                  <Mail className="w-4 h-4 text-white/20 group-hover:text-primary transition-colors" />
+                  <span>info@boyzinthewoodz.com</span>
+                </a>
+                <span className="hidden sm:block w-px h-4 bg-white/10" />
+                <a 
+                  href="tel:+16033543034" 
+                  className="flex items-center gap-2 text-sm text-white/40 hover:text-white/70 transition-colors group"
+                >
+                  <Phone className="w-4 h-4 text-white/20 group-hover:text-primary transition-colors" />
+                  <span>+1 603-354-3034</span>
+                </a>
+              </div>
+
+              {/* Contact + Social + Newsletter Row */}
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
+                
+                {/* Social Icons */}
+                <div className="flex-shrink-0">
+                  <p className="text-[9px] text-white/20 font-heading tracking-wider uppercase mb-1.5">
+                    Follow Us
+                  </p>
+                  <div className="flex gap-2">
+                    {SOCIALS.map(({ Icon: SIcon, href, label }) => (
+                      <motion.a 
+                        key={label} 
+                        href={href} 
+                        aria-label={label} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        whileHover={{ y: -3, scale: 1.1 }} 
+                        transition={{ type: 'spring', stiffness: 400 }}
+                        className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 border border-white/5 hover:border-primary/30"
+                        style={{ background: 'rgba(255,255,255,0.04)', color: SAND }}
+                      >
+                        <SIcon className="w-4 h-4" />
+                      </motion.a>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="hidden sm:block w-px h-10 bg-white/5" />
+
+                {/* Newsletter */}
+                <div className="flex-1 w-full sm:max-w-xs">
+                  <p className="text-[9px] text-white/20 font-heading tracking-wider uppercase mb-1.5">
+                    Join the Brotherhood
+                  </p>
+                  {subscribed ? (
+                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-primary/5 border border-primary/20">
+                      <CheckCircle className="w-4 h-4" style={{ color: FOREST_GREEN }} />
+                      <p className="text-sm font-heading" style={{ color: FOREST_GREEN }}>Welcome to the brotherhood.</p>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleSubscribe} className="flex gap-2">
+                      <Input 
+                        type="email" 
+                        placeholder="Your email" 
+                        value={email} 
+                        onChange={e => setEmail(e.target.value)} 
+                        required
+                        className="bg-white/5 border-white/10 text-white text-sm placeholder:text-white/20 focus-visible:ring-0 focus-visible:ring-primary/30 h-9"
+                      />
+                      <Button 
+                        type="submit" 
+                        size="icon" 
+                        disabled={subscribing} 
+                        className="flex-shrink-0 transition-all duration-300 hover:scale-105 h-9 w-9"
+                        style={{ background: FOREST_GREEN }}
+                      >
+                        {subscribing ? <Loader2 className="w-4 h-4 text-white animate-spin" /> : <ArrowRight className="w-4 h-4 text-white" />}
+                      </Button>
+                    </form>
+                  )}
+                  <p className="text-[8px] text-white/15 mt-1">No spam. Only brotherhood drops.</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Col 2 – Explore */}
-          <div>
-            <h4 className="text-xs font-heading tracking-[0.25em] uppercase mb-4" style={{ color: FOREST_GREEN }}>Explore</h4>
-            <div className="space-y-2.5">
-              {COLUMN_EXPLORE.map(link => (
-                <Link key={link.label} to={link.to}
-                  className="block text-sm text-white/50 hover:text-white transition-colors">{link.label}</Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Col 3 – Brotherhood */}
-          <div>
-            <h4 className="text-xs font-heading tracking-[0.25em] uppercase mb-4" style={{ color: FOREST_GREEN }}>Brotherhood</h4>
-            <div className="space-y-2.5">
-              {COLUMN_BROTHERHOOD.map(link => (
-                <Link key={link.label} to={link.to}
-                  className="block text-sm text-white/50 hover:text-white transition-colors">{link.label}</Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Col 4 – Men's Grooming Lodge */}
-          <div>
-            <h4 className="text-xs font-heading tracking-[0.25em] uppercase mb-4" style={{ color: FOREST_GREEN }}>Men's Grooming Lodge</h4>
-            <div className="space-y-2.5">
-              {COLUMN_GROOMING.map(link => (
-                <Link key={link.label} to={link.to}
-                  className="block text-sm text-white/50 hover:text-white transition-colors">{link.label}</Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Col 5 – Retreats */}
-          <div>
-            <h4 className="text-xs font-heading tracking-[0.25em] uppercase mb-4" style={{ color: FOREST_GREEN }}>Retreats</h4>
-            <div className="space-y-2.5">
-              {COLUMN_RETREATS.map(link => (
-                <Link key={link.label} to={link.to}
-                  className="block text-sm text-white/50 hover:text-white transition-colors">{link.label}</Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Col 5 – Legal & Contact */}
-          <div>
-            <h4 className="text-xs font-heading tracking-[0.25em] uppercase mb-4" style={{ color: FOREST_GREEN }}>Legal & Contact</h4>
-            <div className="space-y-2.5">
-              {COLUMN_LEGAL.map(link => (
-                <Link key={link.label} to={link.to}
-                  className="block text-sm text-white/50 hover:text-white transition-colors">{link.label}</Link>
-              ))}
-            </div>
-            <div className="mt-4 pt-4 border-t border-white/10">
-              <a href="mailto:info@boyzinthewoodz.com"
-                className="flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors">
-                <Mail className="w-3.5 h-3.5" />
-                info@boyzinthewoodz.com
-              </a>
-            </div>
+          {/* ─── COLUMNS GRID ─── */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-8 border-t border-white/5 pt-8">
+            {COLUMNS.map((col) => (
+              <div key={col.title}>
+                <div className="flex items-center gap-2 mb-3">
+                  <col.icon className="w-3.5 h-3.5" style={{ color: FOREST_GREEN }} />
+                  <h4 className="text-[9px] font-heading tracking-[0.25em] uppercase" style={{ color: SAND }}>
+                    {col.title}
+                  </h4>
+                </div>
+                <div className="space-y-2">
+                  {col.links.map((link) => (
+                    link.external ? (
+                      <a
+                        key={link.label}
+                        href={link.to}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block text-sm text-white/40 hover:text-white/70 transition-colors"
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link
+                        key={link.label}
+                        to={link.to}
+                        className="block text-sm text-white/40 hover:text-white/70 transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    )
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Credits */}
-        <div className="border-t border-white/10">
-          <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-white/30">
+        {/* ─── CREDITS ─── */}
+        <div className="border-t border-white/5 bg-white/3">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] text-white/20">
             <span>© {new Date().getFullYear()} Boyz In The Woodz. All rights reserved.</span>
+            
+            <div className="flex items-center gap-3">
+              <Link to="/privacy" className="hover:text-white/40 transition-colors">Privacy</Link>
+              <span className="w-px h-2 bg-white/10" />
+              <Link to="/terms" className="hover:text-white/40 transition-colors">Terms</Link>
+              <span className="w-px h-2 bg-white/10" />
+              <Link to="/sitemap" className="hover:text-white/40 transition-colors">Sitemap</Link>
+            </div>
+
             <span className="flex items-center gap-1.5">
-              Website Design & Development by{' '}
+              Design by{' '}
               <a href="https://emposola.com" target="_blank" rel="noopener noreferrer"
-                className="hover:text-white transition-colors flex items-center gap-1" style={{ color: SAND }}>
-                emposola <ExternalLink className="w-3 h-3" />
+                className="hover:text-white/40 transition-colors flex items-center gap-1" style={{ color: SAND }}>
+                emposola <ExternalLink className="w-2.5 h-2.5" />
               </a>
-              {' '}| emposola.com
             </span>
-            <span style={{ color: SAND }}>Take a brother. Leave better.</span>
           </div>
         </div>
       </div>
