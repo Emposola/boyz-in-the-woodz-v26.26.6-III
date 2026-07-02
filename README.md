@@ -259,3 +259,58 @@ For detailed migration information, see [MIGRATION_CHECKLIST.md](./MIGRATION_CHE
 **Last Updated:** 2026-06-16  
 **Backend:** Supabase  
 **Status:** ✅ Production Ready
+
+
+
+
+
+
+1. Check Active Cron Jobs
+sql
+SELECT 
+  jobid,
+  schedule,
+  command,
+  active
+FROM cron.job
+WHERE active = true;
+2. Check Event Type Distribution
+sql
+SELECT 
+  event_type,
+  COUNT(*) as count,
+  MIN(timestamp) as first_occurrence,
+  MAX(timestamp) as last_occurrence
+FROM sitemap_events
+GROUP BY event_type
+ORDER BY count DESC;
+3. Quick System Status
+sql
+SELECT 
+  COUNT(*) as total_events,
+  COUNT(DISTINCT user_id) as unique_users,
+  COUNT(DISTINCT event_type) as event_types,
+  MAX(timestamp) as last_event_time
+FROM sitemap_events;
+4. Daily Stats Overview
+sql
+SELECT 
+  date,
+  total_events,
+  unique_visitors,
+  page_views,
+  event_types
+FROM sitemap_stats
+ORDER BY date DESC
+LIMIT 7;
+5. Check Event History (Last 24 Hours)
+sql
+SELECT 
+  event_type,
+  user_id,
+  page,
+  timestamp
+FROM sitemap_events
+WHERE timestamp > NOW() - INTERVAL '24 hours'
+ORDER BY timestamp DESC
+LIMIT 20;

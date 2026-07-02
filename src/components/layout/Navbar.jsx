@@ -116,7 +116,7 @@ function useTypewriter(strings) {
 }
 
 // ============================================================
-// NAVIGATION LINKS
+// NAVIGATION LINKS — ADDED "About" as a standalone link
 // ============================================================
 const NAV_LINKS = [
   { label: 'Home', href: '/', icon: Home, title: 'Home - BOYZ IN THE WOODZ' },
@@ -183,12 +183,14 @@ const NAV_LINKS = [
     previewBtn: 'Take the Pledge',
     title: 'The Brotherhood - Men\'s Community',
     children: [
+      { label: 'About Us', href: '/about', desc: 'Our story and mission' },
       { label: 'Take the Pledge', href: '/the-code', desc: 'Commit to the brotherhood' },
       { label: 'Brother Directory', href: '/brotherhood/directory', desc: 'Find brothers near you' },
       { label: 'Brotherhood Map', href: '/locations', desc: 'See where we are' },
       { label: 'Leaderboard', href: '/brotherhood/leaderboard', desc: 'Top brothers' },
       { label: 'Virtual Campfire', href: '/studio', desc: 'Connect online' },
       { label: 'Impact Stories', href: '/brotherhood/impact-stories', desc: 'Real brotherhood moments' },
+      { label: 'FAQ', href: '/faq', desc: 'Frequently asked questions' },
     ]
   },
   {

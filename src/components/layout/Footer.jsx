@@ -80,7 +80,7 @@ const COLUMNS = [
       { label: 'Apply Now', to: '/retreat/apply' },
       { label: 'Gear Loan', to: '/gear' },
       { label: 'Waitlist', to: '/retreat/waitlist' },
-      { label: 'FAQ', to: '/about' },
+      { label: 'FAQ', to: '/faq' },
       { label: 'Retreat Waiver', to: '/legal/retreat-waiver' },
     ]
   },

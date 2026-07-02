@@ -3,6 +3,7 @@
    Phase 1 + Phase 2: Booking, Retreats, Waitlist, Events
    ============================================================ */
 import React, { Suspense } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 
 /* --- Auth Pages --- */
 import { SignIn, SignUp, ForgotPassword, ResetPassword } from './pages/auth';
@@ -19,6 +20,43 @@ import ProtectedRoute from './components/ProtectedRoute';
 /* --- Layout --- */
 import MainLayout from './components/layout/MainLayout';
 import AdminLayout from './components/admin/AdminLayout';
+
+// ============================================================
+// ERROR BOUNDARY FALLBACK
+// ============================================================
+function AppErrorFallback({ error, resetErrorBoundary }) {
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <div className="max-w-md w-full text-center">
+        <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+          <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h2 className="font-heading text-2xl tracking-wide uppercase text-foreground mb-2">
+          Something went wrong
+        </h2>
+        <p className="text-muted-foreground text-sm mb-4">
+          {error?.message || 'An unexpected error occurred.'}
+        </p>
+        <div className="flex gap-3 justify-center">
+          <button
+            onClick={resetErrorBoundary}
+            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-heading tracking-wider uppercase hover:bg-primary/90 transition-colors"
+          >
+            Try Again
+          </button>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-secondary text-foreground rounded-lg text-sm font-heading tracking-wider uppercase hover:bg-secondary/80 transition-colors"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* --- Lazy loaded pages --- */
 const AdminDashboard = React.lazy(() => import('./pages/admin/AdminDashboard'));
@@ -40,6 +78,7 @@ const Points = React.lazy(() => import('./pages/Points'));
 const Cart = React.lazy(() => import('./pages/Cart'));
 const Locations = React.lazy(() => import('./pages/Locations'));
 const About = React.lazy(() => import('./pages/About'));
+const FAQ = React.lazy(() => import('./pages/FAQ'));
 const BarberServices = React.lazy(() => import('./pages/BarberServices'));
 const BarberTeam = React.lazy(() => import('./pages/BarberTeam'));
 const BarberGallery = React.lazy(() => import('./pages/BarberGallery'));
@@ -67,6 +106,7 @@ const StudioLive = React.lazy(() => import('./pages/StudioLive'));
 const StudioSession = React.lazy(() => import('./pages/StudioSession'));
 const AdminStudio = React.lazy(() => import('./pages/AdminStudio'));
 const Sitemap = React.lazy(() => import('./pages/Sitemap'));
+const SitemapXML = React.lazy(() => import('./pages/SitemapXML'));
 const NewsletterUnsubscribe = React.lazy(() => import('./pages/NewsletterUnsubscribe'));
 const Services = React.lazy(() => import('./pages/Services'));
 const RetreatCalendar = React.lazy(() => import('./pages/RetreatCalendar'));
@@ -132,6 +172,9 @@ const AuthenticatedApp = () => {
           <Route path="/auth/reset-password" element={<ResetPassword />} />
           <Route path="/newsletter/unsubscribe" element={<NewsletterUnsubscribe />} />
 
+          {/* ── Sitemap & Robots (no layout, raw XML) ── */}
+          <Route path="/sitemap.xml" element={<SitemapXML />} />
+
           {/* ── Protected Routes with Layout ── */}
           <Route element={<MainLayout />}>
             {/* ── Brand Pages ── */}
@@ -144,6 +187,7 @@ const AuthenticatedApp = () => {
             <Route path="/contact" element={<Contact />} />
             <Route path="/welcome" element={<Welcome />} />
             <Route path="/about" element={<About />} />
+            <Route path="/faq" element={<FAQ />} />
             <Route path="/locations" element={<Locations />} />
             <Route path="/points" element={<Points />} />
             <Route path="/cart" element={<Cart />} />
@@ -216,8 +260,6 @@ const AuthenticatedApp = () => {
             <Route path="/science/mental-health" element={<ScienceHub />} />
             <Route path="/science/testimonials" element={<ScienceHub />} />
 
-            {/* ── Journal ── */}
-
             {/* ── New Premium Pages ── */}
             <Route path="/brotherhood/impact-stories" element={<ImpactStories />} />
             <Route path="/brotherhood/letters" element={<BrotherhoodLetters />} />
@@ -229,7 +271,7 @@ const AuthenticatedApp = () => {
             <Route path="/shop/limited-edition" element={<LimitedDrops />} />
             <Route path="/community/time-capsule" element={<TimeCapsule />} />
 
-          {/* ── Legal ── */}
+            {/* ── Legal ── */}
             <Route path="/legal/retreat-waiver" element={<LegalRetreat />} />
             <Route path="/legal/retreat-cancellation" element={<LegalRetreat />} />
             <Route path="/legal/pledge-terms" element={<LegalRetreat />} />
@@ -246,6 +288,7 @@ const AuthenticatedApp = () => {
             <Route path="/returns" element={<Legal />} />
             <Route path="/cookies" element={<Legal />} />
 
+            {/* ── Sitemap ── */}
             <Route path="/sitemap" element={<Sitemap />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
@@ -328,16 +371,23 @@ const AuthenticatedApp = () => {
   );
 };
 
+// ============================================================
+// MAIN APP WITH ERROR BOUNDARY
+// ============================================================
 function App() {
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
-      </QueryClientProvider>
-    </AuthProvider>
+    <ErrorBoundary FallbackComponent={AppErrorFallback} onReset={() => {
+      window.location.reload();
+    }}>
+      <AuthProvider>
+        <QueryClientProvider client={queryClientInstance}>
+          <Router>
+            <AuthenticatedApp />
+          </Router>
+          <Toaster />
+        </QueryClientProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

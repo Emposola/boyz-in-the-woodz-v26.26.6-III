@@ -13,7 +13,6 @@
     "verify": "node scripts/verify-setup.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.45.0",
     "@hello-pangea/dnd": "^17.0.0",
     "@hookform/resolvers": "^4.1.2",
     "@radix-ui/react-accordion": "^1.2.3",
@@ -45,6 +44,7 @@
     "@radix-ui/react-tooltip": "^1.1.8",
     "@stripe/react-stripe-js": "^3.0.0",
     "@stripe/stripe-js": "^5.2.0",
+    "@supabase/supabase-js": "^2.45.0",
     "@tanstack/react-query": "^5.84.1",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
@@ -62,8 +62,10 @@
     "react": "^18.2.0",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.2.0",
+    "react-error-boundary": "^6.1.2",
     "react-hook-form": "^7.54.2",
     "react-hot-toast": "^2.6.0",
+    "react-icons": "^5.7.0",
     "react-leaflet": "^4.2.1",
     "react-markdown": "^9.0.1",
     "react-quill": "^2.0.0",
