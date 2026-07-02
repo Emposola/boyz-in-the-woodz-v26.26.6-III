@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
+import { AGENCY_API_KEY } from '@/pages/agency/agencyConfig';
 
 const DefaultFallback = () => (
   <div className="fixed inset-0 flex items-center justify-center">
@@ -22,10 +23,14 @@ export default function ProtectedRoute({ children, requiredRole, fallback = <Def
     return fallback;
   }
 
-  // Not logged in at all
-  if (!isAuthenticated) {
+  // Not logged in at all — allow agency routes to bypass Supabase auth
+  if (!isAuthenticated && requiredRole !== 'agency') {
     const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
     return <Navigate to={`/auth/signin?redirect=${returnTo}`} replace />;
+  }
+
+  if (!isAuthenticated && requiredRole === 'agency' && !sessionStorage.getItem('agency_key')) {
+    return <Navigate to="/agency/signin" replace />;
   }
 
   // Logged in but wrong role
@@ -39,6 +44,21 @@ export default function ProtectedRoute({ children, requiredRole, fallback = <Def
         </div>
       </div>
     );
+  }
+
+  if (requiredRole === 'agency') {
+    const agencyKey = sessionStorage.getItem('agency_key');
+    if (!agencyKey || agencyKey !== AGENCY_API_KEY) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="font-heading text-4xl tracking-wide uppercase mb-4">Access Denied</h1>
+            <p className="text-muted-foreground mb-6">Agency credentials required.</p>
+            <a href="/agency/signin" className="text-primary hover:underline">Agency Login</a>
+          </div>
+        </div>
+      );
+    }
   }
 
   return children;
