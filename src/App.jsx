@@ -16,14 +16,14 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { CartProvider } from '@/lib/cartContext';
 import { PledgeProvider } from '@/lib/pledgeContext';
 import ProtectedRoute from './components/ProtectedRoute';
-import ScrollToTop from './components/ScrollToTop';
+import ScrollToTop from './components/ScrollToTop'; // ✅ YOUR ADDITION
 
 /* --- Layout --- */
 import MainLayout from './components/layout/MainLayout';
 import AdminLayout from './components/admin/AdminLayout';
 
 // ============================================================
-// ERROR BOUNDARY FALLBACK
+// ERROR BOUNDARY FALLBACK (from collaborator)
 // ============================================================
 function AppErrorFallback({ error, resetErrorBoundary }) {
   return (
@@ -79,8 +79,7 @@ const Points = React.lazy(() => import('./pages/Points'));
 const Cart = React.lazy(() => import('./pages/Cart'));
 const Locations = React.lazy(() => import('./pages/Locations'));
 const About = React.lazy(() => import('./pages/About'));
-const FAQ = React.lazy(() => import('./pages/FAQ'));
-const Search = React.lazy(() => import('./pages/Search')); // ← ADD THIS
+const FAQ = React.lazy(() => import('./pages/FAQ')); // ✅ YOUR ADDITION
 const BarberServices = React.lazy(() => import('./pages/BarberServices'));
 const BarberTeam = React.lazy(() => import('./pages/BarberTeam'));
 const BarberGallery = React.lazy(() => import('./pages/BarberGallery'));
@@ -108,7 +107,7 @@ const StudioLive = React.lazy(() => import('./pages/StudioLive'));
 const StudioSession = React.lazy(() => import('./pages/StudioSession'));
 const AdminStudio = React.lazy(() => import('./pages/AdminStudio'));
 const Sitemap = React.lazy(() => import('./pages/Sitemap'));
-const SitemapXML = React.lazy(() => import('./pages/SitemapXML'));
+const SitemapXML = React.lazy(() => import('./pages/SitemapXML')); // ✅ YOUR ADDITION
 const NewsletterUnsubscribe = React.lazy(() => import('./pages/NewsletterUnsubscribe'));
 const Services = React.lazy(() => import('./pages/Services'));
 const RetreatCalendar = React.lazy(() => import('./pages/RetreatCalendar'));
@@ -125,9 +124,6 @@ const AdminBlog = React.lazy(() => import('./pages/AdminBlog'));
 const AdminServices = React.lazy(() => import('./pages/admin/AdminServices'));
 const AdminBarbers = React.lazy(() => import('./pages/admin/AdminBarbers'));
 const AdminAddons = React.lazy(() => import('./pages/admin/AdminAddons'));
-const AgencyLogin = React.lazy(() => import('./pages/agency/AgencyLogin'));
-const AgencyBlog = React.lazy(() => import('./pages/agency/AgencyBlog'));
-const AgencyLayout = React.lazy(() => import('./components/agency/AgencyLayout'));
 const ImpactStories = React.lazy(() => import('./pages/ImpactStories'));
 const BrotherhoodLetters = React.lazy(() => import('./pages/BrotherhoodLetters'));
 const BreathingTool = React.lazy(() => import('./pages/BreathingTool'));
@@ -170,10 +166,6 @@ const AuthenticatedApp = () => {
       <PledgeProvider>
         <Suspense fallback={<PageLoader />}>
         <Routes>
-          {/* ── Agency Login (no layout, must be early) ── */}
-          <Route path="/agency/test" element={React.createElement('div', { className: 'min-h-screen flex items-center justify-center bg-black text-white font-heading text-4xl tracking-wider uppercase' }, 'Test OK')} />
-          <Route path="/agency/signin" element={<AgencyLogin />} />
-
           {/* ── Auth Routes (no layout) ── */}
           <Route path="/auth/signin" element={<SignIn />} />
           <Route path="/auth/signup" element={<SignUp />} />
@@ -182,7 +174,7 @@ const AuthenticatedApp = () => {
           <Route path="/newsletter/unsubscribe" element={<NewsletterUnsubscribe />} />
 
           {/* ── Sitemap & Robots (no layout, raw XML) ── */}
-          <Route path="/sitemap.xml" element={<SitemapXML />} />
+          <Route path="/sitemap.xml" element={<SitemapXML />} /> {/* ✅ YOUR ADDITION */}
 
           {/* ── Protected Routes with Layout ── */}
           <Route element={<MainLayout />}>
@@ -196,8 +188,7 @@ const AuthenticatedApp = () => {
             <Route path="/contact" element={<Contact />} />
             <Route path="/welcome" element={<Welcome />} />
             <Route path="/about" element={<About />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/search" element={<Search />} /> {/* ← ADD THIS */}
+            <Route path="/faq" element={<FAQ />} /> {/* ✅ YOUR ADDITION */}
             <Route path="/locations" element={<Locations />} />
             <Route path="/points" element={<Points />} />
             <Route path="/cart" element={<Cart />} />
@@ -300,6 +291,7 @@ const AuthenticatedApp = () => {
 
             {/* ── Sitemap ── */}
             <Route path="/sitemap" element={<Sitemap />} />
+            <Route path="*" element={<PageNotFound />} />
           </Route>
 
           {/* ── Admin Panel (AdminLayout — separate from MainLayout) ── */}
@@ -373,21 +365,6 @@ const AuthenticatedApp = () => {
               <AdminLayout><AdminAddons /></AdminLayout>
             </ProtectedRoute>
           } />
-
-          {/* ── Agency Panel (Emposola) — separate from MainLayout ── */}
-          <Route path="/agency" element={
-            <ProtectedRoute requiredRole="agency">
-              <AgencyLayout><AgencyBlog /></AgencyLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/agency/blog" element={
-            <ProtectedRoute requiredRole="agency">
-              <AgencyLayout><AgencyBlog /></AgencyLayout>
-            </ProtectedRoute>
-          } />
-
-          {/* ── Catch-all 404 (must be last) ── */}
-          <Route path="*" element={<PageNotFound />} />
         </Routes>
         </Suspense>
       </PledgeProvider>
@@ -405,11 +382,8 @@ function App() {
     }}>
       <AuthProvider>
         <QueryClientProvider client={queryClientInstance}>
-          <Router future={{ 
-            v7_relativeSplatPath: true,
-            v7_startTransition: true 
-          }}>
-            <ScrollToTop />
+          <Router>
+            <ScrollToTop /> {/* ✅ YOUR ADDITION */}
             <AuthenticatedApp />
           </Router>
           <Toaster />
