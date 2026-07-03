@@ -63,7 +63,7 @@ const PERSONAS = [
 ];
 
 // ============================================================
-// CAROUSEL IMAGES
+// CAROUSEL IMAGES — Fixed with proper fallback
 // ============================================================
 const CAROUSEL_IMAGES = [
   {
@@ -77,12 +77,6 @@ const CAROUSEL_IMAGES = [
     alt: 'Campfire cooking and brotherhood',
     caption: 'Share a Meal',
     location: 'Campfire',
-  },
-  {
-    src: '/images/unsplash/desert-landscape.webp',
-    alt: 'Desert landscape - open space and clarity',
-    caption: 'Find Clarity',
-    location: 'Desert',
   },
   {
     src: '/images/unsplash/forest-campfire.webp',
@@ -103,6 +97,16 @@ const CAROUSEL_IMAGES = [
     location: 'Camp',
   },
 ];
+
+// ============================================================
+// FALLBACK IMAGE — in case of missing images
+// ============================================================
+const FALLBACK_IMAGE = {
+  src: '/images/unsplash/landscape-1.webp',
+  alt: 'Wilderness landscape',
+  caption: 'Find Your Reset',
+  location: 'Wilderness',
+};
 
 // ============================================================
 // ANIMATION VARIANTS
@@ -149,7 +153,7 @@ export default function ServeBlock() {
   // AUTOPLAY — 5 second interval
   // ============================================================
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    if (!isAutoPlaying || CAROUSEL_IMAGES.length === 0) return;
 
     intervalRef.current = setInterval(() => {
       setDirection(1);
@@ -165,6 +169,7 @@ export default function ServeBlock() {
   // NAVIGATION
   // ============================================================
   const goToPrevious = () => {
+    if (CAROUSEL_IMAGES.length === 0) return;
     setIsAutoPlaying(false);
     setDirection(-1);
     setCurrentIndex((prev) => (prev - 1 + CAROUSEL_IMAGES.length) % CAROUSEL_IMAGES.length);
@@ -172,6 +177,7 @@ export default function ServeBlock() {
   };
 
   const goToNext = () => {
+    if (CAROUSEL_IMAGES.length === 0) return;
     setIsAutoPlaying(false);
     setDirection(1);
     setCurrentIndex((prev) => (prev + 1) % CAROUSEL_IMAGES.length);
@@ -179,16 +185,20 @@ export default function ServeBlock() {
   };
 
   const goToSlide = (index) => {
+    if (CAROUSEL_IMAGES.length === 0) return;
     setIsAutoPlaying(false);
     setDirection(index > currentIndex ? 1 : -1);
     setCurrentIndex(index);
     setTimeout(() => setIsAutoPlaying(true), 6000);
   };
 
-  const currentImage = CAROUSEL_IMAGES[currentIndex];
+  // ─── SAFETY CHECK: Get current image with fallback ───
+  const currentImage = CAROUSEL_IMAGES.length > 0 
+    ? CAROUSEL_IMAGES[currentIndex] || CAROUSEL_IMAGES[0] || FALLBACK_IMAGE
+    : FALLBACK_IMAGE;
 
   return (
-    <section className="relative py-5 md:py-5 overflow-hidden">
+    <section className="relative py-12 md:py-16 lg:py-20 overflow-hidden">
       {/* ─── BACKGROUND ─── */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-secondary/20 to-black/5" />
       
@@ -204,7 +214,7 @@ export default function ServeBlock() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="text-center max-w-3xl mx-auto mb-6 md:mb-8"
+          className="text-center max-w-3xl mx-auto mb-10 md:mb-12"
         >
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/5 border border-primary/20 backdrop-blur-sm mb-4">
             <Users className="w-3 h-3 text-primary" />
@@ -247,6 +257,9 @@ export default function ServeBlock() {
                     alt={currentImage.alt}
                     className="w-full h-full object-cover"
                     loading="lazy"
+                    onError={(e) => {
+                      e.target.src = '/images/unsplash/landscape-1.webp';
+                    }}
                   />
                   
                   {/* Overlay gradient */}
@@ -260,7 +273,7 @@ export default function ServeBlock() {
                       </span>
                       <span className="w-4 h-px bg-primary/30" />
                       <span className="text-[8px] text-white/40">
-                        {currentIndex + 1} / {CAROUSEL_IMAGES.length}
+                        {CAROUSEL_IMAGES.length > 0 ? `${currentIndex + 1} / ${CAROUSEL_IMAGES.length}` : '1 / 1'}
                       </span>
                     </div>
                     <h3 className="font-heading text-xl sm:text-2xl text-white tracking-wide">
@@ -274,36 +287,42 @@ export default function ServeBlock() {
               </AnimatePresence>
 
               {/* Navigation Arrows */}
-              <button
-                onClick={goToPrevious}
-                className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 text-white hover:bg-black/60 transition-all duration-300 flex items-center justify-center"
-                aria-label="Previous slide"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={goToNext}
-                className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 text-white hover:bg-black/60 transition-all duration-300 flex items-center justify-center"
-                aria-label="Next slide"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
+              {CAROUSEL_IMAGES.length > 1 && (
+                <>
+                  <button
+                    onClick={goToPrevious}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 text-white hover:bg-black/60 transition-all duration-300 flex items-center justify-center"
+                    aria-label="Previous slide"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={goToNext}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 text-white hover:bg-black/60 transition-all duration-300 flex items-center justify-center"
+                    aria-label="Next slide"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </>
+              )}
 
               {/* Dots */}
-              <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-10 flex gap-1.5">
-                {CAROUSEL_IMAGES.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => goToSlide(index)}
-                    className={`transition-all duration-500 rounded-full ${
-                      index === currentIndex
-                        ? 'w-6 h-1.5 bg-white/80'
-                        : 'w-1.5 h-1.5 bg-white/30 hover:bg-white/50'
-                    }`}
-                    aria-label={`Go to slide ${index + 1}`}
-                  />
-                ))}
-              </div>
+              {CAROUSEL_IMAGES.length > 1 && (
+                <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-10 flex gap-1.5">
+                  {CAROUSEL_IMAGES.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => goToSlide(index)}
+                      className={`transition-all duration-500 rounded-full ${
+                        index === currentIndex
+                          ? 'w-6 h-1.5 bg-white/80'
+                          : 'w-1.5 h-1.5 bg-white/30 hover:bg-white/50'
+                      }`}
+                      aria-label={`Go to slide ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -349,7 +368,7 @@ export default function ServeBlock() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.5 }}
-              className="mt-3"
+              className="mt-4"
             >
               <Link
                 to="/who-we-serve"

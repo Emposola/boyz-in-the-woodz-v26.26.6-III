@@ -12,7 +12,7 @@ import HomeFinalCTA from '../components/home/HomeFinalCTA';
 
 export default function Home() {
   return (
-    <div className="pt-0">
+    <div className="pt-0 overflow-visible">
       <SEO
         title={null}
         description="Boyz In The Woodz — Brotherhood. Freedom. Nature. Wilderness retreats for men who need space to breathe. Barber shop. Outdoor clothing. Science-backed reset through nature and brotherhood."
@@ -75,32 +75,65 @@ export default function Home() {
         ]}
       />
 
-      {/* 1. Hero — Emotional hook + primary CTAs */}
-      <HomeHero />
+      {/* ─── Each section with proper spacing ─── */}
+      <style>{`
+        .section-container {
+          height: auto !important;
+          min-height: auto !important;
+          max-height: none !important;
+          overflow: visible !important;
+        }
+        .section-container > * {
+          height: auto !important;
+          min-height: auto !important;
+          max-height: none !important;
+        }
+      `}</style>
+      
+      {/* 1. Hero */}
+      <div className="section-container">
+        <HomeHero />
+      </div>
 
-      {/* 2. Crisis — Iceberg + stats (the problem we solve) */}
-      <HomeCrisis />
+      {/* 2. Crisis */}
+      <div className="section-container">
+        <HomeCrisis />
+      </div>
 
-      {/* 3. Science — Why nature works (peer-reviewed proof) */}
-      <HomeScience />
+      {/* 3. Science */}
+      <div className="section-container">
+        <HomeScience />
+      </div>
 
-      {/* 4. Who We Serve — 4 personas */}
-      <ServeBlock />
+      {/* 4. Serve Block */}
+      <div className="section-container">
+        <ServeBlock />
+      </div>
 
-      {/* 5. The Code — 5 non-negotiables */}
-      <HomeCode />
+      {/* 5. The Code */}
+      <div className="section-container">
+        <HomeCode />
+      </div>
 
-      {/* 6. Products — Survival Pack 01 + Retreat dual CTA */}
-      <HomeProducts />
+      {/* 6. Products */}
+      <div className="section-container">
+        <HomeProducts />
+      </div>
 
-      {/* 7. Experience — Arrive → Unplug → Connect → Return */}
-      <HomeExperience />
+      {/* 7. Experience */}
+      <div className="section-container">
+        <HomeExperience />
+      </div>
 
-      {/* 8. Social Proof — Reviews + Numbers combined */}
-      <HomeProof />
+      {/* 8. Proof */}
+      <div className="section-container">
+        <HomeProof />
+      </div>
 
-      {/* 9. Final CTA — The Final Truth */}
-      <HomeFinalCTA />
+      {/* 9. Final CTA */}
+      <div className="section-container">
+        <HomeFinalCTA />
+      </div>
     </div>
   );
 }

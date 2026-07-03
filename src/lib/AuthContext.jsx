@@ -7,10 +7,10 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
-  const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(true);
+  const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(false);
   const [authError, setAuthError] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
-  const [appPublicSettings, setAppPublicSettings] = useState(null);
+  const [appPublicSettings, setAppPublicSettings] = useState({ app_name: 'BOYZ IN THE WOODZ' });
 
   useEffect(() => {
     checkAppState();
@@ -45,10 +45,10 @@ export const AuthProvider = ({ children }) => {
       .from('profiles')
       .select('*')
       .eq('id', user.id)
-      .single();
+      .maybeSingle(); // Use maybeSingle() instead of single()
 
     if (error && error.code !== 'PGRST116') {
-      console.error('Error fetching profile:', error);
+      console.debug('Error fetching profile:', error.message);
       return null;
     }
 
@@ -70,10 +70,10 @@ export const AuthProvider = ({ children }) => {
       .from('profiles')
       .insert(profileDefaults)
       .select()
-      .single();
+      .maybeSingle();
 
     if (insertError) {
-      console.error('Error creating profile:', insertError);
+      console.debug('Error creating profile:', insertError.message);
       const mergedUser = { ...user, ...profileDefaults };
       setUser(mergedUser);
       return mergedUser;
@@ -88,13 +88,18 @@ export const AuthProvider = ({ children }) => {
     try {
       setIsLoadingPublicSettings(true);
       
+      // ─── FIX: Use maybeSingle() to avoid 406 errors ───
       const { data: settings, error } = await supabase
         .from('app_settings')
         .select('*')
-        .single();
+        .maybeSingle(); // Changed from .single() to .maybeSingle()
       
-      if (error && error.code !== 'PGRST116') throw error;
-      setAppPublicSettings(settings || { app_name: 'BOYZ IN THE WOODZ' });
+      // If no settings found or error, use defaults
+      if (settings && !error) {
+        setAppPublicSettings(settings);
+      } else {
+        setAppPublicSettings({ app_name: 'BOYZ IN THE WOODZ' });
+      }
       
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -109,11 +114,8 @@ export const AuthProvider = ({ children }) => {
       setAuthChecked(true);
       
     } catch (error) {
-      console.error('App state check failed:', error);
-      setAuthError({
-        type: 'unknown',
-        message: error.message || 'Failed to load app'
-      });
+      console.debug('App state check error:', error.message);
+      setAppPublicSettings({ app_name: 'BOYZ IN THE WOODZ' });
       setIsLoadingPublicSettings(false);
       setIsLoadingAuth(false);
       setAuthChecked(true);

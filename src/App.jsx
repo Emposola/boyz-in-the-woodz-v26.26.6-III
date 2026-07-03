@@ -16,6 +16,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { CartProvider } from '@/lib/cartContext';
 import { PledgeProvider } from '@/lib/pledgeContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import ScrollToTop from './components/ScrollToTop';
 
 /* --- Layout --- */
 import MainLayout from './components/layout/MainLayout';
@@ -79,6 +80,7 @@ const Cart = React.lazy(() => import('./pages/Cart'));
 const Locations = React.lazy(() => import('./pages/Locations'));
 const About = React.lazy(() => import('./pages/About'));
 const FAQ = React.lazy(() => import('./pages/FAQ'));
+const Search = React.lazy(() => import('./pages/Search')); // ← ADD THIS
 const BarberServices = React.lazy(() => import('./pages/BarberServices'));
 const BarberTeam = React.lazy(() => import('./pages/BarberTeam'));
 const BarberGallery = React.lazy(() => import('./pages/BarberGallery'));
@@ -188,6 +190,7 @@ const AuthenticatedApp = () => {
             <Route path="/welcome" element={<Welcome />} />
             <Route path="/about" element={<About />} />
             <Route path="/faq" element={<FAQ />} />
+            <Route path="/search" element={<Search />} /> {/* ← ADD THIS */}
             <Route path="/locations" element={<Locations />} />
             <Route path="/points" element={<Points />} />
             <Route path="/cart" element={<Cart />} />
@@ -372,7 +375,7 @@ const AuthenticatedApp = () => {
 };
 
 // ============================================================
-// MAIN APP WITH ERROR BOUNDARY
+// MAIN APP WITH ERROR BOUNDARY & SCROLL TO TOP
 // ============================================================
 function App() {
   return (
@@ -381,7 +384,11 @@ function App() {
     }}>
       <AuthProvider>
         <QueryClientProvider client={queryClientInstance}>
-          <Router>
+          <Router future={{ 
+            v7_relativeSplatPath: true,
+            v7_startTransition: true 
+          }}>
+            <ScrollToTop />
             <AuthenticatedApp />
           </Router>
           <Toaster />
