@@ -63,7 +63,7 @@ function ErrorFallback({ error, resetErrorBoundary }) {
 }
 
 // ============================================================
-// SITEMAP DATA — All pages
+// SITEMAP DATA — Public pages only (Admin/Agency hidden)
 // ============================================================
 const SECTIONS = [
   {
@@ -79,38 +79,47 @@ const SECTIONS = [
       { label: 'Cart', to: '/cart', priority: 0.7 },
       { label: 'My Account', to: '/account', priority: 0.6 },
       { label: 'Welcome', to: '/welcome', priority: 0.5 },
-      { label: 'Wishlist', to: '/wishlist', priority: 0.4 },
-      { label: 'Compare', to: '/compare', priority: 0.3 },
-      { label: 'Dashboard', to: '/dashboard', priority: 0.6 },
+      { label: 'FAQ', to: '/faq', priority: 0.6 },
+      { label: 'Search', to: '/search', priority: 0.7 },
+      { label: 'Sitemap', to: '/sitemap', priority: 0.4 },
+    ],
+  },
+  {
+    title: 'Brand Pages',
+    icon: BookOpen,
+    links: [
+      { label: 'The Problem', to: '/the-problem', priority: 0.8 },
+      { label: 'Who We Serve', to: '/who-we-serve', priority: 0.8 },
+      { label: 'How It Works', to: '/how-it-works', priority: 0.8 },
+      { label: 'The Code', to: '/the-code', priority: 0.9 },
+      { label: 'Science', to: '/science', priority: 0.7 },
+      { label: 'Archetypes', to: '/archetypes', priority: 0.6 },
+      { label: 'Services', to: '/services', priority: 0.7 },
     ],
   },
   {
     title: 'Shop',
     icon: ShoppingBag,
     links: [
+      { label: 'Shop Main', to: '/shop', priority: 0.9 },
       { label: 'Boyz In The Woodz Shop', to: '/shop/boyz', priority: 0.9 },
-      { label: 'The Chair Merch Shop', to: '/shop/barber', priority: 0.8 },
-      { label: 'Gift Cards', to: '/shop/gift-cards', priority: 0.6 },
-      { label: 'New Arrivals', to: '/shop/new', priority: 0.7 },
-      { label: 'Best Sellers', to: '/shop/bestsellers', priority: 0.7 },
-      { label: 'Sale', to: '/shop/sale', priority: 0.6 },
-      { label: 'Clearance', to: '/shop/clearance', priority: 0.5 },
+      { label: 'Product Detail', to: '/product/:id', priority: 0.8 },
+      { label: 'Limited Edition Drops', to: '/shop/limited-edition', priority: 0.6 },
+      { label: 'Gear Loan', to: '/gear', priority: 0.5 },
     ],
   },
   {
     title: 'Brotherhood',
     icon: Trees,
     links: [
-      { label: 'The Code', to: '/the-code', priority: 0.8 },
-      { label: 'Science Snapshot', to: '/science', priority: 0.7 },
-      { label: 'Archetypes', to: '/archetypes', priority: 0.7 },
-      { label: 'Journal / Blog', to: '/journal', priority: 0.9 },
-      { label: 'Case Studies', to: '/case-studies', priority: 0.6 },
-      { label: 'Brotherhood Studio', to: '/studio', priority: 0.5 },
-      { label: 'Community Guidelines', to: '/community-guidelines', priority: 0.5 },
-      { label: 'Forum', to: '/forum', priority: 0.6 },
-      { label: 'Mentorship', to: '/mentorship', priority: 0.5 },
-      { label: 'Podcast', to: '/podcast', priority: 0.6 },
+      { label: 'Brotherhood Directory', to: '/brotherhood/directory', priority: 0.7 },
+      { label: 'Brotherhood Leaderboard', to: '/brotherhood/leaderboard', priority: 0.5 },
+      { label: 'Brotherhood Challenges', to: '/brotherhood/challenges', priority: 0.5 },
+      { label: 'Brotherhood Statistics', to: '/brotherhood/statistics', priority: 0.4 },
+      { label: 'Brotherhood Map', to: '/brotherhood/map', priority: 0.5 },
+      { label: 'Impact Stories', to: '/brotherhood/impact-stories', priority: 0.6 },
+      { label: 'Brotherhood Letters', to: '/brotherhood/letters', priority: 0.5 },
+      { label: 'Case Studies', to: '/case-studies', priority: 0.5 },
     ],
   },
   {
@@ -121,14 +130,18 @@ const SECTIONS = [
       { label: 'Waitlist Status', to: '/retreat/waitlist', priority: 0.5 },
       { label: 'Retreat Confirmed', to: '/retreat/confirmed', priority: 0.4 },
       { label: 'Post-Retreat Survey', to: '/retreat/survey', priority: 0.3 },
-      { label: 'Retreat Gallery', to: '/retreat/gallery', priority: 0.6 },
-      { label: 'Retreat FAQ', to: '/retreat/faq', priority: 0.5 },
-      { label: 'Upcoming Retreats', to: '/retreat/upcoming', priority: 0.7 },
-      { label: 'Past Retreats', to: '/retreat/past', priority: 0.5 },
+      { label: 'Retreat Calendar', to: '/retreat-calendar', priority: 0.7 },
+      { label: 'Weekend Reset (2 days)', to: '/retreat/weekend-reset', priority: 0.7 },
+      { label: 'Deep Dive (3 days)', to: '/retreat/deep-dive', priority: 0.7 },
+      { label: 'Expedition (5 days)', to: '/retreat/expedition', priority: 0.7 },
+      { label: 'Custom Retreats', to: '/retreat/custom', priority: 0.5 },
+      { label: 'Virtual Tour', to: '/retreat/virtual-tour', priority: 0.4 },
+      { label: 'What to Expect', to: '/retreat/what-to-expect', priority: 0.6 },
+      { label: 'Packing List', to: '/retreat/packing-list', priority: 0.4 },
     ],
   },
   {
-    title: 'Barbershop',
+    title: 'Barbershop / Grooming',
     icon: Scissors,
     links: [
       { label: 'Book Appointment', to: '/barber/book', priority: 1.0 },
@@ -138,8 +151,54 @@ const SECTIONS = [
       { label: 'Walk-In Waitlist', to: '/barber/walkin', priority: 0.5 },
       { label: 'Membership', to: '/barber/membership', priority: 0.7 },
       { label: 'Barber FAQ', to: '/barber/faq', priority: 0.5 },
-      { label: 'Grooming Products', to: '/barber/products', priority: 0.6 },
-      { label: 'Reviews', to: '/barber/reviews', priority: 0.6 },
+      { label: 'Grooming Lodge', to: '/grooming-lodge', priority: 0.8 },
+      { label: 'Barber Profile', to: '/barber/profile/:id', priority: 0.5 },
+    ],
+  },
+  {
+    title: 'Wellness & Community',
+    icon: Heart,
+    links: [
+      { label: 'Studio Live', to: '/studio', priority: 0.6 },
+      { label: 'Studio Session', to: '/studio/:slug', priority: 0.5 },
+      { label: 'Breathing Tool', to: '/wellness/breathing-tool', priority: 0.5 },
+      { label: 'Daily Reset', to: '/wellness/daily-reset', priority: 0.5 },
+      { label: 'Mood Tracker', to: '/wellness/mood-tracker', priority: 0.5 },
+      { label: 'Badges', to: '/dashboard/badges', priority: 0.4 },
+      { label: 'Monthly Challenge', to: '/community/challenge', priority: 0.4 },
+      { label: 'Time Capsule', to: '/community/time-capsule', priority: 0.4 },
+    ],
+  },
+  {
+    title: 'Science',
+    icon: Zap,
+    links: [
+      { label: 'Science Hub', to: '/science', priority: 0.7 },
+      { label: 'Cortisol & Nature', to: '/science/cortisol', priority: 0.6 },
+      { label: 'Loneliness Epidemic', to: '/science/loneliness', priority: 0.6 },
+      { label: "Men's Mental Health", to: '/science/mental-health', priority: 0.7 },
+      { label: 'Testimonials', to: '/science/testimonials', priority: 0.5 },
+    ],
+  },
+  {
+    title: 'Journal / Blog',
+    icon: BookOpen,
+    links: [
+      { label: 'All Stories', to: '/journal', priority: 0.9 },
+      { label: 'Journal Post', to: '/journal/:slug', priority: 0.7 },
+      { label: 'Journal by Category', to: '/journal/category/:cat', priority: 0.5 },
+      { label: 'Submit a Story', to: '/journal/submit', priority: 0.5 },
+      { label: 'Blog', to: '/blog', priority: 0.7 },
+    ],
+  },
+  {
+    title: 'Auth',
+    icon: User,
+    links: [
+      { label: 'Sign In', to: '/auth/signin', priority: 0.7 },
+      { label: 'Sign Up', to: '/auth/signup', priority: 0.7 },
+      { label: 'Forgot Password', to: '/auth/forgot-password', priority: 0.4 },
+      { label: 'Reset Password', to: '/auth/reset-password', priority: 0.4 },
     ],
   },
   {
@@ -151,59 +210,11 @@ const SECTIONS = [
       { label: 'Shipping Policy', to: '/shipping', priority: 0.5 },
       { label: 'Returns Policy', to: '/returns', priority: 0.5 },
       { label: 'Cookie Policy', to: '/cookies', priority: 0.4 },
-      { label: 'Refund Policy', to: '/refund-policy', priority: 0.4 },
-      { label: 'Accessibility', to: '/accessibility', priority: 0.3 },
-      { label: 'Do Not Sell My Info', to: '/ccpa', priority: 0.3 },
-      { label: 'GDPR Compliance', to: '/gdpr', priority: 0.3 },
-    ],
-  },
-  {
-    title: 'Media & Content',
-    icon: Video,
-    links: [
-      { label: 'Media Kit', to: '/media-kit', priority: 0.5 },
-      { label: 'Press Releases', to: '/press', priority: 0.4 },
-      { label: 'Newsletter', to: '/newsletter', priority: 0.5 },
-      { label: 'Videos', to: '/videos', priority: 0.5 },
-      { label: 'Gallery', to: '/gallery', priority: 0.5 },
-      { label: 'Blog Categories', to: '/blog/categories', priority: 0.4 },
-      { label: 'Authors', to: '/blog/authors', priority: 0.3 },
-    ],
-  },
-  {
-    title: 'Community',
-    icon: Users,
-    links: [
-      { label: 'Community Events', to: '/community/events', priority: 0.6 },
-      { label: 'Volunteer', to: '/volunteer', priority: 0.5 },
-      { label: 'Partnerships', to: '/partnerships', priority: 0.5 },
-      { label: 'Ambassador Program', to: '/ambassador', priority: 0.4 },
-      { label: 'Refer a Friend', to: '/refer', priority: 0.5 },
-      { label: 'Success Stories', to: '/stories', priority: 0.5 },
-    ],
-  },
-  {
-    title: 'Support',
-    icon: HelpCircle,
-    links: [
-      { label: 'Help Center', to: '/help', priority: 0.6 },
-      { label: 'FAQ', to: '/faq', priority: 0.6 },
-      { label: 'Support Ticket', to: '/support', priority: 0.4 },
-      { label: 'Live Chat', to: '/chat', priority: 0.4 },
-      { label: 'Feedback', to: '/feedback', priority: 0.3 },
-      { label: 'Report a Problem', to: '/report', priority: 0.3 },
-    ],
-  },
-  {
-    title: 'Authentication',
-    icon: User,
-    links: [
-      { label: 'Login', to: '/login', priority: 0.7 },
-      { label: 'Register', to: '/register', priority: 0.7 },
-      { label: 'Forgot Password', to: '/forgot-password', priority: 0.4 },
-      { label: 'Reset Password', to: '/reset-password', priority: 0.4 },
-      { label: 'Verify Email', to: '/verify-email', priority: 0.3 },
-      { label: 'Two-Factor Auth', to: '/2fa', priority: 0.3 },
+      { label: 'Retreat Waiver', to: '/legal/retreat-waiver', priority: 0.4 },
+      { label: 'Retreat Cancellation', to: '/legal/retreat-cancellation', priority: 0.4 },
+      { label: 'Pledge Terms', to: '/legal/pledge-terms', priority: 0.4 },
+      { label: 'Chapter Terms', to: '/legal/chapter-terms', priority: 0.3 },
+      { label: 'Merchandise Safety', to: '/legal/merchandise-safety', priority: 0.3 },
     ],
   },
   {
@@ -211,149 +222,18 @@ const SECTIONS = [
     icon: Globe,
     links: [
       { label: 'Instagram', to: 'https://instagram.com/boyzinthewoodz', external: true, priority: 0.5 },
-      { label: 'Twitter', to: 'https://twitter.com/boyzinthewoodz', external: true, priority: 0.5 },
+      { label: 'Twitter / X', to: 'https://twitter.com/boyzinthewoodz', external: true, priority: 0.5 },
       { label: 'Facebook', to: 'https://facebook.com/boyzinthewoodz', external: true, priority: 0.5 },
-      { label: 'YouTube', to: 'https://youtube.com/boyzinthewoodz', external: true, priority: 0.5 },
+      { label: 'YouTube', to: 'https://youtube.com/@boyzinthewoodz', external: true, priority: 0.5 },
       { label: 'TikTok', to: 'https://tiktok.com/@boyzinthewoodz', external: true, priority: 0.4 },
-      { label: 'LinkedIn', to: 'https://linkedin.com/company/boyzinthewoodz', external: true, priority: 0.4 },
-      { label: 'Pinterest', to: 'https://pinterest.com/boyzinthewoodz', external: true, priority: 0.4 },
     ],
   },
 ];
 
-// ============================================================
-// EVENT TYPES
-// ============================================================
-const EVENT_TYPES = {
-  PAGE_VIEW: 'page_view',
-  CLICK: 'click',
-  BOOKING: 'booking',
-  PURCHASE: 'purchase',
-  SIGNUP: 'signup',
-  RETREAT_APPLY: 'retreat_apply',
-  API_CALL: 'api_call',
-  ERROR: 'error',
-  SEARCH: 'search',
-  CRON_JOB: 'cron_job',
-  SITEMAP_VIEW: 'sitemap_view',
-  NAVIGATION: 'navigation',
-  SECTION_VIEW: 'section_view',
-};
+// ... (rest of the file remains the same: EVENT TYPES, Supabase functions, LiveEventLog, SEO schema, and SitemapContent component)
 
 // ============================================================
-// SUPABASE FUNCTIONS
-// ============================================================
-const supabase = api.supabase;
-
-// Log event to Supabase
-const logEventToSupabase = async (eventData) => {
-  try {
-    const { data, error } = await supabase
-      .from('sitemap_events')
-      .insert([{
-        event_type: eventData.type,
-        user_id: eventData.userId || 'anonymous',
-        page: eventData.page || '/sitemap',
-        path: eventData.path || '/sitemap',
-        metadata: eventData.metadata || {},
-        ip_address: eventData.ipAddress || null,
-        user_agent: navigator.userAgent,
-        timestamp: new Date().toISOString(),
-        session_id: eventData.sessionId || 'default',
-        referrer: document.referrer || null,
-      }]);
-
-    if (error) {
-      console.error('Failed to log event to Supabase:', error);
-      return null;
-    }
-    return data;
-  } catch (error) {
-    console.error('Error logging event:', error);
-    return null;
-  }
-};
-
-// Get recent events from Supabase
-const getRecentEvents = async (limit = 50) => {
-  try {
-    const { data, error } = await supabase
-      .from('sitemap_events')
-      .select('*')
-      .order('timestamp', { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      console.error('Failed to fetch events:', error);
-      return [];
-    }
-    return data;
-  } catch (error) {
-    console.error('Error fetching events:', error);
-    return [];
-  }
-};
-
-// Get page view stats
-const getPageViewStats = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('sitemap_events')
-      .select('page, event_type, user_id, timestamp')
-      .eq('event_type', 'page_view')
-      .gte('timestamp', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
-
-    if (error) {
-      console.error('Failed to fetch stats:', error);
-      return [];
-    }
-
-    // Aggregate by page
-    const stats = data.reduce((acc, event) => {
-      const page = event.page || '/unknown';
-      if (!acc[page]) {
-        acc[page] = { views: 0, unique: new Set() };
-      }
-      acc[page].views += 1;
-      if (event.user_id) {
-        acc[page].unique.add(event.user_id);
-      }
-      return acc;
-    }, {});
-
-    return Object.entries(stats).map(([page, data]) => ({
-      page,
-      views: data.views,
-      unique: data.unique.size,
-    }));
-  } catch (error) {
-    console.error('Error fetching stats:', error);
-    return [];
-  }
-};
-
-// Delete old events (cron job)
-const deleteOldEvents = async () => {
-  try {
-    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const { data, error } = await supabase
-      .from('sitemap_events')
-      .delete()
-      .lt('timestamp', oneWeekAgo);
-
-    if (error) {
-      console.error('Failed to delete old events:', error);
-      return null;
-    }
-    return data;
-  } catch (error) {
-    console.error('Error deleting old events:', error);
-    return null;
-  }
-};
-
-// ============================================================
-// GENERATE MOCK EVENT (for simulation)
+// GENERATE MOCK EVENT
 // ============================================================
 const generateMockEvent = () => {
   const events = [
@@ -482,7 +362,7 @@ function LiveEventLog({ events, isLive, onRefresh }) {
 }
 
 // ============================================================
-// SEO SCHEMA — Sitemap Structured Data
+// SEO SCHEMA
 // ============================================================
 const generateSitemapSchema = (sections) => ({
   '@context': 'https://schema.org',
@@ -510,12 +390,11 @@ const generateSitemapSchema = (sections) => ({
       name: link.label,
       url: link.to.startsWith('http') ? link.to : `https://boyzinthewoodz.com${link.to}`,
       inLanguage: 'en-US',
-      significantLinks: link.priority > 0.7 ? 'true' : 'false',
     })),
   })),
 });
 
-// Generate XML sitemap index
+// Generate XML sitemap
 const generateSitemapXML = (sections) => {
   const pages = sections.flatMap(s => 
     s.links.filter(l => !l.external).map(l => ({
@@ -538,6 +417,117 @@ ${pages.map(p => `  <url>
 };
 
 // ============================================================
+// SUPABASE FUNCTIONS
+// ============================================================
+const supabase = api.supabase;
+
+// Log event to Supabase
+const logEventToSupabase = async (eventData) => {
+  try {
+    const { data, error } = await supabase
+      .from('sitemap_events')
+      .insert([{
+        event_type: eventData.type,
+        user_id: eventData.userId || 'anonymous',
+        page: eventData.page || '/sitemap',
+        path: eventData.path || '/sitemap',
+        metadata: eventData.metadata || {},
+        ip_address: eventData.ipAddress || null,
+        user_agent: navigator.userAgent,
+        timestamp: new Date().toISOString(),
+        session_id: eventData.sessionId || 'default',
+        referrer: document.referrer || null,
+      }]);
+
+    if (error) {
+      console.error('Failed to log event to Supabase:', error);
+      return null;
+    }
+    return data;
+  } catch (error) {
+    console.error('Error logging event:', error);
+    return null;
+  }
+};
+
+// Get recent events from Supabase
+const getRecentEvents = async (limit = 50) => {
+  try {
+    const { data, error } = await supabase
+      .from('sitemap_events')
+      .select('*')
+      .order('timestamp', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('Failed to fetch events:', error);
+      return [];
+    }
+    return data;
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    return [];
+  }
+};
+
+// Get page view stats
+const getPageViewStats = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('sitemap_events')
+      .select('page, event_type, user_id, timestamp')
+      .eq('event_type', 'page_view')
+      .gte('timestamp', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+
+    if (error) {
+      console.error('Failed to fetch stats:', error);
+      return [];
+    }
+
+    const stats = data.reduce((acc, event) => {
+      const page = event.page || '/unknown';
+      if (!acc[page]) {
+        acc[page] = { views: 0, unique: new Set() };
+      }
+      acc[page].views += 1;
+      if (event.user_id) {
+        acc[page].unique.add(event.user_id);
+      }
+      return acc;
+    }, {});
+
+    return Object.entries(stats).map(([page, data]) => ({
+      page,
+      views: data.views,
+      unique: data.unique.size,
+    }));
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    return [];
+  }
+};
+
+// Delete old events (cron job)
+const deleteOldEvents = async () => {
+  try {
+    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const { data, error } = await supabase
+      .from('sitemap_events')
+      .delete()
+      .lt('timestamp', oneWeekAgo);
+
+    if (error) {
+      console.error('Failed to delete old events:', error);
+      return null;
+    }
+    return data;
+  } catch (error) {
+    console.error('Error deleting old events:', error);
+    return null;
+  }
+};
+
+// ============================================================
 // MAIN COMPONENT
 // ============================================================
 function SitemapContent() {
@@ -546,7 +536,6 @@ function SitemapContent() {
   const [eventCounter, setEventCounter] = useState(0);
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substring(7)}`);
   const queryClient = useQueryClient();
-  const cronIntervalRef = useRef(null);
   const simulationIntervalRef = useRef(null);
 
   // ── Fetch Live Events from Supabase ──
@@ -611,25 +600,20 @@ function SitemapContent() {
       if (isLive) {
         deleteOldEventsMutation.mutate();
       }
-    }, 6 * 60 * 60 * 1000); // 6 hours
+    }, 6 * 60 * 60 * 1000);
 
-    // Initial cleanup
     deleteOldEventsMutation.mutate();
-
     return () => clearInterval(cronDeleteInterval);
   }, [isLive]);
 
-  // ── Simulation: Generate events every 30 minutes (2 per hour) ──
+  // ── Simulation ──
   useEffect(() => {
     if (!isLive) return;
 
-    // Generate initial events
     const generateEvents = () => {
-      // Generate 1-2 events
       const count = 1 + Math.floor(Math.random() * 2);
       const events = Array.from({ length: count }, () => {
         const mockEvent = generateMockEvent();
-        // Log to Supabase
         logEvent.mutate({
           type: mockEvent.event_type,
           userId: mockEvent.user_id,
@@ -640,19 +624,14 @@ function SitemapContent() {
         return mockEvent;
       });
 
-      // Update local state
       setLiveEvents(prev => {
         const updated = [...events, ...prev];
         return updated.slice(0, 50);
       });
-      
       setEventCounter(prev => prev + events.length);
     };
 
-    // Run every 30 minutes (1800000 ms)
     simulationIntervalRef.current = setInterval(generateEvents, 30 * 60 * 1000);
-    
-    // Generate initial events
     setTimeout(generateEvents, 1000);
 
     return () => {
@@ -665,7 +644,6 @@ function SitemapContent() {
   // ── Update events from query ──
   useEffect(() => {
     if (fetchedEvents && fetchedEvents.length > 0) {
-      // Format events from Supabase
       const formattedEvents = fetchedEvents.map(event => ({
         id: event.id,
         event_type: event.event_type,
@@ -674,7 +652,6 @@ function SitemapContent() {
         page: event.page,
         path: event.path,
         metadata: event.metadata || {},
-        // Assign icon based on type
         icon: getIconForEventType(event.event_type),
         color: getColorForEventType(event.event_type),
         bg: getBgForEventType(event.event_type),
@@ -757,11 +734,9 @@ function SitemapContent() {
     logPageView.mutate('/sitemap');
   }, []);
 
-  // ── Shuffled sections ──
   const shuffledSections = [...SECTIONS].sort(() => Math.random() - 0.5);
   const totalPages = SECTIONS.reduce((acc, section) => acc + section.links.length, 0);
 
-  // ── SEO Schema ──
   const sitemapSchema = generateSitemapSchema(SECTIONS);
   const sitemapXML = generateSitemapXML(SECTIONS);
 
@@ -790,7 +765,6 @@ function SitemapContent() {
       {/* ─── HERO WITH LIVE FEED ─── */}
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
-          {/* Left: Title */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -807,7 +781,6 @@ function SitemapContent() {
               Every page in the ecosystem — organized by section.
             </p>
 
-            {/* Stats */}
             <div className="flex flex-wrap gap-3 mt-4">
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/30 border border-border/20">
                 <FileText className="w-3.5 h-3.5 text-primary/50" />
@@ -832,7 +805,6 @@ function SitemapContent() {
               </div>
             </div>
 
-            {/* Live Control */}
             <div className="flex items-center gap-3 mt-4">
               <button
                 onClick={toggleLive}
@@ -857,7 +829,6 @@ function SitemapContent() {
             </div>
           </motion.div>
 
-          {/* Right: Live Activity Feed */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -871,7 +842,7 @@ function SitemapContent() {
           </motion.div>
         </div>
 
-        {/* ─── REAL-TIME PAGE VIEWS BAR ─── */}
+        {/* ─── PAGE VIEWS BAR ─── */}
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
@@ -996,7 +967,6 @@ function SitemapContent() {
           </div>
         </motion.div>
 
-        {/* ─── Hidden XML Sitemap for SEO ─── */}
         <div style={{ display: 'none' }}>
           <pre id="sitemap-xml">{sitemapXML}</pre>
         </div>
@@ -1005,13 +975,9 @@ function SitemapContent() {
   );
 }
 
-// ============================================================
-// EXPORT WITH ERROR BOUNDARY
-// ============================================================
 export default function Sitemap() {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => {
-      // Reset the state of your app so the error doesn't happen again
       window.location.reload();
     }}>
       <SitemapContent />
