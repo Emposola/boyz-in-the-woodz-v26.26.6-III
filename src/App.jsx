@@ -16,14 +16,14 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { CartProvider } from '@/lib/cartContext';
 import { PledgeProvider } from '@/lib/pledgeContext';
 import ProtectedRoute from './components/ProtectedRoute';
-import ScrollToTop from './components/ScrollToTop'; // ✅ YOUR ADDITION
+import ScrollToTop from './components/ScrollToTop';
 
 /* --- Layout --- */
 import MainLayout from './components/layout/MainLayout';
 import AdminLayout from './components/admin/AdminLayout';
 
 // ============================================================
-// ERROR BOUNDARY FALLBACK (from collaborator)
+// ERROR BOUNDARY FALLBACK
 // ============================================================
 function AppErrorFallback({ error, resetErrorBoundary }) {
   return (
@@ -79,7 +79,7 @@ const Points = React.lazy(() => import('./pages/Points'));
 const Cart = React.lazy(() => import('./pages/Cart'));
 const Locations = React.lazy(() => import('./pages/Locations'));
 const About = React.lazy(() => import('./pages/About'));
-const FAQ = React.lazy(() => import('./pages/FAQ')); // ✅ YOUR ADDITION
+const FAQ = React.lazy(() => import('./pages/FAQ'));
 const BarberServices = React.lazy(() => import('./pages/BarberServices'));
 const BarberTeam = React.lazy(() => import('./pages/BarberTeam'));
 const BarberGallery = React.lazy(() => import('./pages/BarberGallery'));
@@ -107,7 +107,7 @@ const StudioLive = React.lazy(() => import('./pages/StudioLive'));
 const StudioSession = React.lazy(() => import('./pages/StudioSession'));
 const AdminStudio = React.lazy(() => import('./pages/AdminStudio'));
 const Sitemap = React.lazy(() => import('./pages/Sitemap'));
-const SitemapXML = React.lazy(() => import('./pages/SitemapXML')); // ✅ YOUR ADDITION
+const SitemapXML = React.lazy(() => import('./pages/SitemapXML'));
 const NewsletterUnsubscribe = React.lazy(() => import('./pages/NewsletterUnsubscribe'));
 const Services = React.lazy(() => import('./pages/Services'));
 const RetreatCalendar = React.lazy(() => import('./pages/RetreatCalendar'));
@@ -124,6 +124,10 @@ const AdminBlog = React.lazy(() => import('./pages/AdminBlog'));
 const AdminServices = React.lazy(() => import('./pages/admin/AdminServices'));
 const AdminBarbers = React.lazy(() => import('./pages/admin/AdminBarbers'));
 const AdminAddons = React.lazy(() => import('./pages/admin/AdminAddons'));
+// ─── AGENCY PAGES (from collaborator) ───
+const AgencyLogin = React.lazy(() => import('./pages/agency/AgencyLogin'));
+const AgencyBlog = React.lazy(() => import('./pages/agency/AgencyBlog'));
+const AgencyLayout = React.lazy(() => import('./components/agency/AgencyLayout'));
 const ImpactStories = React.lazy(() => import('./pages/ImpactStories'));
 const BrotherhoodLetters = React.lazy(() => import('./pages/BrotherhoodLetters'));
 const BreathingTool = React.lazy(() => import('./pages/BreathingTool'));
@@ -166,6 +170,9 @@ const AuthenticatedApp = () => {
       <PledgeProvider>
         <Suspense fallback={<PageLoader />}>
         <Routes>
+          {/* ── Agency Login (no layout, must be early) ── */}
+          <Route path="/agency/signin" element={<AgencyLogin />} />
+
           {/* ── Auth Routes (no layout) ── */}
           <Route path="/auth/signin" element={<SignIn />} />
           <Route path="/auth/signup" element={<SignUp />} />
@@ -174,7 +181,7 @@ const AuthenticatedApp = () => {
           <Route path="/newsletter/unsubscribe" element={<NewsletterUnsubscribe />} />
 
           {/* ── Sitemap & Robots (no layout, raw XML) ── */}
-          <Route path="/sitemap.xml" element={<SitemapXML />} /> {/* ✅ YOUR ADDITION */}
+          <Route path="/sitemap.xml" element={<SitemapXML />} />
 
           {/* ── Protected Routes with Layout ── */}
           <Route element={<MainLayout />}>
@@ -188,7 +195,7 @@ const AuthenticatedApp = () => {
             <Route path="/contact" element={<Contact />} />
             <Route path="/welcome" element={<Welcome />} />
             <Route path="/about" element={<About />} />
-            <Route path="/faq" element={<FAQ />} /> {/* ✅ YOUR ADDITION */}
+            <Route path="/faq" element={<FAQ />} />
             <Route path="/locations" element={<Locations />} />
             <Route path="/points" element={<Points />} />
             <Route path="/cart" element={<Cart />} />
@@ -365,6 +372,18 @@ const AuthenticatedApp = () => {
               <AdminLayout><AdminAddons /></AdminLayout>
             </ProtectedRoute>
           } />
+
+          {/* ── Agency Panel (Emposola) — separate from MainLayout ── */}
+          <Route path="/agency" element={
+            <ProtectedRoute requiredRole="agency">
+              <AgencyLayout><AgencyBlog /></AgencyLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/agency/blog" element={
+            <ProtectedRoute requiredRole="agency">
+              <AgencyLayout><AgencyBlog /></AgencyLayout>
+            </ProtectedRoute>
+          } />
         </Routes>
         </Suspense>
       </PledgeProvider>
@@ -383,7 +402,7 @@ function App() {
       <AuthProvider>
         <QueryClientProvider client={queryClientInstance}>
           <Router>
-            <ScrollToTop /> {/* ✅ YOUR ADDITION */}
+            <ScrollToTop />
             <AuthenticatedApp />
           </Router>
           <Toaster />
