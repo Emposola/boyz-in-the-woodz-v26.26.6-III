@@ -125,6 +125,9 @@ const AdminBlog = React.lazy(() => import('./pages/AdminBlog'));
 const AdminServices = React.lazy(() => import('./pages/admin/AdminServices'));
 const AdminBarbers = React.lazy(() => import('./pages/admin/AdminBarbers'));
 const AdminAddons = React.lazy(() => import('./pages/admin/AdminAddons'));
+const AgencyLogin = React.lazy(() => import('./pages/agency/AgencyLogin'));
+const AgencyBlog = React.lazy(() => import('./pages/agency/AgencyBlog'));
+const AgencyLayout = React.lazy(() => import('./components/agency/AgencyLayout'));
 const ImpactStories = React.lazy(() => import('./pages/ImpactStories'));
 const BrotherhoodLetters = React.lazy(() => import('./pages/BrotherhoodLetters'));
 const BreathingTool = React.lazy(() => import('./pages/BreathingTool'));
@@ -167,6 +170,10 @@ const AuthenticatedApp = () => {
       <PledgeProvider>
         <Suspense fallback={<PageLoader />}>
         <Routes>
+          {/* ── Agency Login (no layout, must be early) ── */}
+          <Route path="/agency/test" element={React.createElement('div', { className: 'min-h-screen flex items-center justify-center bg-black text-white font-heading text-4xl tracking-wider uppercase' }, 'Test OK')} />
+          <Route path="/agency/signin" element={<AgencyLogin />} />
+
           {/* ── Auth Routes (no layout) ── */}
           <Route path="/auth/signin" element={<SignIn />} />
           <Route path="/auth/signup" element={<SignUp />} />
@@ -293,7 +300,6 @@ const AuthenticatedApp = () => {
 
             {/* ── Sitemap ── */}
             <Route path="/sitemap" element={<Sitemap />} />
-            <Route path="*" element={<PageNotFound />} />
           </Route>
 
           {/* ── Admin Panel (AdminLayout — separate from MainLayout) ── */}
@@ -367,6 +373,21 @@ const AuthenticatedApp = () => {
               <AdminLayout><AdminAddons /></AdminLayout>
             </ProtectedRoute>
           } />
+
+          {/* ── Agency Panel (Emposola) — separate from MainLayout ── */}
+          <Route path="/agency" element={
+            <ProtectedRoute requiredRole="agency">
+              <AgencyLayout><AgencyBlog /></AgencyLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/agency/blog" element={
+            <ProtectedRoute requiredRole="agency">
+              <AgencyLayout><AgencyBlog /></AgencyLayout>
+            </ProtectedRoute>
+          } />
+
+          {/* ── Catch-all 404 (must be last) ── */}
+          <Route path="*" element={<PageNotFound />} />
         </Routes>
         </Suspense>
       </PledgeProvider>
