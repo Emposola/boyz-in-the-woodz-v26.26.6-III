@@ -84,25 +84,37 @@ Deno.serve(async (req) => {
       if (!subscribers?.length) throw new Error('No active subscribers');
 
       const emails = subscribers.map(s => s.email);
+      const CHUNK_SIZE = 50;
       let sent = 0;
 
-      for (const email of emails) {
+      for (let i = 0; i < emails.length; i += CHUNK_SIZE) {
+        const chunk = emails.slice(i, i + CHUNK_SIZE);
+        const payload = chunk.map(email => ({
+          from: `${FROM_NAME} <${FROM_EMAIL}>`,
+          to: email,
+          subject: campaign.subject,
+          html: htmlTemplate(campaign.body_html, `${BASE_URL}/newsletter/unsubscribe?email=${encodeURIComponent(email)}`),
+        }));
+
         try {
-          const res = await fetch('https://api.resend.com/emails', {
+          const res = await fetch('https://api.resend.com/emails/batch', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              from: `${FROM_NAME} <${FROM_EMAIL}>`,
-              to: email,
-              subject: campaign.subject,
-              html: htmlTemplate(campaign.body_html, `${BASE_URL}/newsletter/unsubscribe?email=${encodeURIComponent(email)}`),
-            }),
+            body: JSON.stringify(payload),
           });
-          if (res.ok) { sent++; continue; }
-          const errText = await res.text();
-          console.error(`Failed to send to ${email}:`, errText.slice(0, 200));
+          if (res.ok) {
+            const result = await res.json();
+            sent += Array.isArray(result) ? result.filter(r => r?.id).length : chunk.length;
+          } else {
+            const errText = await res.text();
+            console.error(`Batch send error (chunk ${i / CHUNK_SIZE}):`, errText.slice(0, 300));
+          }
         } catch (e) {
-          console.error(`Error sending to ${email}:`, e.message);
+          console.error(`Batch send exception (chunk ${i / CHUNK_SIZE}):`, e.message);
+        }
+
+        if (i + CHUNK_SIZE < emails.length) {
+          await new Promise(r => setTimeout(r, 200));
         }
       }
 
@@ -111,6 +123,37 @@ Deno.serve(async (req) => {
         .eq('id', campaign_id);
 
       return new Response(JSON.stringify({ ok: true, sent }), {
+        status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
+    }
+
+    // --- Test send (send to a single email for preview) ---
+    if (action === 'test_send') {
+      const { email: testEmail, campaign_id: testCampaignId } = body;
+      if (!testEmail || !testCampaignId) throw new Error('email and campaign_id required');
+
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+      const { data: campaign } = await supabase
+        .from('newsletter_campaigns').select('*').eq('id', testCampaignId).single();
+      if (!campaign) throw new Error('Campaign not found');
+
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: `${FROM_NAME} <${FROM_EMAIL}>`,
+          to: testEmail,
+          subject: `[TEST] ${campaign.subject}`,
+          html: htmlTemplate(campaign.body_html, `${BASE_URL}/newsletter/unsubscribe?email=${encodeURIComponent(testEmail)}`),
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error('Test send failed: ' + err.slice(0, 200));
+      }
+
+      return new Response(JSON.stringify({ ok: true }), {
         status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
@@ -126,7 +169,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    throw new Error('Unknown action. Use: welcome, broadcast, unsubscribe');
+    throw new Error('Unknown action. Use: welcome, broadcast, unsubscribe, test_send');
   } catch (err) {
     console.error('send-newsletter error:', err);
     return new Response(JSON.stringify({ error: err.message }), {

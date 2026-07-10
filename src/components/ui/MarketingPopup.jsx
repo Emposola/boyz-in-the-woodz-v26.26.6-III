@@ -1,15 +1,30 @@
 /* Marketing popup — shows after 8 seconds, once per session */
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Gift, ArrowRight } from 'lucide-react';
+import { X, Gift, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+
+const EDGE_FN_URL = import.meta.env.VITE_SUPABASE_EDGE_FUNCTIONS_URL
+  || 'https://pgwcfazhwuzxcqbqbjat.supabase.co/functions/v1';
+
+async function sendWelcomeEmail(email) {
+  try {
+    await supabase.functions.invoke('send-newsletter', {
+      body: { action: 'welcome', email },
+    });
+  } catch (e) {
+    console.error('Welcome email send failed:', e);
+  }
+}
 
 export default function MarketingPopup() {
   const [visible, setVisible] = useState(false);
   const [email, setEmail] = useState('');
   const [done, setDone] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const dismissed = sessionStorage.getItem('bitw_popup');
@@ -21,11 +36,24 @@ export default function MarketingPopup() {
 
   const dismiss = () => { sessionStorage.setItem('bitw_popup', '1'); setVisible(false); };
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    setDone(true);
-    toast.success('Welcome to the brotherhood! Check your inbox.');
-    setTimeout(dismiss, 2000);
+    if (!email.trim()) return;
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from('newsletter_subscribers')
+        .insert({ email: email.trim(), source: 'popup' });
+      if (error && error.code !== '23505') throw error;
+      await sendWelcomeEmail(email.trim());
+      setDone(true);
+      toast.success('Welcome to the brotherhood! Check your inbox.');
+      setTimeout(dismiss, 2000);
+    } catch (err) {
+      console.error('Popup subscribe error:', err);
+      toast.error('Something went wrong. Try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -60,8 +88,8 @@ export default function MarketingPopup() {
                   <p className="text-sm text-muted-foreground mb-5">Join the brotherhood. Get exclusive drops, retreat access, and 10% off — instantly.</p>
                   <form onSubmit={submit} className="flex gap-2">
                     <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Your email address" className="bg-secondary border-border" required />
-                    <Button type="submit" className="font-heading tracking-wider uppercase text-xs flex-shrink-0">
-                      Join <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                    <Button type="submit" disabled={submitting} className="font-heading tracking-wider uppercase text-xs flex-shrink-0">
+                      {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><ArrowRight className="w-3.5 h-3.5 ml-1" /> Join</>}
                     </Button>
                   </form>
                   <p className="text-[10px] text-muted-foreground mt-3 text-center">No spam. Unsubscribe anytime. We live The Code.</p>

@@ -4,8 +4,10 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, Filter, Share2, Heart, PenLine } from 'lucide-react';
+import { ArrowRight, Star, Filter, Share2, Heart, PenLine, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 import SEO from '@/components/shared/SEO';
 
 const FG = '#2D5A27';
@@ -35,6 +37,7 @@ export default function ImpactStories() {
   const [liked, setLiked] = useState([]);
   const [email, setEmail] = useState('');
   const [subbed, setSubbed] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const filtered = filter === 'All' ? STORIES : STORIES.filter(s => s.archetype === filter);
   const featured = STORIES.find(s => s.featured);
@@ -157,10 +160,10 @@ export default function ImpactStories() {
           {subbed ? (
             <p className="text-primary font-heading tracking-wider uppercase text-sm">You're in. Welcome to the feed.</p>
           ) : (
-            <form onSubmit={e => { e.preventDefault(); setSubbed(true); }} className="flex gap-2">
+            <form onSubmit={async e => { e.preventDefault(); if (!email.trim()) return; setSubmitting(true); try { const { error } = await supabase.from('newsletter_subscribers').insert({ email: email.trim(), source: 'impact-stories' }); if (error && error.code !== '23505') throw error; await supabase.functions.invoke('send-newsletter', { body: { action: 'welcome', email: email.trim() } }).catch(() => {}); setSubbed(true); toast.success('Welcome to the brotherhood!'); } catch (err) { toast.error('Something went wrong.'); } finally { setSubmitting(false); } }} className="flex gap-2">
               <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" required
                 className="flex-1 bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none" />
-              <Button type="submit" size="sm" className="font-heading tracking-wider uppercase" style={{ background: FG }}>Subscribe</Button>
+              <Button type="submit" disabled={submitting} size="sm" className="font-heading tracking-wider uppercase" style={{ background: FG }}>{submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Subscribe'}</Button>
             </form>
           )}
         </div>

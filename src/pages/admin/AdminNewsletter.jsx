@@ -111,6 +111,8 @@ function CampaignsTab() {
   const [showCompose, setShowCompose] = useState(false);
   const [subject, setSubject] = useState('');
   const [bodyHtml, setBodyHtml] = useState('');
+  const [testEmail, setTestEmail] = useState('');
+  const [testCampaignId, setTestCampaignId] = useState(null);
 
   const { data: campaigns = [], isLoading } = useQuery({
     queryKey: ['admin-newsletter-campaigns'],
@@ -139,6 +141,28 @@ function CampaignsTab() {
     onSuccess: (data) => {
       toast({ title: `Sent to ${data.sent} subscribers` });
       qc.invalidateQueries({ queryKey: ['admin-newsletter-campaigns'] });
+    },
+    onError: (e) => toast({ variant: 'destructive', title: e.message }),
+  });
+
+  const testSend = useMutation({
+    mutationFn: async ({ email, campaignId }) => {
+      const token = (await supabase.auth.getSession()).data.session?.access_token;
+      const res = await fetch(`${EDGE_FN_URL}/send-newsletter`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ action: 'test_send', email, campaign_id: campaignId }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error || 'Test send failed');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: 'Test email sent!' });
+      setTestCampaignId(null);
+      setTestEmail('');
     },
     onError: (e) => toast({ variant: 'destructive', title: e.message }),
   });
@@ -230,11 +254,28 @@ function CampaignsTab() {
                   </div>
                 </div>
                 {c.status === 'draft' && (
-                  <Button onClick={() => sendCampaign.mutate(c.id)} disabled={sendCampaign.isPending}
-                    size="sm" className="font-heading tracking-wider uppercase text-xs gap-1.5 flex-shrink-0" style={{ background: FG }}>
-                    {sendCampaign.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
-                    Send
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button onClick={() => setTestCampaignId(testCampaignId === c.id ? null : c.id)}
+                      size="sm" variant="outline" className="font-heading tracking-wider uppercase text-xs h-8 px-2 gap-1">
+                      <Eye className="w-3 h-3" /> Test
+                    </Button>
+                    <Button onClick={() => sendCampaign.mutate(c.id)} disabled={sendCampaign.isPending}
+                      size="sm" className="font-heading tracking-wider uppercase text-xs gap-1.5 flex-shrink-0" style={{ background: FG }}>
+                      {sendCampaign.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                      Send
+                    </Button>
+                  </div>
+                )}
+                {testCampaignId === c.id && (
+                  <div className="mt-3 flex gap-2 items-center">
+                    <input type="email" value={testEmail} onChange={e => setTestEmail(e.target.value)}
+                      placeholder="Enter test email..." className="flex-1 bg-secondary border border-border rounded-md px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none" />
+                    <Button onClick={() => testSend.mutate({ email: testEmail, campaignId: c.id })}
+                      disabled={!testEmail || testSend.isPending} size="sm" className="font-heading tracking-wider uppercase text-xs h-8"
+                      style={{ background: FG }}>
+                      {testSend.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Send Test'}
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>

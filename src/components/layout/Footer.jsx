@@ -118,6 +118,8 @@ export default function Footer() {
         } else {
           throw error;
         }
+      } else {
+        supabase.functions.invoke('send-newsletter', { body: { action: 'welcome', email: email.trim() } }).catch(() => {});
       }
       setSubscribed(true);
       setEmail('');
