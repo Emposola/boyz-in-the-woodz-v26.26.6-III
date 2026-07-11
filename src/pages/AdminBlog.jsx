@@ -316,14 +316,24 @@ export default function AdminBlog() {
       if (data.status === 'published') {
         const { data: post } = await supabase.from('blog_posts').select('author_id, status').eq('id', id).single();
         if (post?.status !== 'published' && post?.author_id) {
-          const { error: ptError } = await supabase.from('loyalty_transactions').insert({
+          await supabase.from('loyalty_transactions').insert({
             user_id: post.author_id,
-            points: 500,
-            type: 'earned',
-            source: 'journal_approval',
+            points_amount: 500,
+            type: 'earn',
+            source: 'journal_approved',
             description: 'Journal post published — Guest Author reward',
           });
-          if (ptError) console.error('Failed to award points:', ptError);
+
+          const { data: curProf } = await supabase.from('profiles').select('loyalty_points').eq('id', post.author_id).single();
+          await supabase.from('profiles').update({ loyalty_points: (curProf?.loyalty_points || 0) + 500, last_active_at: new Date().toISOString() }).eq('id', post.author_id);
+
+          await supabase.from('activity_feed').insert({
+            user_id: post.author_id,
+            action_type: 'journal_approved',
+            description: 'Journal post published — Guest Author reward',
+            points: 500,
+            metadata: { post_id: id },
+          }).catch(() => {});
         }
       }
       const { error } = await supabase.from('blog_posts').update(data).eq('id', id);

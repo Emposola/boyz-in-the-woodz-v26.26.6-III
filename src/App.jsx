@@ -7,6 +7,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 
 /* --- Auth Pages --- */
 import { SignIn, SignUp, ForgotPassword, ResetPassword } from './pages/auth';
+import AuthCallback from './pages/auth/AuthCallback';
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClientInstance } from '@/lib/query-client';
@@ -176,6 +177,7 @@ const AuthenticatedApp = () => {
           {/* ── Auth Routes (no layout) ── */}
           <Route path="/auth/signin" element={<SignIn />} />
           <Route path="/auth/signup" element={<SignUp />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/auth/forgot-password" element={<ForgotPassword />} />
           <Route path="/auth/reset-password" element={<ResetPassword />} />
           <Route path="/newsletter/unsubscribe" element={<NewsletterUnsubscribe />} />
@@ -274,6 +276,7 @@ const AuthenticatedApp = () => {
             <Route path="/wellness/breathing-tool" element={<BreathingTool />} />
             <Route path="/wellness/daily-reset" element={<DailyReset />} />
             <Route path="/wellness/mood-tracker" element={<MoodTracker />} />
+            <Route path="/brotherhood/badges" element={<BadgesPage />} />
             <Route path="/dashboard/badges" element={<BadgesPage />} />
             <Route path="/community/challenge" element={<MonthlyChallenge />} />
             <Route path="/shop/limited-edition" element={<LimitedDrops />} />

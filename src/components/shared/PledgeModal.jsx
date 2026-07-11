@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { usePledge } from '@/lib/pledgeContext';
+import { useAuth } from '@/lib/AuthContext';
 import { Shield, Smartphone, Eye, Heart, Users, ArrowUp } from 'lucide-react';
 
 const CODE_RULES = [
@@ -18,10 +19,11 @@ const CODE_RULES = [
 
 export default function PledgeModal({ open, onOpenChange, onAccept }) {
   const { acceptPledge } = usePledge();
+  const { user } = useAuth();
   const [checked, setChecked] = useState(false);
 
   const handleAccept = () => {
-    acceptPledge();
+    acceptPledge(user?.id);
     onOpenChange(false);
     if (onAccept) onAccept();
   };

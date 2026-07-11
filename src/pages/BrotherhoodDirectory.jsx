@@ -1,36 +1,92 @@
-/* ============================================================
-   BROTHERHOOD DIRECTORY — Opt-in brother search
-   URL: /brotherhood/directory
-   ============================================================ */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, MapPin, Users, UserPlus, Check, Shield } from 'lucide-react';
+import { Search, MapPin, Users, UserPlus, Check, Shield, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/lib/AuthContext';
+import { supabase } from '@/lib/supabase';
 import SEO from '@/components/shared/SEO';
 
 const FG = '#2D5A27';
 
-const SAMPLE_BROTHERS = [
-  { id: 1, name: 'Marcus T.', city: 'Houston, TX', retreats: ['Broken Bow 2024', 'Ouachita 2025'], interests: ['Fishing', 'Fatherhood', 'Men\'s circle'], pledged: true, avatar: 'MT' },
-  { id: 2, name: 'James W.', city: 'Atlanta, GA', retreats: ['Broken Bow 2024'], interests: ['Running', 'Mental health', 'Brotherhood'], pledged: true, avatar: 'JW' },
-  { id: 3, name: 'David R.', city: 'Chicago, IL', retreats: ['Ozark 2025', 'Broken Bow 2024'], interests: ['Hiking', 'Camping', 'Stoicism'], pledged: true, avatar: 'DR' },
-  { id: 4, name: 'Andre L.', city: 'Dallas, TX', retreats: ['Ouachita 2025'], interests: ['Fatherhood', 'Nature', 'Fitness'], pledged: true, avatar: 'AL' },
-  { id: 5, name: 'Kevin H.', city: 'Memphis, TN', retreats: ['Broken Bow 2024', 'Broken Bow 2025'], interests: ['Veterans', 'Accountability', 'Brotherhood'], pledged: true, avatar: 'KH' },
-  { id: 6, name: 'Troy M.', city: 'Nashville, TN', retreats: ['Ozark 2025'], interests: ['Fishing', 'Mental health', 'Music'], pledged: true, avatar: 'TM' },
-];
-
 export default function BrotherhoodDirectory() {
+  const { user, isAuthenticated } = useAuth();
   const [search, setSearch] = useState('');
-  const [connected, setConnected] = useState([]);
+  const [brothers, setBrothers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [connectedIds, setConnectedIds] = useState(new Set());
+  const [pendingIds, setPendingIds] = useState(new Set());
 
-  const filtered = SAMPLE_BROTHERS.filter(b =>
+  useEffect(() => {
+    supabase
+      .from('profiles')
+      .select(`
+        id, full_name, city, archetype, bio, interests,
+        retreats:retreat_applications(location_name)
+      `)
+      .eq('directory_opt_in', true)
+      .then(({ data, error }) => {
+        if (!error && data) {
+          setBrothers(data.map(b => ({
+            id: b.id,
+            name: b.full_name || 'Anonymous Brother',
+            city: b.city || null,
+            archetype: b.archetype || null,
+            bio: b.bio || null,
+            interests: b.interests || [],
+            retreats: [...new Set((b.retreats || []).map(r => r.location_name).filter(Boolean))],
+            avatar: (b.full_name || 'A').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase(),
+          })));
+        }
+        setLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      supabase
+        .from('connections')
+        .select('recipient_id, status')
+        .eq('requester_id', user.id)
+        .then(({ data }) => {
+          if (data) {
+            const accepted = new Set();
+            const pending = new Set();
+            data.forEach(c => {
+              if (c.status === 'accepted') accepted.add(c.recipient_id);
+              else if (c.status === 'pending') pending.add(c.recipient_id);
+            });
+            setConnectedIds(accepted);
+            setPendingIds(pending);
+          }
+        });
+    }
+  }, [isAuthenticated, user]);
+
+  const handleConnect = async (brotherId) => {
+    if (!isAuthenticated) return;
+    const { error } = await supabase.from('connections').insert({
+      requester_id: user.id,
+      recipient_id: brotherId,
+      status: 'pending',
+    });
+    if (!error) {
+      setPendingIds(prev => new Set(prev).add(brotherId));
+      supabase.from('activity_feed').insert({
+        user_id: user.id,
+        action_type: 'connection_sent',
+        description: `Sent a connection request`,
+        metadata: { recipient_id: brotherId },
+      }).catch(() => {});
+    }
+  };
+
+  const filtered = brothers.filter(b =>
     !search || b.name.toLowerCase().includes(search.toLowerCase()) ||
-    b.city.toLowerCase().includes(search.toLowerCase()) ||
-    b.interests.some(i => i.toLowerCase().includes(search.toLowerCase()))
+    (b.city && b.city.toLowerCase().includes(search.toLowerCase())) ||
+    b.interests.some(i => typeof i === 'string' && i.toLowerCase().includes(search.toLowerCase()))
   );
-
-  const connect = (id) => setConnected(c => [...c, id]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -58,61 +114,100 @@ export default function BrotherhoodDirectory() {
             <p className="text-sm text-muted-foreground">This directory is opt-in only. Brothers choose to be visible. Connection requests require approval. Names and locations are approximate.</p>
           </div>
 
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
-            {filtered.map((brother, i) => (
-              <motion.div key={brother.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }} transition={{ delay: i * 0.06 }}
-                className="bg-card border border-border rounded-2xl p-5 hover:border-primary/40 transition-all">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center font-heading text-lg text-white" style={{ background: FG }}>
-                      {brother.avatar}
-                    </div>
-                    <div>
-                      <p className="font-heading text-base tracking-wider uppercase">{brother.name}</p>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <MapPin className="w-3 h-3" />{brother.city}
+          {loading ? (
+            <div className="flex justify-center py-16"><div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" /></div>
+          ) : (
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
+              {filtered.map((brother, i) => {
+                const isConnected = connectedIds.has(brother.id);
+                const isPending = pendingIds.has(brother.id);
+                const isMe = user?.id === brother.id;
+
+                return (
+                  <motion.div key={brother.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }} transition={{ delay: i * 0.06 }}
+                    className="bg-card border border-border rounded-2xl p-5 hover:border-primary/40 transition-all">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center font-heading text-lg text-white" style={{ background: FG }}>
+                          {brother.avatar}
+                        </div>
+                        <div>
+                          <p className="font-heading text-base tracking-wider uppercase">{isMe ? 'You' : brother.name}</p>
+                          {brother.city && (
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <MapPin className="w-3 h-3" />{brother.city}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <div className="mb-3">
-                  <p className="text-[10px] font-heading tracking-wider uppercase text-muted-foreground mb-1">Retreats Attended</p>
-                  <div className="flex flex-wrap gap-1">
-                    {brother.retreats.map(r => (
-                      <span key={r} className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">{r}</span>
-                    ))}
-                  </div>
-                </div>
+                    {brother.archetype && (
+                      <div className="mb-2">
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-heading tracking-wider uppercase">
+                          {brother.archetype}
+                        </span>
+                      </div>
+                    )}
 
-                <div className="mb-4">
-                  <p className="text-[10px] font-heading tracking-wider uppercase text-muted-foreground mb-1">Interests</p>
-                  <div className="flex flex-wrap gap-1">
-                    {brother.interests.map(interest => (
-                      <span key={interest} className="text-[10px] px-2 py-0.5 rounded-full border border-border text-muted-foreground">{interest}</span>
-                    ))}
-                  </div>
-                </div>
+                    {brother.retreats.length > 0 && (
+                      <div className="mb-3">
+                        <p className="text-[10px] font-heading tracking-wider uppercase text-muted-foreground mb-1">Retreats Attended</p>
+                        <div className="flex flex-wrap gap-1">
+                          {brother.retreats.map(r => (
+                            <span key={r} className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">{r}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-                {connected.includes(brother.id) ? (
-                  <div className="flex items-center gap-2 text-xs font-heading tracking-wider" style={{ color: FG }}>
-                    <Check className="w-4 h-4" /> Request Sent
-                  </div>
-                ) : (
-                  <Button onClick={() => connect(brother.id)} size="sm" variant="outline"
-                    className="w-full font-heading tracking-wider uppercase text-xs">
-                    <UserPlus className="w-3.5 h-3.5 mr-1" /> Connect
-                  </Button>
-                )}
-              </motion.div>
-            ))}
-          </div>
+                    {brother.interests.length > 0 && (
+                      <div className="mb-4">
+                        <p className="text-[10px] font-heading tracking-wider uppercase text-muted-foreground mb-1">Interests</p>
+                        <div className="flex flex-wrap gap-1">
+                          {brother.interests.map(interest => (
+                            <span key={interest} className="text-[10px] px-2 py-0.5 rounded-full border border-border text-muted-foreground">{interest}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-          {filtered.length === 0 && (
+                    {brother.bio && (
+                      <p className="text-xs text-muted-foreground mb-4 italic line-clamp-2">{brother.bio}</p>
+                    )}
+
+                    {isMe ? (
+                      <p className="text-xs text-muted-foreground text-center font-heading tracking-wider uppercase">This is you</p>
+                    ) : isConnected ? (
+                      <div className="flex items-center gap-2 text-xs font-heading tracking-wider justify-center" style={{ color: FG }}>
+                        <Check className="w-4 h-4" /> Connected
+                      </div>
+                    ) : isPending ? (
+                      <div className="flex items-center gap-2 text-xs font-heading tracking-wider justify-center text-muted-foreground">
+                        <MessageCircle className="w-4 h-4" /> Request Sent
+                      </div>
+                    ) : isAuthenticated ? (
+                      <Button onClick={() => handleConnect(brother.id)} size="sm" variant="outline"
+                        className="w-full font-heading tracking-wider uppercase text-xs">
+                        <UserPlus className="w-3.5 h-3.5 mr-1" /> Connect
+                      </Button>
+                    ) : (
+                      <Button asChild size="sm" variant="outline" className="w-full font-heading tracking-wider uppercase text-xs">
+                        <Link to="/auth/signin"><UserPlus className="w-3.5 h-3.5 mr-1" /> Sign in to Connect</Link>
+                      </Button>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+
+          {!loading && filtered.length === 0 && (
             <div className="text-center py-16 text-muted-foreground">
               <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p className="font-heading tracking-wider uppercase">No brothers found</p>
+              <p className="text-xs mt-2">Try a different search term, or check back when more brothers opt in.</p>
             </div>
           )}
         </div>

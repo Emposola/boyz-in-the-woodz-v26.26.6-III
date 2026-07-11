@@ -22,6 +22,7 @@ import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { usePledge } from '@/lib/pledgeContext';
 import SEO from '@/components/shared/SEO';
+import StripePaymentForm from '@/components/shared/StripePaymentForm';
 
 // --- Skeleton Loader ---
 const SkeletonLoader = () => (
@@ -78,7 +79,9 @@ export default function Account() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [expandedOrderId, setExpandedOrderId] = useState(null);
+  const [payingBalanceAppId, setPayingBalanceAppId] = useState(null);
   const { pledgeAccepted } = usePledge();
+  const FG = '#2D5A27';
 
   const logout = async () => {
     await logoutAuth();
@@ -89,7 +92,23 @@ export default function Account() {
     if (!isLoadingAuth) setLoading(false);
   }, [isLoadingAuth]);
 
+  useEffect(() => {
+    if (sessionStorage.getItem('bw_welcome_toast') === 'true') {
+      sessionStorage.removeItem('bw_welcome_toast');
+      toast.success('Welcome to the Brotherhood! You earned 100 points + the First Step badge.', { duration: 6000 });
+    }
+  }, []);
+
   // Fetch user data
+  const { data: profileData } = useQuery({
+    queryKey: ['profile-points', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from('profiles').select('loyalty_points').eq('id', user.id).single();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
   const { data: transactions = [] } = useQuery({
     queryKey: ['loyalty', user?.id],
     queryFn: () => api.entities.LoyaltyTransaction.filter({ user_id: user.id }, '-created_date', 50),
@@ -111,6 +130,7 @@ export default function Account() {
   const { data: retreatApps = [] } = useQuery({
     queryKey: ['retreat-apps', user?.id],
     queryFn: () => api.entities.RetreatApplication.filter({ user_id: user.id }, '-created_date', 10),
+    refetchInterval: 5000,
   });
 
   const { data: submissions = [] } = useQuery({
@@ -126,8 +146,8 @@ export default function Account() {
     enabled: !!user?.id,
   });
 
-  // Calculate points
-  const pointsBalance = transactions.reduce((sum, t) => sum + (t.points_amount || 0), 0);
+  // Calculate points from profile (source of truth)
+  const pointsBalance = profileData?.loyalty_points || 0;
   const dollarValue = (pointsBalance / 500) * 5;
   const referralLink = user ? `${window.location.origin}?ref=${user.id}` : '';
 
@@ -347,18 +367,81 @@ export default function Account() {
                   pending: 'text-amber-400 bg-amber-400/10 border-amber-400/20',
                   waitlist: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
                   confirmed: 'text-green-400 bg-green-400/10 border-green-400/20',
-                  attended: 'text-primary bg-primary/10 border-primary/20',
                   cancelled: 'text-red-400 bg-red-400/10 border-red-400/20'
                 };
+                const isPayingBalance = payingBalanceAppId === app.id;
                 return (
-                  <div key={app.id} className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:border-primary/30 transition-all">
-                    <div>
-                      <p className="text-sm font-medium text-white">{app.location_name || app.responses?.location_name}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{app.requested_date || app.responses?.requested_date}</p>
+                  <div key={app.id} className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-4 hover:border-primary/30 transition-all">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                      <div>
+                        <p className="text-sm font-medium text-white">{app.location_name || app.responses?.location_name}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{app.requested_date || app.responses?.requested_date}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className={`${statusColors[app.status] || 'text-gray-400 bg-gray-700/50'} border`}>
+                          {app.status}
+                        </Badge>
+
+                        {/* Pay Balance — for confirmed apps with outstanding balance */}
+                        {app.status === 'confirmed' && app.deposit_paid && !app.balance_paid && (
+                          <Button size="sm" onClick={() => setPayingBalanceAppId(app.id)}
+                            className="font-heading tracking-wider uppercase text-xs gap-1"
+                            style={{ background: FG }}>
+                            Pay Balance
+                          </Button>
+                        )}
+                        {app.balance_paid && (
+                          <Badge className="bg-blue-900/40 text-blue-400 border-blue-800/40 border text-[10px]">
+                            Balance Paid ✓
+                          </Badge>
+                        )}
+
+                        {/* Survey — after attended */}
+                        {app.attended && !app.responses?.survey_completed && (
+                          <Link to={`/retreat/survey?id=${app.id}`}
+                            className="text-xs font-heading tracking-wider uppercase px-3 py-1 rounded-lg transition-colors"
+                            style={{ background: `${FG}20`, color: FG }}
+                            title="Complete the post-retreat survey to earn +100 Brotherhood Points">
+                            Survey
+                          </Link>
+                        )}
+                        {app.responses?.survey_completed && (
+                          <Check className="w-4 h-4 flex-shrink-0" style={{ color: FG }} />
+                        )}
+                      </div>
                     </div>
-                    <Badge className={`${statusColors[app.status] || 'text-gray-400 bg-gray-700/50'} border`}>
-                      {app.status}
-                    </Badge>
+
+                    {/* Balance payment Stripe form */}
+                    {isPayingBalance && (
+                      <div className="mt-4 border-t border-gray-700/50 pt-4">
+                        <p className="text-sm text-gray-300 mb-3 font-heading tracking-wider uppercase">
+                          Pay Remaining Balance — ${app.balance_amount ?? '—'}
+                        </p>
+                        <StripePaymentForm
+                          amount={app.balance_amount ?? 0}
+                          onSuccess={async (paymentIntent) => {
+                            await supabase
+                              .from('retreat_applications')
+                              .update({
+                                balance_paid: true,
+                                paid_in_full: true,
+                                stripe_balance_payment_id: paymentIntent.id,
+                              })
+                              .eq('id', app.id);
+                            setPayingBalanceAppId(null);
+                            toast.success('Balance paid in full!');
+                          }}
+                          onError={(err) => {
+                            toast.error(err?.message || 'Balance payment failed');
+                          }}
+                          buttonText={`Pay $${app.balance_amount ?? 0}`}
+                        />
+                        <Button size="sm" variant="outline" onClick={() => setPayingBalanceAppId(null)}
+                          className="mt-2 font-heading tracking-wider uppercase text-xs border-gray-600">
+                          Cancel
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 );
               })
@@ -528,11 +611,11 @@ export default function Account() {
               transactions.map(t => (
                 <div key={t.id} className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-3 flex justify-between items-center hover:border-primary/30 transition-all">
                   <div>
-                    <p className="text-sm text-white">{t.description || t.source}</p>
+                    <p className="text-sm text-white">{t.description || t.source || 'Points earned'}</p>
                     <p className="text-xs text-gray-400">{t.created_date && format(new Date(t.created_date), 'MMM d, yyyy')}</p>
                   </div>
-                  <span className={`font-heading text-lg ${t.type === 'earn' ? 'text-green-400' : 'text-red-400'}`}>
-                    {t.type === 'earn' ? '+' : ''}{t.points_amount}
+                  <span className={`font-heading text-lg ${!t.type || t.type === 'earn' ? 'text-green-400' : 'text-red-400'}`}>
+                    {!t.type || t.type === 'earn' ? '+' : ''}{t.points_amount}
                   </span>
                 </div>
               ))

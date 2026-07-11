@@ -19,7 +19,7 @@ const TABS = ['applications', 'events'];
 
 const APP_STATUS_COLORS = {
   pending:  'bg-yellow-900/40 text-yellow-400 border-yellow-800/40',
-  approved: 'bg-green-900/40 text-green-400 border-green-800/40',
+  confirmed: 'bg-green-900/40 text-green-400 border-green-800/40',
   waitlist: 'bg-blue-900/40 text-blue-400 border-blue-800/40',
   rejected: 'bg-red-900/40 text-red-400 border-red-800/40',
 };
@@ -58,6 +58,16 @@ function AppRow({ app, onUpdate }) {
             {app.deposit_paid && (
               <span className="text-[10px] font-heading tracking-wider uppercase px-2 py-0.5 rounded-full bg-green-900/40 text-green-400 border border-green-800/40">
                 Deposit Paid ✓
+              </span>
+            )}
+            {app.balance_paid && (
+              <span className="text-[10px] font-heading tracking-wider uppercase px-2 py-0.5 rounded-full bg-blue-900/40 text-blue-400 border border-blue-800/40">
+                Balance Paid ✓
+              </span>
+            )}
+            {app.attended && (
+              <span className="text-[10px] font-heading tracking-wider uppercase px-2 py-0.5 rounded-full bg-purple-900/40 text-purple-400 border border-purple-800/40">
+                Attended ✓
               </span>
             )}
           </div>
@@ -101,34 +111,79 @@ function AppRow({ app, onUpdate }) {
                 </div>
               </div>
 
+              {/* Payment info */}
+              <div className="bg-secondary/30 rounded-lg p-3 mb-4 text-sm space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total price</span>
+                  <span>${app.total_amount ?? '—'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Deposit</span>
+                  <span className={app.deposit_paid ? 'text-green-400' : 'text-orange-400'}>
+                    ${app.deposit_amount ?? '—'} {app.deposit_paid ? '✓ Paid' : '(pending)'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Balance</span>
+                  <span className={app.balance_paid ? 'text-green-400' : 'text-orange-400'}>
+                    ${app.balance_amount ?? '—'} {app.balance_paid ? '✓ Paid' : '(pending)'}
+                  </span>
+                </div>
+                {app.paid_in_full && (
+                  <div className="flex justify-between text-green-400 font-medium border-t border-border pt-1 mt-1">
+                    <span>Paid in full</span>
+                    <span>✓</span>
+                  </div>
+                )}
+              </div>
+
               {/* Action buttons */}
               <div className="flex flex-wrap gap-2">
                 {app.payment_pending && !app.deposit_paid && (
                   <Button onClick={() => onUpdate(app.id, 'deposit_paid')} size="sm"
+                    title="Manually mark the deposit as paid (if paid outside Stripe)"
                     className="font-heading tracking-wider uppercase text-xs gap-1.5 bg-orange-600 hover:bg-orange-500 text-white">
                     ✓ Mark Deposit Paid
                   </Button>
                 )}
-                {app.status !== 'approved' && (
-                  <Button onClick={() => onUpdate(app.id, 'approved')} size="sm"
+                {app.status !== 'confirmed' && (
+                  <Button onClick={() => onUpdate(app.id, 'confirmed')} size="sm"
+                    title="Approve this application — moves the applicant to confirmed status"
                     className="font-heading tracking-wider uppercase text-xs gap-1.5" style={{ background: FG }}>
                     <Check className="w-3.5 h-3.5" /> Approve
                   </Button>
                 )}
+                {app.status === 'confirmed' && !app.attended && (
+                  <Button onClick={() => onUpdate(app.id, 'attended')} size="sm"
+                    title="Mark that this brother attended the retreat — unlocks survey & points"
+                    className="font-heading tracking-wider uppercase text-xs gap-1.5 bg-green-600 hover:bg-green-500 text-white">
+                    <Check className="w-3.5 h-3.5" /> Mark Attended
+                  </Button>
+                )}
+                {app.deposit_paid && !app.balance_paid && (
+                  <Button onClick={() => onUpdate(app.id, 'balance_paid')} size="sm"
+                    title="Mark the remaining balance as paid"
+                    className="font-heading tracking-wider uppercase text-xs gap-1.5 bg-blue-600 hover:bg-blue-500 text-white">
+                    ✓ Mark Balance Paid
+                  </Button>
+                )}
                 {app.status !== 'waitlist' && (
                   <Button onClick={() => onUpdate(app.id, 'waitlist')} size="sm" variant="outline"
+                    title="Move this applicant to the waitlist"
                     className="font-heading tracking-wider uppercase text-xs gap-1.5">
                     <Users className="w-3.5 h-3.5" /> Waitlist
                   </Button>
                 )}
                 {app.status !== 'rejected' && (
                   <Button onClick={() => onUpdate(app.id, 'rejected')} size="sm" variant="destructive"
+                    title="Reject this application"
                     className="font-heading tracking-wider uppercase text-xs gap-1.5">
                     <X className="w-3.5 h-3.5" /> Reject
                   </Button>
                 )}
                 {app.status !== 'pending' && (
                   <Button onClick={() => onUpdate(app.id, 'pending')} size="sm" variant="outline"
+                    title="Reset the application status back to pending for re-review"
                     className="font-heading tracking-wider uppercase text-xs">
                     Reset to Pending
                   </Button>
@@ -258,18 +313,24 @@ function EventForm({ initial, onSave, onCancel }) {
 export default function AdminRetreats() {
   const [tab, setTab] = useState('applications');
   const [appStatusFilter, setAppStatusFilter] = useState('pending');
+  const [paymentFilter, setPaymentFilter] = useState('all');
   const [showEventForm, setShowEventForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const qc = useQueryClient();
 
   /* Applications */
   const { data: applications = [], isLoading: appsLoading } = useQuery({
-    queryKey: ['admin-retreat-apps', appStatusFilter],
+    queryKey: ['admin-retreat-apps', appStatusFilter, paymentFilter],
+    refetchInterval: 5000,
     queryFn: async () => {
       let q = supabase.from('retreat_applications')
         .select('*')
         .order('created_date', { ascending: false });
       if (appStatusFilter !== 'all') q = q.eq('status', appStatusFilter);
+      if (paymentFilter === 'deposit_paid') q = q.eq('deposit_paid', true);
+      else if (paymentFilter === 'balance_paid') q = q.eq('balance_paid', true);
+      else if (paymentFilter === 'paid_in_full') q = q.eq('paid_in_full', true);
+      else if (paymentFilter === 'unpaid') q = q.eq('deposit_paid', false);
       const { data, error } = await q;
       if (error) throw error;
       return data || [];
@@ -279,6 +340,7 @@ export default function AdminRetreats() {
   /* Events */
   const { data: events = [], isLoading: eventsLoading } = useQuery({
     queryKey: ['admin-retreat-events'],
+    refetchInterval: 5000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('events')
@@ -292,6 +354,7 @@ export default function AdminRetreats() {
   /* Counts per status */
   const { data: appCounts = {} } = useQuery({
     queryKey: ['admin-retreat-app-counts'],
+    refetchInterval: 5000,
     queryFn: async () => {
       const { data } = await supabase
         .from('retreat_applications')
@@ -308,6 +371,18 @@ export default function AdminRetreats() {
         const { error } = await supabase
           .from('retreat_applications')
           .update({ deposit_paid: true, payment_pending: false })
+          .eq('id', id);
+        if (error) throw error;
+      } else if (status === 'attended') {
+        const { error } = await supabase
+          .from('retreat_applications')
+          .update({ attended: true })
+          .eq('id', id);
+        if (error) throw error;
+      } else if (status === 'balance_paid') {
+        const { error } = await supabase
+          .from('retreat_applications')
+          .update({ balance_paid: true, paid_in_full: true })
           .eq('id', id);
         if (error) throw error;
       } else {
@@ -367,10 +442,18 @@ export default function AdminRetreats() {
 
   const APP_FILTERS = [
     { key: 'pending',  label: `Pending (${appCounts.pending || 0})` },
-    { key: 'approved', label: `Approved (${appCounts.approved || 0})` },
+    { key: 'confirmed', label: `Confirmed (${appCounts.confirmed || 0})` },
     { key: 'waitlist', label: `Waitlist (${appCounts.waitlist || 0})` },
     { key: 'rejected', label: `Rejected (${appCounts.rejected || 0})` },
     { key: 'all',      label: `All (${appCounts.all || 0})` },
+  ];
+
+  const PAYMENT_FILTERS = [
+    { key: 'all',          label: 'All Payments' },
+    { key: 'deposit_paid', label: 'Deposit Paid' },
+    { key: 'balance_paid', label: 'Balance Paid' },
+    { key: 'paid_in_full', label: 'Paid in Full' },
+    { key: 'unpaid',       label: 'Unpaid' },
   ];
 
   return (
@@ -402,15 +485,44 @@ export default function AdminRetreats() {
       {tab === 'applications' && (
         <div>
           {/* Status filter pills */}
-          <div className="flex gap-2 flex-wrap mb-5">
+          <div className="flex gap-2 flex-wrap mb-3">
             {APP_FILTERS.map(f => (
               <button key={f.key} onClick={() => setAppStatusFilter(f.key)}
+                title={{
+                  pending: 'Applications awaiting review',
+                  confirmed: 'Approved applicants awaiting their retreat',
+                  waitlist: 'On waitlist — will be moved up if spots open',
+                  rejected: 'Applications that were declined',
+                  all: 'Show all applications regardless of status',
+                }[f.key]}
                 className={`px-3 py-1.5 rounded-full text-xs font-heading tracking-wider uppercase border transition-all ${
                   appStatusFilter === f.key
                     ? 'text-white border-transparent'
                     : 'border-border text-muted-foreground hover:border-primary/40'
                 }`}
                 style={appStatusFilter === f.key ? { background: FG } : {}}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Payment filter pills */}
+          <div className="flex gap-2 flex-wrap mb-5">
+            {PAYMENT_FILTERS.map(f => (
+              <button key={f.key} onClick={() => setPaymentFilter(f.key)}
+                title={{
+                  all: 'All payment statuses',
+                  deposit_paid: 'Deposit has been paid',
+                  balance_paid: 'Balance has been paid',
+                  paid_in_full: 'Fully paid — deposit + balance',
+                  unpaid: 'No payment received yet',
+                }[f.key]}
+                className={`px-3 py-1.5 rounded-full text-xs font-heading tracking-wider uppercase border transition-all ${
+                  paymentFilter === f.key
+                    ? 'text-white border-transparent'
+                    : 'border-border text-muted-foreground hover:border-primary/40'
+                }`}
+                style={paymentFilter === f.key ? { background: '#1a3a1a' } : {}}>
                 {f.label}
               </button>
             ))}

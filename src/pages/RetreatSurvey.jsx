@@ -6,7 +6,8 @@ import React, { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { api } from '@/api/supabaseClient';
-import { Camera, CheckCircle, Upload } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
@@ -43,49 +44,68 @@ export default function RetreatSurvey() {
   const { user, isAuthenticated, isLoadingAuth } = useAuth();
   const navigate = useNavigate();
   const [answers, setAnswers] = useState({});
-  const [proofPhoto, setProofPhoto] = useState(null);
-  const [uploading, setUploading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [validating, setValidating] = useState(true);
+  const [accessDenied, setAccessDenied] = useState(null);
   const urlParams = new URLSearchParams(window.location.search);
   const appId = urlParams.get('id');
 
-  const setAnswer = (id, val) => setAnswers(p => ({ ...p, [id]: val }));
+  React.useEffect(() => {
+    if (isLoadingAuth) return;
+    if (!isAuthenticated) { navigate('/auth/signin?redirect=/retreat/survey' + (appId ? `%3Fid%3D${appId}` : '')); return; }
+    if (!appId) { setAccessDenied('No retreat application specified.'); setValidating(false); return; }
+    api.entities.RetreatApplication.get(appId).then(app => {
+      if (!app) { setAccessDenied('Retreat application not found.'); setValidating(false); return; }
+      if (app.user_id !== user.id) { setAccessDenied('This application does not belong to you.'); setValidating(false); return; }
+      if (app.responses?.survey_completed) { setAccessDenied('Survey already completed for this retreat.'); setValidating(false); return; }
+      if (!app.attended && app.status !== 'confirmed') { setAccessDenied('Survey is only available for completed retreats.'); setValidating(false); return; }
+      setValidating(false);
+    }).catch(() => { setAccessDenied('Error loading application.'); setValidating(false); });
+  }, [isAuthenticated, isLoadingAuth, user, appId, navigate]);
 
-  const handlePhotoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploading(true);
-    const { file_url } = await api.integrations.Core.UploadFile({ file });
-    setProofPhoto(file_url);
-    setUploading(false);
-    toast.success('Photo uploaded!');
-  };
+  const setAnswer = (id, val) => setAnswers(p => ({ ...p, [id]: val }));
 
   const handleSubmit = async () => {
     if (!isAuthenticated && !isLoadingAuth) { navigate('/auth/signin'); return; }
-    // Update the application with survey data
-    if (appId) {
-      const existingApp = await api.entities.RetreatApplication.get(appId);
-      const updatedResponses = {
-        ...(existingApp?.responses || {}),
-        survey_completed: true,
-        proof_photo_url: proofPhoto,
-        survey_answers: answers,
-      };
-      await api.entities.RetreatApplication.update(appId, {
-        responses: updatedResponses,
+    try {
+      // Update the application with survey data
+      if (appId) {
+        const existingApp = await api.entities.RetreatApplication.get(appId);
+        const updatedResponses = {
+          ...(existingApp?.responses || {}),
+          survey_completed: true,
+          survey_answers: answers,
+        };
+        await api.entities.RetreatApplication.update(appId, {
+          responses: updatedResponses,
+        });
+      }
+      // Award 100 loyalty points
+      await supabase.from('loyalty_transactions').insert({
+        user_id: user.id,
+        points_amount: 100,
+        type: 'earn',
+        source: 'retreat_survey',
+        description: 'Post-retreat survey completed',
       });
+
+      const { data: curProf } = await supabase.from('profiles').select('loyalty_points').eq('id', user.id).single();
+      await supabase.from('profiles').update({ loyalty_points: (curProf?.loyalty_points || 0) + 100, last_active_at: new Date().toISOString() }).eq('id', user.id);
+
+      try {
+        await supabase.from('activity_feed').insert({
+          user_id: user.id,
+          action_type: 'retreat_survey',
+          description: 'Post-retreat survey completed',
+          points: 100,
+        });
+      } catch (_) { /* activity_feed may not exist */ }
+
+      setSubmitted(true);
+      toast.success('+100 Brotherhood Points earned!');
+    } catch (err) {
+      toast.error(err?.message || 'Failed to submit survey');
     }
-    // Award 100 loyalty points
-    await api.entities.LoyaltyTransaction.create({
-      user_id: user.id,
-      points_amount: 100,
-      type: 'earn',
-      source: 'survey',
-      description: 'Post-retreat survey completed',
-    });
-    setSubmitted(true);
-    toast.success('+100 Brotherhood Points earned!');
   };
 
   const allAnswered = QUESTIONS.every(q => {
@@ -100,12 +120,25 @@ export default function RetreatSurvey() {
         <CheckCircle className="w-16 h-16 text-primary mb-4" />
         <h1 className="font-heading text-4xl tracking-wide uppercase">Thank You, Brother</h1>
         <p className="text-muted-foreground text-sm mt-2 mb-2">Your survey is submitted and +100 Brotherhood Points have been added.</p>
-        {proofPhoto && (
-          <div className="mt-4 w-48 h-48 rounded-xl overflow-hidden">
-            <img src={proofPhoto} alt="Proof" className="w-full h-full object-cover" />
-          </div>
-        )}
         <Button className="mt-6 font-heading tracking-wider uppercase" onClick={() => window.location.href = '/account'}>View My Points</Button>
+      </div>
+    );
+  }
+
+  if (validating) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (accessDenied) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4 text-center bg-background">
+        <h1 className="font-heading text-3xl tracking-wide uppercase text-foreground mb-3">Access Denied</h1>
+        <p className="text-muted-foreground text-sm mb-6">{accessDenied}</p>
+        <Button onClick={() => window.location.href = '/account'} className="font-heading tracking-wider uppercase" style={{ background: '#2D5A27' }}>Go to Account</Button>
       </div>
     );
   }
@@ -143,27 +176,6 @@ export default function RetreatSurvey() {
             )}
           </motion.div>
         ))}
-
-        {/* Proof Photo Upload */}
-        <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-card border border-border rounded-xl p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <Camera className="w-5 h-5 text-primary" />
-            <h3 className="font-heading text-lg tracking-wider uppercase">Upload Proof Photo</h3>
-          </div>
-          <p className="text-xs text-muted-foreground mb-4">Optional but encouraged. This becomes your badge of honor on your profile.</p>
-          {proofPhoto ? (
-            <div className="relative">
-              <img src={proofPhoto} alt="Proof" className="w-full h-48 object-cover rounded-lg" />
-              <button onClick={() => setProofPhoto(null)} className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">Remove</button>
-            </div>
-          ) : (
-            <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg p-8 cursor-pointer hover:border-primary/40 transition-colors">
-              <Upload className="w-8 h-8 text-muted-foreground mb-2" />
-              <span className="text-sm text-muted-foreground">{uploading ? 'Uploading...' : 'Click to upload photo'}</span>
-              <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} disabled={uploading} />
-            </label>
-          )}
-        </motion.div>
 
         <Button onClick={handleSubmit} disabled={!allAnswered} className="w-full font-heading tracking-wider uppercase py-6 text-base">
           Submit Survey & Earn 100 Points

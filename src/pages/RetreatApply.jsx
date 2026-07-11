@@ -15,7 +15,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Trees, MapPin, Heart, Shield, CheckCircle, ArrowLeft,
-  ArrowRight, CreditCard, Lock, Clock, Users, Calendar, DollarSign, Check
+  ArrowRight, CreditCard, Lock, Clock, Calendar, DollarSign
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -79,8 +79,6 @@ export default function RetreatApply() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [depositConfirmed, setDepositConfirmed] = useState(false);
-  const [depositPaid, setDepositPaid] = useState(false);
 
   const [form, setForm] = useState({
     retreat: null,
@@ -126,12 +124,12 @@ export default function RetreatApply() {
     if (step === 0) return !!selectedRetreat;
     if (step === 1) return form.emergency_contact_name && form.emergency_contact_phone;
     if (step === 3) return allCodeChecked;
-    if (step === 5) return depositConfirmed;
+    if (step === 5) return true;
     return true;
   };
 
-  /* ── Submit ── */
-  const handleSubmit = async () => {
+  /* ── Payment Success — insert application, then redirect ── */
+  const handlePaymentSuccess = async (paymentIntent) => {
     if (!isAuthenticated || !user) {
       navigate('/auth/signin?redirect=/retreat/apply');
       return;
@@ -148,11 +146,12 @@ export default function RetreatApply() {
         user_id: user.id,
         event_id: isRealEvent ? selectedRetreat.id : null,
         status: 'pending',
-        deposit_paid: depositPaid,
-        payment_pending: !depositPaid,
+        deposit_paid: true,
+        payment_pending: false,
         deposit_amount: depositAmount,
         balance_amount: balanceAmount,
         total_amount: fullPrice,
+        stripe_deposit_payment_id: paymentIntent.id,
         responses: {
           retreat_title: selectedRetreat.title,
           location_name: selectedRetreat.location_name,
@@ -186,10 +185,10 @@ export default function RetreatApply() {
       }
 
       setSubmitted(true);
-      toast.success('Application submitted! We\'ll contact you with payment details within 24 hours.');
     } catch (err) {
       console.error('Retreat application error:', err);
-      setError(err.message || 'Unable to submit your application. Please try again.');
+      const msg = `Payment succeeded but we couldn't save your application. Contact support with payment ID: ${paymentIntent.id}`;
+      setError(err.message ? `${msg} Details: ${err.message}` : msg);
     } finally {
       setSubmitting(false);
     }
@@ -208,17 +207,17 @@ export default function RetreatApply() {
           <p className="text-muted-foreground text-sm mb-2 max-w-md">
             Your application is in. We review every man personally.
           </p>
-          <div className="bg-card border border-border rounded-xl p-5 my-6 text-left space-y-3">
+            <div className="bg-card border border-border rounded-xl p-5 my-6 text-left space-y-3">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Retreat</span>
               <span className="font-medium">{selectedRetreat?.title}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Deposit due</span>
+              <span className="text-muted-foreground">Deposit paid</span>
               <span className="font-heading text-lg" style={{ color: FG }}>${depositAmount}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Balance (on approval)</span>
+              <span className="text-muted-foreground">Balance (due on approval)</span>
               <span className="text-muted-foreground">${balanceAmount}</span>
             </div>
             <div className="border-t border-border pt-3 flex justify-between text-sm font-medium">
@@ -492,40 +491,22 @@ export default function RetreatApply() {
                   </span>
                 </div>
 
-                {/* Stripe payment */}
-                {depositPaid ? (
-                  <div className="bg-green-900/20 border border-green-800/30 rounded-lg p-4 text-center">
-                    <Check className="w-8 h-8 text-green-400 mx-auto mb-2" />
-                    <p className="text-sm font-medium text-green-300">Deposit Paid — ${depositAmount}</p>
-                  </div>
-                ) : (
-                  <StripePaymentForm
-                    amount={depositAmount}
-                    onSuccess={() => setDepositPaid(true)}
-                    buttonText={`Pay Deposit — $${depositAmount}`}
-                  />
-                )}
+                {/* Stripe payment — pays deposit AND submits application */}
+                <StripePaymentForm
+                  amount={depositAmount}
+                  onSuccess={handlePaymentSuccess}
+                  onError={(err) => toast.error(err?.message || 'Payment failed')}
+                  buttonText={`Pay Deposit — $${depositAmount}`}
+                />
 
                 {/* Policy */}
                 <div className="bg-amber-900/10 border border-amber-800/30 rounded-lg p-3 text-xs text-amber-400 flex items-start gap-2">
                   <Clock className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
                   <span>
                     The deposit is <strong>non-refundable</strong> but transferable to another retreat date.
-                    The remaining balance is due on or before the retreat start date.
-                  </span>
-                </div>
-
-                {/* Confirmation checkbox */}
-                <label className="flex items-start gap-3 cursor-pointer">
-                  <input type="checkbox"
-                    checked={depositConfirmed}
-                    onChange={e => setDepositConfirmed(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 accent-primary rounded" />
-                  <span className="text-sm text-muted-foreground">
-                    I understand the <strong className="text-foreground">${depositAmount} deposit is non-refundable</strong>.
                     The remaining balance of <strong className="text-foreground">${balanceAmount}</strong> is due before the retreat.
                   </span>
-                </label>
+                </div>
               </div>
 
             </div>
@@ -547,20 +528,9 @@ export default function RetreatApply() {
             <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
           </Button>
         ) : (
-          <Button onClick={handleSubmit} disabled={submitting || !depositConfirmed}
-            className="font-heading tracking-wider uppercase flex-1 py-5 text-sm" style={{ background: FG }}>
-            {submitting ? (
-              <span className="flex items-center gap-2">
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Submitting...
-              </span>
-            ) : (
-              <span className="flex items-center gap-2">
-                <Shield className="w-4 h-4" />
-                Submit Application
-              </span>
-            )}
-          </Button>
+          <div className="text-xs text-muted-foreground text-right">
+            Pay via the secure form above to submit your application
+          </div>
         )}
       </div>
     </div>

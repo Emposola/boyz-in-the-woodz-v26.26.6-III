@@ -32,7 +32,7 @@ export default function SignUp() {
   const location = useLocation();
   
   const queryParams = new URLSearchParams(location.search);
-  const redirectTo = queryParams.get('redirect') || '/account';
+  const redirectTo = queryParams.get('redirect') || '/welcome';
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });

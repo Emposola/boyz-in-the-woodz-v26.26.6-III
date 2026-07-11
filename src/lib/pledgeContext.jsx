@@ -1,8 +1,10 @@
 /* ============================================================
    PLEDGE CONTEXT — Tracks if user has accepted The Code
-   Also exposes a trigger to open the pledge modal
+   Now persists to DB (profiles.pledge_accepted) for logged-in users
+   Falls back to localStorage for guests
    ============================================================ */
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from './supabase';
 
 const PledgeContext = createContext();
 
@@ -12,9 +14,19 @@ export function PledgeProvider({ children }) {
   });
   const [pledgeOpen, setPledgeOpen] = useState(false);
 
-  const acceptPledge = () => {
+  const acceptPledge = async (userId) => {
     setPledgeAccepted(true);
     localStorage.setItem('bitw_pledge', 'true');
+
+    if (userId) {
+      await supabase
+        .from('profiles')
+        .update({
+          pledge_accepted: true,
+          pledged_at: new Date().toISOString(),
+        })
+        .eq('id', userId);
+    }
   };
 
   const openPledge = () => setPledgeOpen(true);

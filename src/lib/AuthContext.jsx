@@ -38,6 +38,41 @@ export const AuthProvider = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const awardWelcomePoints = async (userId) => {
+    const { error: ltErr } = await supabase.from('loyalty_transactions').insert({
+      user_id: userId,
+      points_amount: 100,
+      type: 'earn',
+      source: 'welcome_bonus',
+      description: 'Welcome to the Brotherhood! +100 points',
+    });
+    if (ltErr) { console.debug('welcome points insert error:', ltErr.message); return; }
+
+    await supabase.from('profiles').update({
+      loyalty_points: 100,
+      last_active_at: new Date().toISOString(),
+    }).eq('id', userId);
+
+    const { data: firstBadge } = await supabase
+      .from('badges')
+      .select('id')
+      .eq('slug', 'first-step')
+      .single();
+
+    if (firstBadge) {
+      await supabase.from('user_badges').insert({ user_id: userId, badge_id: firstBadge.id });
+      await supabase.from('activity_feed').insert({
+        user_id: userId,
+        action_type: 'badge_earned',
+        description: 'Earned the "First Step" badge',
+        points: 100,
+        metadata: { badge_slug: 'first-step' },
+      });
+    }
+
+    sessionStorage.setItem('bw_welcome_toast', 'true');
+  };
+
   const fetchOrCreateUserProfile = async (user) => {
     if (!user?.id) return null;
 
@@ -45,24 +80,29 @@ export const AuthProvider = ({ children }) => {
       .from('profiles')
       .select('*')
       .eq('id', user.id)
-      .maybeSingle(); // Use maybeSingle() instead of single()
+      .maybeSingle();
 
     if (error && error.code !== 'PGRST116') {
       console.debug('Error fetching profile:', error.message);
       return null;
     }
 
+    // Profile already exists (e.g. created by trigger)
     if (profile) {
       const mergedUser = { ...user, ...profile };
       setUser(mergedUser);
+      if (!profile.loyalty_points) {
+        awardWelcomePoints(user.id);
+      }
       return mergedUser;
     }
 
+    // No profile found — create one
     const profileDefaults = {
       id: user.id,
       email: user.email,
       full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || null,
-      role: user.user_metadata?.role || 'member',
+      role: user.user_metadata?.role || 'user',
       created_at: new Date().toISOString(),
     };
 
@@ -76,11 +116,14 @@ export const AuthProvider = ({ children }) => {
       console.debug('Error creating profile:', insertError.message);
       const mergedUser = { ...user, ...profileDefaults };
       setUser(mergedUser);
+      // Award welcome points anyway even if profile insert failed
+      awardWelcomePoints(user.id);
       return mergedUser;
     }
 
     const mergedUser = { ...user, ...createdProfile };
     setUser(mergedUser);
+    awardWelcomePoints(user.id);
     return mergedUser;
   };
 
@@ -136,7 +179,10 @@ export const AuthProvider = ({ children }) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: signUpMetadata }
+      options: {
+        data: signUpMetadata,
+        redirectTo: window.location.origin + '/auth/callback',
+      },
     });
     if (error) throw error;
 

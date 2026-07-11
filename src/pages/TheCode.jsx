@@ -2,11 +2,12 @@
    THE CODE — The 5 non-negotiables displayed as hero icons
    No Phones, Show Up, Respect, No Ego, Leave Better
    ============================================================ */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Smartphone, Footprints, Heart, Eye, ArrowUp, Shield } from 'lucide-react';
+import { Smartphone, Footprints, Heart, Eye, ArrowUp, Shield, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePledge } from '@/lib/pledgeContext';
+import { supabase } from '@/lib/supabase';
 import PledgeModal from '../components/shared/PledgeModal';
 import SEO from '@/components/shared/SEO';
 
@@ -46,6 +47,13 @@ const CODE_RULES = [
 export default function TheCode() {
   const { pledgeAccepted } = usePledge();
   const [pledgeOpen, setPledgeOpen] = useState(false);
+  const [brotherCount, setBrotherCount] = useState(null);
+
+  useEffect(() => {
+    supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('pledge_accepted', true)
+      .then(({ count }) => setBrotherCount(count ?? null))
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen">
@@ -76,6 +84,12 @@ export default function TheCode() {
           <Shield className="w-10 h-10 text-primary mx-auto mb-4" />
           <h1 className="font-heading text-5xl md:text-7xl tracking-wide uppercase">The Code</h1>
           <p className="text-muted-foreground text-sm mt-2">Five non-negotiables. One brotherhood.</p>
+          {brotherCount !== null && (
+            <p className="text-xs font-heading tracking-widest uppercase mt-3" style={{ color: '#D2B48C' }}>
+              <Users className="w-3 h-3 inline mr-1" />
+              {brotherCount.toLocaleString()} Brothers Pledged
+            </p>
+          )}
         </motion.div>
       </section>
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '@/lib/cartContext';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,7 @@ const STEPS = [
 export default function Cart() {
   const { items, updateQuantity, removeItem, clearCart, subtotal, itemCount } = useCart();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [step, setStep] = useState('cart');
   const [discountCode, setDiscountCode] = useState('');
   const [discountApplied, setDiscountApplied] = useState(false);
@@ -127,23 +129,26 @@ export default function Cart() {
       await supabase.from('loyalty_transactions').insert({
         user_id: user.id,
         points_amount: pointsEarned,
-        type: 'credit',
+        type: 'earn',
         source: 'purchase',
         description: `Order #${orderResult.id.slice(0, 8)}`,
       });
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('loyalty_points')
-        .eq('id', user.id)
-        .single();
+      const { data: curProf } = await supabase.from('profiles').select('loyalty_points').eq('id', user.id).single();
+      await supabase.from('profiles').update({ loyalty_points: (curProf?.loyalty_points || 0) + pointsEarned, last_active_at: new Date().toISOString() }).eq('id', user.id);
 
-      await supabase
-        .from('profiles')
-        .update({ loyalty_points: (profile?.loyalty_points || 0) + pointsEarned })
-        .eq('id', user.id);
+      await supabase.from('activity_feed').insert({
+        user_id: user.id,
+        action_type: 'purchase',
+        description: `Order #${orderResult.id.slice(0, 8)}`,
+        points: pointsEarned,
+        metadata: { order_id: orderResult.id },
+      }).catch(() => {});
 
-      setPlacedOrder(orderResult);
+      queryClient.invalidateQueries({ queryKey: ['loyalty'] });
+      queryClient.invalidateQueries({ queryKey: ['profile-points'] });
+
+      setPlacedOrder({ ...orderResult, _pointsEarned: pointsEarned });
       clearCart();
     } catch (err) {
       console.error('Checkout error:', err);
@@ -170,7 +175,7 @@ export default function Cart() {
           </p>
           <div className="bg-primary/10 rounded-xl p-4 mb-6 inline-flex items-center gap-2">
             <Coins className="w-5 h-5 text-primary" />
-            <span className="text-sm">You earned <strong className="text-foreground">{pointsEarned.toLocaleString()} Brotherhood Points</strong></span>
+            <span className="text-sm">You earned <strong className="text-foreground">{((placedOrder?._pointsEarned || Math.floor((placedOrder?.subtotal || 0) * 10))).toLocaleString()} Brotherhood Points</strong></span>
           </div>
           <div className="flex gap-3 justify-center">
             <Button asChild variant="outline" className="font-heading tracking-wider uppercase text-xs">
