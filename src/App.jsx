@@ -135,6 +135,8 @@ const BreathingTool = React.lazy(() => import('./pages/BreathingTool'));
 const DailyReset = React.lazy(() => import('./pages/DailyReset'));
 const BadgesPage = React.lazy(() => import('./pages/BadgesPage'));
 const MonthlyChallenge = React.lazy(() => import('./pages/MonthlyChallenge'));
+const ChallengeDashboard = React.lazy(() => import('./pages/ChallengeDashboard'));
+const ChallengeDetail = React.lazy(() => import('./pages/ChallengeDetail'));
 const LimitedDrops = React.lazy(() => import('./pages/LimitedDrops'));
 const TimeCapsule = React.lazy(() => import('./pages/TimeCapsule'));
 const MoodTracker = React.lazy(() => import('./pages/MoodTracker'));
@@ -260,7 +262,8 @@ const AuthenticatedApp = () => {
             {/* ── Brotherhood Hub ── */}
             <Route path="/brotherhood/directory" element={<BrotherhoodDirectory />} />
             <Route path="/brotherhood/leaderboard" element={<BrotherhoodHub />} />
-            <Route path="/brotherhood/challenges" element={<BrotherhoodHub />} />
+            <Route path="/brotherhood/challenges" element={<ChallengeDashboard />} />
+            <Route path="/brotherhood/challenges/:slug" element={<ChallengeDetail />} />
             <Route path="/brotherhood/statistics" element={<BrotherhoodHub />} />
             <Route path="/brotherhood/map" element={<Locations />} />
 
@@ -404,7 +407,7 @@ function App() {
     }}>
       <AuthProvider>
         <QueryClientProvider client={queryClientInstance}>
-          <Router>
+          <Router basename={import.meta.env.BASE_URL}>
             <ScrollToTop />
             <AuthenticatedApp />
           </Router>
