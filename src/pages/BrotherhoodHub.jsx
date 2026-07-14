@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
-import { Trophy, Target, BarChart3, Zap, ArrowRight, Check, Users, Crown, Search, MapPin, TrendingUp, Award } from 'lucide-react';
+import { Trophy, BarChart3, Zap, ArrowRight, Users, Crown, Search, MapPin, TrendingUp, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/AuthContext';
 import { supabase } from '@/lib/supabase';
 import SEO from '@/components/shared/SEO';
@@ -404,60 +403,6 @@ function Leaderboard() {
   );
 }
 
-function Challenges() {
-  const [joined, setJoined] = useState([]);
-  const challenges = [
-    { id: 1, title: 'Upload 3 Proofs This Month', reward: '150 pts + Trail Blazer badge', progress: 0, total: 3, deadline: 'Jun 30', icon: '📸' },
-    { id: 2, title: 'Attend a Virtual Campfire', reward: '100 pts', progress: 0, total: 1, deadline: 'Jun 30', icon: '🔥' },
-    { id: 3, title: 'Refer a Brother', reward: '200 pts', progress: 0, total: 1, deadline: 'Jun 30', icon: '🤝' },
-    { id: 4, title: 'Read 5 Journal Posts', reward: '50 pts', progress: 3, total: 5, deadline: 'Jun 30', icon: '📖' },
-    { id: 5, title: 'Complete Your Profile', reward: '75 pts + Profile badge', progress: 0, total: 1, deadline: 'Ongoing', icon: '✅' },
-    { id: 6, title: 'Apply for a Retreat', reward: '500 pts + Brave Step badge', progress: 0, total: 1, deadline: 'Dec 31', icon: '🏕️' },
-  ];
-
-  return (
-    <div className="min-h-screen" style={{ background: '#0a0a0a' }}>
-      <section className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a2a1a 40%, #0a0a0a 100%)' }}>
-        <div className="relative max-w-6xl mx-auto px-4 pt-20 pb-12">
-          <div className="flex items-center gap-2 mb-3">
-            <Target className="w-4 h-4" style={{ color: SAND }} />
-            <span className="text-xs font-heading tracking-[0.3em] uppercase" style={{ color: SAND }}>Monthly</span>
-          </div>
-          <h1 className="font-heading text-5xl md:text-6xl tracking-wide uppercase text-white leading-none">Challenges</h1>
-          <p className="text-white/50 mt-3">Complete challenges, earn points, unlock badges.</p>
-        </div>
-      </section>
-      <div className="max-w-6xl mx-auto px-4 py-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {challenges.map((c, i) => (
-          <motion.div key={c.id} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }}
-            className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5 hover:border-white/[0.12] transition-all">
-            <div className="flex items-start justify-between mb-3">
-              <span className="text-2xl">{c.icon}</span>
-              <span className="text-[10px] font-heading tracking-wider uppercase text-white/30">Ends {c.deadline}</span>
-            </div>
-            <h3 className="font-heading text-sm tracking-wider uppercase text-white mb-1">{c.title}</h3>
-            <p className="text-xs text-white/40 mb-4">Reward: <span style={{ color: FG }}>{c.reward}</span></p>
-            {c.total > 1 && (
-              <div className="mb-4">
-                <div className="flex justify-between text-xs text-white/30 mb-1"><span>Progress</span><span>{c.progress}/{c.total}</span></div>
-                <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-                  <div className="h-full rounded-full transition-all" style={{ width: `${(c.progress / c.total) * 100}%`, background: FG }} />
-                </div>
-              </div>
-            )}
-            <Button onClick={() => setJoined(j => j.includes(c.id) ? j : [...j, c.id])} size="sm"
-              className="w-full font-heading tracking-wider uppercase text-xs"
-              variant={joined.includes(c.id) ? 'secondary' : 'default'}
-              style={joined.includes(c.id) ? {} : { background: FG }}>
-              {joined.includes(c.id) ? <><Check className="w-3.5 h-3.5 mr-1" /> Joined</> : 'Accept Challenge'}
-            </Button>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function Statistics() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -513,7 +458,6 @@ function Statistics() {
 export default function BrotherhoodHub() {
   const location = useLocation();
   if (location.pathname.includes('/leaderboard')) return <><SEO title="Brotherhood Leaderboard — BOYZ IN THE WOODZ" description="Top brothers ranked by loyalty points, retreats, and engagement." canonical="/brotherhood/leaderboard" /><Leaderboard /></>;
-  if (location.pathname.includes('/challenges')) return <><SEO title="Brotherhood Challenges — BOYZ IN THE WOODZ" description="Complete monthly challenges, earn points, and unlock badges." canonical="/brotherhood/challenges" /><Challenges /></>;
   if (location.pathname.includes('/statistics')) return <><SEO title="Brotherhood Statistics — BOYZ IN THE WOODZ" description="Live impact numbers from the Boyz In The Woodz brotherhood movement." canonical="/brotherhood/statistics" /><Statistics /></>;
   return <><SEO title="Brotherhood Leaderboard — BOYZ IN THE WOODZ" description="Top brothers ranked by loyalty points." canonical="/brotherhood" /><Leaderboard /></>;
 }

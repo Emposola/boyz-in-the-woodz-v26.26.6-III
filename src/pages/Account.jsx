@@ -11,7 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { 
   Coins, Gift, Settings, Copy, Calendar, 
   Trees, RotateCcw, User, Mail, LogOut, ChevronRight,
-  Star, Package, Users, Shield, Crown, BookOpen, Check, X, Clock
+  Star, Package, Users, Shield, Crown, BookOpen, Check, X, Clock, Target
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -146,6 +146,22 @@ export default function Account() {
     enabled: !!user?.id,
   });
 
+  const { data: userChallenges = [] } = useQuery({
+    queryKey: ['user-challenges', user?.id],
+    queryFn: async () => {
+      const now = new Date().toISOString();
+      const { data } = await supabase
+        .from('challenge_participants')
+        .select('challenge_id, progress, completed_at, monthly_challenges(id, slug, title, goal_target, goal_type, end_date, active)')
+        .eq('user_id', user.id);
+      return (data || [])
+        .filter(p => p.monthly_challenges && p.monthly_challenges.active)
+        .map(p => ({ ...p, challenge: p.monthly_challenges }));
+    },
+    enabled: !!user?.id,
+    refetchInterval: 5000,
+  });
+
   // Calculate points from profile (source of truth)
   const pointsBalance = profileData?.loyalty_points || 0;
   const dollarValue = (pointsBalance / 500) * 5;
@@ -263,6 +279,44 @@ export default function Account() {
 
         {/* Points Card */}
         <PointsCard pointsBalance={pointsBalance} dollarValue={dollarValue} />
+
+        {/* Your Challenges */}
+        {userChallenges.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-heading text-sm tracking-wider uppercase text-gray-400 flex items-center gap-2">
+                <Target className="w-4 h-4 text-primary" /> Your Challenges
+              </h3>
+              <Link to="/brotherhood/challenges" className="text-xs text-primary hover:underline">View all</Link>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {userChallenges.map(uc => {
+                const ch = uc.challenge;
+                const pct = Math.min((uc.progress / ch.goal_target) * 100, 100);
+                const isComplete = uc.progress >= ch.goal_target;
+                return (
+                  <div key={uc.challenge_id} className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-4 hover:border-primary/30 transition-all">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <p className="text-sm font-medium text-white truncate">{ch.title}</p>
+                      {isComplete && <Check className="w-4 h-4 flex-shrink-0" style={{ color: FG }} />}
+                    </div>
+                    <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden mb-3">
+                      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: FG }} />
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs text-gray-400">{uc.progress}/{ch.goal_target} {ch.goal_type}</span>
+                      <Link to={`/brotherhood/challenges/${ch.slug}`}
+                        className="text-xs font-heading tracking-wider uppercase px-3 py-1.5 rounded-lg transition-colors"
+                        style={{ background: isComplete ? `${FG}20` : FG, color: isComplete ? FG : 'white' }}>
+                        {isComplete ? 'View' : 'Complete Now'}
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Tabs */}
         <Tabs defaultValue="appointments">
