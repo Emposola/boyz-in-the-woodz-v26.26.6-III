@@ -1,0 +1,347 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Extractor - Boyz In The Woodz</title>
+    <style>
+        body { 
+            font-family: monospace; 
+            padding: 20px; 
+            background: #1a1a1a; 
+            color: #fff; 
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 { color: #4CAF50; }
+        .controls { 
+            background: #333; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin: 20px 0;
+        }
+        button { 
+            background: #4CAF50; 
+            color: white; 
+            padding: 12px 24px; 
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background: #45a049; }
+        button.danger { background: #f44336; }
+        button.danger:hover { background: #da190b; }
+        .status { 
+            background: #222; 
+            padding: 15px; 
+            border-radius: 5px;
+            margin: 10px 0;
+            min-height: 60px;
+        }
+        .progress { 
+            width: 100%; 
+            height: 30px; 
+            background: #333; 
+            margin: 10px 0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-bar { 
+            height: 100%; 
+            background: #4CAF50; 
+            width: 0%; 
+            transition: width 0.3s;
+            line-height: 30px;
+            padding-left: 10px;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .image-item {
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .image-item img {
+            max-width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 3px;
+        }
+        .image-item .filename {
+            font-size: 10px;
+            color: #888;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .stat-box {
+            background: #222;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .stat-box .number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .stat-box .label {
+            font-size: 12px;
+            color: #888;
+        }
+        .url-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #222;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            margin: 10px 0;
+        }
+        .url-list .url-item {
+            padding: 3px 0;
+            border-bottom: 1px solid #333;
+            word-break: break-all;
+        }
+        .url-list .url-item .index {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .loading { 
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #333;
+            border-top: 3px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 10px;
+            margin-left: 5px;
+        }
+        .badge.success { background: #4CAF50; }
+        .badge.error { background: #f44336; }
+        .badge.warning { background: #ff9800; }
+    </style>
+</head>
+<body>
+    <h1>📸 Image Extractor - Boyz In The Woodz</h1>
+    
+    <div class="controls">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Make sure your app is running at http://localhost:5173</li>
+            <li>Open your app in another tab and navigate to pages with images</li>
+            <li>Click "Extract All Images" below</li>
+            <li>Images will be downloaded automatically</li>
+        </ol>
+        <p style="color: #ff9800;">
+            ⚠️ This tool extracts images from your OPEN tabs. 
+            Make sure you have your app open in another tab!
+        </p>
+        <button onclick="extractImages()">🔄 Extract All Images</button>
+        <button onclick="downloadAll()">💾 Download All Images</button>
+        <button onclick="clearResults()" class="danger">🗑️ Clear Results</button>
+    </div>
+
+    <div class="stats" id="stats">
+        <div class="stat-box"><div class="number" id="totalCount">0</div><div class="label">Total Found</div></div>
+        <div class="stat-box"><div class="number" id="downloadedCount">0</div><div class="label">Downloaded</div></div>
+        <div class="stat-box"><div class="number" id="failedCount">0</div><div class="label">Failed</div></div>
+        <div class="stat-box"><div class="number" id="skippedCount">0</div><div class="label">Skipped</div></div>
+    </div>
+
+    <div class="status" id="status">
+        Ready. Open your app in another tab first.
+    </div>
+
+    <div class="progress">
+        <div class="progress-bar" id="progressBar">0%</div>
+    </div>
+
+    <div id="urlList" class="url-list" style="display:none;"></div>
+    <div class="image-grid" id="imageGrid"></div>
+
+    <script>
+        let allImages = [];
+        let downloaded = [];
+        let failed = [];
+        let skipped = [];
+        let isExtracting = false;
+
+        function updateStats() {
+            document.getElementById('totalCount').textContent = allImages.length;
+            document.getElementById('downloadedCount').textContent = downloaded.length;
+            document.getElementById('failedCount').textContent = failed.length;
+            document.getElementById('skippedCount').textContent = skipped.length;
+            
+            const percent = allImages.length > 0 ? (downloaded.length / allImages.length * 100) : 0;
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = percent + '%';
+            progressBar.textContent = Math.round(percent) + '%';
+        }
+
+        function addStatus(message) {
+            const statusDiv = document.getElementById('status');
+            const time = new Date().toLocaleTimeString();
+            statusDiv.innerHTML = [\] \<br>\;
+            if (statusDiv.children.length > 100) {
+                statusDiv.removeChild(statusDiv.lastChild);
+            }
+        }
+
+        function extractImages() {
+            if (isExtracting) return;
+            isExtracting = true;
+            
+            addStatus('🔍 Starting extraction...');
+            
+            // Try to access the running app
+            try {
+                // Open a new window to the app to access its DOM
+                const appWindow = window.open('http://localhost:5173', '_blank');
+                if (!appWindow) {
+                    addStatus('❌ Cannot open app. Please open http://localhost:5173 manually.');
+                    isExtracting = false;
+                    return;
+                }
+                
+                addStatus('⏳ Waiting for app to load...');
+                
+                setTimeout(() => {
+                    try {
+                        // Extract all images from the app window
+                        const images = appWindow.document.querySelectorAll('img');
+                        const bgElements = appWindow.document.querySelectorAll('[style*="background-image"]');
+                        
+                        let urls = [];
+                        
+                        images.forEach(img => {
+                            if (img.src && img.src.startsWith('http')) {
+                                urls.push(img.src);
+                            }
+                        });
+                        
+                        bgElements.forEach(el => {
+                            const style = appWindow.getComputedStyle(el);
+                            const bgImage = style.backgroundImage;
+                            const match = bgImage.match(/url\(["']?([^"')]+)["']?\)/);
+                            if (match && match[1] && match[1].startsWith('http')) {
+                                urls.push(match[1]);
+                            }
+                        });
+                        
+                        allImages = [...new Set(urls)];
+                        addStatus(✅ Found \ images in the app);
+                        updateStats();
+                        
+                        // Show URLs
+                        const urlListDiv = document.getElementById('urlList');
+                        urlListDiv.style.display = 'block';
+                        urlListDiv.innerHTML = allImages.map((url, i) => 
+                            <div class="url-item"><span class="index">\.</span> \</div>
+                        ).join('');
+                        
+                        // Close the app window
+                        appWindow.close();
+                        
+                        isExtracting = false;
+                        addStatus('✅ Extraction complete! Click "Download All Images" to save them.');
+                        
+                    } catch (err) {
+                        addStatus(❌ Error: \);
+                        addStatus('💡 Make sure you have opened the app manually at http://localhost:5173');
+                        appWindow.close();
+                        isExtracting = false;
+                    }
+                }, 3000);
+                
+            } catch (err) {
+                addStatus(❌ Error: \);
+                addStatus('💡 Please open http://localhost:5173 in another tab manually');
+                isExtracting = false;
+            }
+        }
+
+        function downloadAll() {
+            if (allImages.length === 0) {
+                addStatus('❌ No images found. Click "Extract All Images" first.');
+                return;
+            }
+            
+            addStatus(📥 Downloading \ images...);
+            downloaded = [];
+            failed = [];
+            skipped = [];
+            
+            allImages.forEach((url, index) => {
+                const filename = url.split('/').pop().split('?')[0] || image_\.jpg;
+                
+                // Determine subfolder
+                let subfolder = 'products';
+                if (url.includes('barber') || url.includes('Barber')) subfolder = 'barbers';
+                else if (url.includes('blog') || url.includes('post') || url.includes('journal')) subfolder = 'blog';
+                else if (url.includes('bg') || url.includes('background') || url.includes('hero')) subfolder = 'backgrounds';
+                else if (url.includes('logo') || url.includes('icon')) subfolder = 'logos';
+                
+                // Try to download
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        // Create download link
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        setTimeout(() => URL.revokeObjectURL(link.href), 100);
+                        
+                        downloaded.push(filename);
+                        addStatus(✅ Downloaded: \);
+                        updateStats();
+                    })
+                    .catch(err => {
+                        failed.push(filename);
+                        addStatus(❌ Failed: \ - \);
+                        updateStats();
+                    });
+            });
+            
+            addStatus(📥 Download complete! \ downloaded, \ failed);
+        }
+
+        function clearResults() {
+            allImages = [];
+            downloaded = [];
+            failed = [];
+            skipped = [];
+            document.getElementById('imageGrid').innerHTML = '';
+            document.getElementById('urlList').style.display = 'none';
+            document.getElementById('status').innerHTML = 'Cleared. Ready.';
+            updateStats();
+        }
+    </script>
+</body>
+</html>

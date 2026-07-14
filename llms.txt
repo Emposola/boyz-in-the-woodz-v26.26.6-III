@@ -1,0 +1,58 @@
+# BOYZ IN THE WOODZ
+
+> Brotherhood. Freedom. Nature. — A clothing brand and brotherhood movement built for men who need space to breathe.
+
+## What We Are
+
+Boyz In The Woodz (BITW) is a dual-brand ecosystem:
+- **The Woodz** — Wilderness retreats and outdoor brotherhood experiences for men
+- **The Chair** — A barbershop and grooming brand
+- **Survival Pack 01** — Clothing line (hoodies, tees, caps, crewnecks)
+
+We are not therapy. We are not a retreat center. We are a controlled, intentional break — backed by science — built on brotherhood, freedom, and nature.
+
+## The Problem We Solve
+
+- 77% of men experience high daily stress (APA, 2023)
+- 40% of men never discuss mental health (Movember, 2022)
+- 62% of men feel emotionally isolated (Harvard, 2023)
+- 70% of men lost their best friend after age 30 (American Perspectives, 2022)
+- Men with fewer than 2 close friends: 55% (Survey Centre on American Social Life, 2021)
+
+## The Solution
+
+Nature reduces cortisol by 21% in 20 minutes (Cornell, 2019). Face-to-face connection reduces depression risk by 50% (Social Psychiatry Journal, 2021). Strong social ties lower mortality risk by 45% (PLOS Medicine, 2022).
+
+We deliver this through wilderness retreats, a barbershop community, clothing that serves as proof of belonging, and a loyalty points system that rewards showing up.
+
+## The Code (Non-Negotiable)
+
+1. No Phones — Full presence only
+2. Show Up Physically — Body and mind
+3. Respect Everyone — No hierarchy in the woods
+4. No Ego — Leave it at the gate
+5. Leave Better — Or don't come
+
+## Key Pages
+
+- `/` — Homepage with hero, products, events, brotherhood feed
+- `/the-problem` — The crisis facing men today (data + personas)
+- `/who-we-serve` — The 4 men we serve: Hustler, Father, Lost One, Nostalgic
+- `/how-it-works` — The experience journey: Arrive, Unplug, Connect, Return
+- `/the-code` — The 5 non-negotiable rules
+- `/science` — Peer-reviewed research backing our approach
+- `/shop/boyz` — Survival Pack 01 clothing
+- `/barber/book` — Book a barber appointment
+- `/retreat/apply` — Apply for a wilderness retreat
+- `/journal` — Community stories and writing
+- `/brotherhood/directory` — Find brothers near you
+- `/points` — Brotherhood Points loyalty system
+
+## Tone & Voice
+
+Direct. Honest. No performance. We speak to men who are tired of pretending they're fine. We don't sell lifestyle — we sell proof that a moment existed and that you were there.
+
+## Contact
+
+- Website: https://boyzinthewoodz.com
+- Email: info@boyzinthewoodz.com
