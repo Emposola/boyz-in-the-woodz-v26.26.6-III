@@ -5,7 +5,8 @@ import { defineConfig } from 'vite'
 // On GitHub Pages the site is served from /<repo-name>/, so we set `base`
 // to that path ONLY when building for Pages (GITHUB_PAGES env).
 // Local dev keeps base '/' so the dev server is unaffected.
-const BASE = process.env.GITHUB_PAGES ? '/boyz-in-the-woodz-v26.26.6-III-master/' : '/'
+// NOTE: repo name is "boyz-in-the-woodz-v26.26.6-III" (do NOT append "-master").
+const BASE = process.env.GITHUB_PAGES ? '/boyz-in-the-woodz-v26.26.6-III/' : '/'
 
 export default defineConfig({
   base: BASE,
